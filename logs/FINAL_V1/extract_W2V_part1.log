@@ -1,0 +1,28 @@
+Loading weights:   0%|          | 0/422 [00:00<?, ?it/s]Loading weights: 100%|██████████| 422/422 [00:00<00:00, 41126.36it/s]
+[transformers] [1mWav2Vec2Model LOAD REPORT[0m from: /root/Projects/Project4a_FINAL_V1_ISOLATED/cache/hf/models--facebook--wav2vec2-large-lv60/snapshots/0cde644b64dac88d8416bec1c92a4099b850ba0b
+Key                          | Status     |  | 
+-----------------------------+------------+--+-
+project_q.weight             | UNEXPECTED |  | 
+quantizer.codevectors        | UNEXPECTED |  | 
+quantizer.weight_proj.bias   | UNEXPECTED |  | 
+quantizer.weight_proj.weight | UNEXPECTED |  | 
+project_q.bias               | UNEXPECTED |  | 
+project_hid.weight           | UNEXPECTED |  | 
+project_hid.bias             | UNEXPECTED |  | 
+
+Notes:
+- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+W2V part 1 done 20 of 262
+W2V part 1 done 40 of 262
+W2V part 1 done 60 of 262
+W2V part 1 done 80 of 262
+W2V part 1 done 100 of 262
+W2V part 1 done 120 of 262
+W2V part 1 done 140 of 262
+W2V part 1 done 160 of 262
+W2V part 1 done 180 of 262
+W2V part 1 done 200 of 262
+W2V part 1 done 220 of 262
+W2V part 1 done 240 of 262
+W2V part 1 done 260 of 262
+W2V part 1 finished 262

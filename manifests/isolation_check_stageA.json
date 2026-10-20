@@ -1,0 +1,12 @@
+{
+ "label": "stageA",
+ "original": "/root/Projects/PatchTST",
+ "original_audio_files_changed": [],
+ "original_audio_files_checked": 831,
+ "original_project_files_added_or_changed_since_start": [],
+ "original_project_files_removed_or_changed_since_start": [],
+ "passed": true,
+ "time_utc": "2026-10-20T09:36:27Z",
+ "workspace": "/root/Projects/Project4a_FINAL_V1_ISOLATED",
+ "workspace_distinct_and_not_inside_original": true
+}

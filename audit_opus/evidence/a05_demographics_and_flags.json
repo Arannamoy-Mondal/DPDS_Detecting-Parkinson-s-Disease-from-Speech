@@ -1,0 +1,108 @@
+{
+ "PD_sheet_rows": 28,
+ "PD_unique_people": 25,
+ "PD_age": {
+  "n": 25,
+  "mean": 66.8,
+  "sd": 9.13,
+  "min": 40,
+  "max": 80,
+  "median": 70.0
+ },
+ "PD_sex": {
+  "M": 16,
+  "F": 9
+ },
+ "HC_rows": 22,
+ "HC_age": {
+  "n": 22,
+  "mean": 67.09,
+  "sd": 5.16,
+  "min": 60,
+  "max": 77,
+  "median": 68.0
+ },
+ "HC_sex": {
+  "F": 12,
+  "M": 10
+ },
+ "HC_starred": [
+  "Agnese P",
+  "Gilda C",
+  "Vitantonio D",
+  "Giovanna G"
+ ],
+ "sheet_notes_for_asterisks": [
+  "*registrazioni di scarsa qualit\u00e0",
+  "*no brano/no frasi (difficolt\u00e0 nella lettura)",
+  "*difficolt\u00e0 nella lettura"
+ ],
+ "sex_from_file_names_by_label": {
+  "(0, 'F')": 12,
+  "(0, 'M')": 10,
+  "(1, 'M')": 16,
+  "(1, 'F')": 9
+ },
+ "file_name_number_by_label": {
+  "0": {
+   "n": 22,
+   "mean": 49.91,
+   "sd": 5.16,
+   "min": 40,
+   "max": 57,
+   "median": 49.0
+  },
+  "1": {
+   "n": 25,
+   "mean": 50.2,
+   "sd": 9.13,
+   "min": 37,
+   "max": 77,
+   "median": 47.0
+  }
+ },
+ "flagged_control_speaker_ids": [
+  {
+   "speaker_id": "HC_001",
+   "folder": "AGNESE P",
+   "n_recordings": 16,
+   "tasks": "B1,B2,D1,D2,FB1,PR1,VA1,VA2,VE1,VE2,VI1,VI2,VO1,VO2,VU1,VU2"
+  },
+  {
+   "speaker_id": "HC_007",
+   "folder": "GILDA C",
+   "n_recordings": 16,
+   "tasks": "B1,B2,D1,D2,FB1,PR1,VA1,VA2,VE1,VE2,VI1,VI2,VO1,VO2,VU1,VU2"
+  },
+  {
+   "speaker_id": "HC_008",
+   "folder": "GIOVANNA G",
+   "n_recordings": 16,
+   "tasks": "B1,B2,D1,D2,FB1,PR1,VA1,VA2,VE1,VE2,VI1,VI2,VO1,VO2,VU1,VU2"
+  },
+  {
+   "speaker_id": "HC_020",
+   "folder": "VITANTONIO D",
+   "n_recordings": 13,
+   "tasks": "D1,D2,PR1,VA1,VA2,VE1,VE2,VI1,VI2,VO1,VO2,VU1,VU2"
+  }
+ ],
+ "false_positive_events_total": 44,
+ "false_positive_events_from_flagged_controls": 29,
+ "false_negative_events_by_speaker": {
+  "PD_005": 54
+ },
+ "errors_by_speaker": {
+  "PD_005": 54,
+  "HC_001": 14,
+  "HC_020": 11,
+  "HC_006": 5,
+  "HC_010": 3,
+  "HC_018": 3,
+  "HC_007": 3,
+  "HC_012": 2,
+  "HC_008": 1,
+  "HC_009": 1,
+  "HC_019": 1
+ }
+}

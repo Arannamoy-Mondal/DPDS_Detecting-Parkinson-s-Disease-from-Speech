@@ -1,0 +1,346 @@
+{
+ "errors": {
+  "detail": {
+   "HC_001": {
+    "FV1-AC-ALL-LR": {
+     "by_task": {
+      "B1": 1.0,
+      "B2": 0.081,
+      "D1": 0.0,
+      "D2": 0.0,
+      "FB1": 0.998,
+      "PR1": 0.297,
+      "VA1": 0.019,
+      "VA2": 0.0,
+      "VE1": 0.0,
+      "VE2": 0.0,
+      "VI1": 0.0,
+      "VI2": 0.0,
+      "VO1": 0.0,
+      "VO2": 0.0,
+      "VU1": 0.0,
+      "VU2": 0.0
+     },
+     "speaker_score": 0.14961389401550118
+    },
+    "FV1-WLM-ALL-LR": {
+     "by_task": {
+      "B1": 0.25,
+      "B2": 0.336,
+      "D1": 0.468,
+      "D2": 0.374,
+      "FB1": 0.317,
+      "PR1": 0.376,
+      "VA1": 0.574,
+      "VA2": 0.559,
+      "VE1": 0.384,
+      "VE2": 0.337,
+      "VI1": 0.422,
+      "VI2": 0.174,
+      "VO1": 0.528,
+      "VO2": 0.288,
+      "VU1": 0.308,
+      "VU2": 0.233
+     },
+     "speaker_score": 0.3705278648241853
+    },
+    "age_token": "55",
+    "dates": [
+     "2017-03-17"
+    ],
+    "label": 0,
+    "n_recordings": 16,
+    "sample_rates": [
+     16000
+    ],
+    "sex": "F"
+   },
+   "HC_020": {
+    "FV1-AC-ALL-LR": {
+     "by_task": {
+      "D1": 0.275,
+      "D2": 0.0,
+      "PR1": 0.0,
+      "VA1": 0.092,
+      "VA2": 0.0,
+      "VE1": 0.0,
+      "VE2": 0.0,
+      "VI1": 0.0,
+      "VI2": 0.0,
+      "VO1": 1.0,
+      "VO2": 1.0,
+      "VU1": 0.0,
+      "VU2": 0.0
+     },
+     "speaker_score": 0.18202271179233
+    },
+    "FV1-WLM-ALL-LR": {
+     "by_task": {
+      "D1": 0.545,
+      "D2": 0.403,
+      "PR1": 0.536,
+      "VA1": 0.589,
+      "VA2": 0.535,
+      "VE1": 0.334,
+      "VE2": 0.252,
+      "VI1": 0.365,
+      "VI2": 0.358,
+      "VO1": 0.544,
+      "VO2": 0.54,
+      "VU1": 0.451,
+      "VU2": 0.436
+     },
+     "speaker_score": 0.452990308003732
+    },
+    "age_token": "47",
+    "dates": [
+     "2017-03-21"
+    ],
+    "label": 0,
+    "n_recordings": 13,
+    "sample_rates": [
+     16000
+    ],
+    "sex": "M"
+   },
+   "PD_005": {
+    "FV1-AC-ALL-LR": {
+     "by_task": {
+      "B1": 0.874,
+      "B2": 0.992,
+      "D1": 0.001,
+      "D2": 0.881,
+      "FB1": 0.989,
+      "PR1": 0.951,
+      "VA1": 0.028,
+      "VA2": 0.0,
+      "VE1": 0.017,
+      "VE2": 0.102,
+      "VI1": 0.0,
+      "VI2": 0.008,
+      "VO1": 0.028,
+      "VO2": 0.999,
+      "VU1": 1.0,
+      "VU2": 1.0
+     },
+     "speaker_score": 0.4918507357634379
+    },
+    "FV1-WLM-ALL-LR": {
+     "by_task": {
+      "B1": 0.33,
+      "B2": 0.349,
+      "D1": 0.223,
+      "D2": 0.191,
+      "FB1": 0.475,
+      "PR1": 0.587,
+      "VA1": 0.486,
+      "VA2": 0.394,
+      "VE1": 0.482,
+      "VE2": 0.452,
+      "VI1": 0.401,
+      "VI2": 0.439,
+      "VO1": 0.425,
+      "VO2": 0.483,
+      "VU1": 0.512,
+      "VU2": 0.538
+     },
+     "speaker_score": 0.4228489523865058
+    },
+    "age_token": "54",
+    "dates": [
+     "2016-05-26"
+    ],
+    "label": 1,
+    "n_recordings": 16,
+    "sample_rates": [
+     44100
+    ],
+    "sex": "F"
+   }
+  },
+  "n_conditions": 56,
+  "recording_error_by_task_family": {
+   "FV1-AC-ALL-LR": {
+    "_all": {
+     "n": 785,
+     "rate": 0.061146496815286625,
+     "wrong": 48
+    },
+    "passage": {
+     "n": 93,
+     "rate": 0.021505376344086023,
+     "wrong": 2
+    },
+    "phrase": {
+     "n": 47,
+     "rate": 0.0851063829787234,
+     "wrong": 4
+    },
+    "syllable": {
+     "n": 100,
+     "rate": 0.03,
+     "wrong": 3
+    },
+    "vowel": {
+     "n": 495,
+     "rate": 0.07474747474747474,
+     "wrong": 37
+    },
+    "word list": {
+     "n": 50,
+     "rate": 0.04,
+     "wrong": 2
+    }
+   },
+   "FV1-WLM-ALL-LR": {
+    "_all": {
+     "n": 785,
+     "rate": 0.09681528662420383,
+     "wrong": 76
+    },
+    "passage": {
+     "n": 93,
+     "rate": 0.06451612903225806,
+     "wrong": 6
+    },
+    "phrase": {
+     "n": 47,
+     "rate": 0.0425531914893617,
+     "wrong": 2
+    },
+    "syllable": {
+     "n": 100,
+     "rate": 0.07,
+     "wrong": 7
+    },
+    "vowel": {
+     "n": 495,
+     "rate": 0.1191919191919192,
+     "wrong": 59
+    },
+    "word list": {
+     "n": 50,
+     "rate": 0.04,
+     "wrong": 2
+    }
+   }
+  },
+  "speaker_error_counts": {
+   "HC_001": 14,
+   "HC_006": 5,
+   "HC_007": 3,
+   "HC_008": 1,
+   "HC_009": 1,
+   "HC_010": 3,
+   "HC_012": 2,
+   "HC_018": 3,
+   "HC_019": 1,
+   "HC_020": 11,
+   "PD_005": 54
+  }
+ },
+ "parameter_counts_logistic_regression": {
+  "AC": 41,
+  "H1": 1065,
+  "H2": 1065,
+  "H3": 1065,
+  "H4": 2049,
+  "H5": 2049,
+  "H6": 2049,
+  "H7": 3073,
+  "H8": 3113,
+  "W2V": 1025,
+  "WLM": 1025,
+  "XLSR": 1025
+ },
+ "replay": [
+  {
+   "condition": "FV1-WLM-ALL-LR",
+   "max_abs_probability_difference": 0.0
+  },
+  {
+   "condition": "FV1-AC-ALL-LR",
+   "max_abs_probability_difference": 0.0
+  },
+  {
+   "condition": "FV1-XLSR-ALL-LSVM",
+   "max_abs_probability_difference": 0.0
+  }
+ ],
+ "train_val_test": [
+  {
+   "condition": "FV1-AC-ALL-LR",
+   "heldout_fold_auprc_mean": 1.0,
+   "heldout_fold_auprc_sd": 0.0,
+   "inner_val_auprc_mean": 0.9975884028252452,
+   "inner_val_auprc_sd": 0.0034648333046974527
+  },
+  {
+   "condition": "FV1-WLM-ALL-LR",
+   "heldout_fold_auprc_mean": 0.9933333333333334,
+   "heldout_fold_auprc_sd": 0.014907119849998545,
+   "inner_val_auprc_mean": 0.9985714285714288,
+   "inner_val_auprc_sd": 0.0013041013273932481
+  },
+  {
+   "condition": "FV1-W2V-ALL-LR",
+   "heldout_fold_auprc_mean": 0.9822222222222223,
+   "heldout_fold_auprc_sd": 0.039752319599996214,
+   "inner_val_auprc_mean": 0.9882959150860957,
+   "inner_val_auprc_sd": 0.008244608116519767
+  },
+  {
+   "condition": "FV1-XLSR-ALL-LR",
+   "heldout_fold_auprc_mean": 1.0,
+   "heldout_fold_auprc_sd": 0.0,
+   "inner_val_auprc_mean": 0.9990476190476192,
+   "inner_val_auprc_sd": 0.0013041013273932481
+  },
+  {
+   "condition": "FV1-H3-ALL-LR",
+   "heldout_fold_auprc_mean": 1.0,
+   "heldout_fold_auprc_sd": 0.0,
+   "inner_val_auprc_mean": 0.9990476190476192,
+   "inner_val_auprc_sd": 0.0013041013273932481
+  },
+  {
+   "condition": "FV1-WLM-ALL-XGB",
+   "heldout_fold_auprc_mean": 1.0,
+   "heldout_fold_auprc_sd": 0.0,
+   "inner_val_auprc_mean": 0.996904761904762,
+   "inner_val_auprc_sd": 0.003104382097715536
+  }
+ ],
+ "training_partition_scores": [
+  {
+   "condition": "FV1-AC-ALL-LR",
+   "train_auprc_mean": 1.0000000000000002,
+   "train_auroc_mean": 1.0
+  },
+  {
+   "condition": "FV1-WLM-ALL-LR",
+   "train_auprc_mean": 1.0000000000000002,
+   "train_auroc_mean": 1.0
+  },
+  {
+   "condition": "FV1-W2V-ALL-LR",
+   "train_auprc_mean": 1.0000000000000002,
+   "train_auroc_mean": 1.0
+  },
+  {
+   "condition": "FV1-XLSR-ALL-LR",
+   "train_auprc_mean": 1.0000000000000002,
+   "train_auroc_mean": 1.0
+  },
+  {
+   "condition": "FV1-H3-ALL-LR",
+   "train_auprc_mean": 1.0000000000000002,
+   "train_auroc_mean": 1.0
+  },
+  {
+   "condition": "FV1-WLM-ALL-XGB",
+   "train_auprc_mean": 1.0000000000000002,
+   "train_auroc_mean": 1.0
+  }
+ ]
+}

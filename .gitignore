@@ -1,0 +1,64 @@
+# ===== Project4a_FINAL_V1_ISOLATED: what must NOT go to GitHub =====
+
+# --- Python environment and caches -----------------------------------------
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# --- Raw corpus: never commit the audio or its spreadsheets ----------------
+# The copy under data_input/ is the original dataset (about 813 MB). It is
+# licensed separately (IEEE DataPort, CC BY) and must be downloaded by users.
+data_input/
+
+# --- Downloaded and regenerable large files --------------------------------
+# Hugging Face model weights (about 3.6 GB) are re-downloaded by
+# src/final_v1/download_models.py.
+cache/
+features/cache/
+
+# --- Historical copies (previous projects, kept only on this machine) ------
+Archive/
+
+# --- Smoke-test output (not results) ---------------------------------------
+tests/tmp_smoke/
+
+# --- Secrets and local settings --------------------------------------------
+.env
+.env.*
+*.key
+*.pem
+secrets*.json
+*.token
+
+# --- Partial or temporary writes -------------------------------------------
+*.tmp
+*.tmp[0-9]*
+*.partial.*
+*.swp
+*~
+
+# --- LaTeX build leftovers (PDFs and .tex sources are kept) ----------------
+*.aux
+*.out
+*.toc
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.nav
+*.snm
+*.vrb
+_build/
+*/_build/
+**/_build_*/
+
+# --- OS and editor files ---------------------------------------------------
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# ----- PDFs: tracked with Git LFS (see .gitattributes); the raw dataset is still excluded above -----
+# Git LFS objects are created by `git lfs install` followed by `git add`; nothing else is needed here.

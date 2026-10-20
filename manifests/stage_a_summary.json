@@ -1,0 +1,121 @@
+{
+ "age_typo_speakers": [
+  "PD_002"
+ ],
+ "audio_hours": 4.978,
+ "class_prevalence_recordings": 0.5554140127388535,
+ "class_prevalence_speakers": 0.5319148936170213,
+ "date_by_label": {
+  "0": [
+   "2017-03-17",
+   "2017-03-21",
+   "2017-03-23",
+   "2017-03-30",
+   "2017-04-02"
+  ],
+  "1": [
+   "2016-05-26",
+   "2016-06-16",
+   "2017-01-24",
+   "2017-02-10"
+  ]
+ },
+ "dates_one_class_only": true,
+ "duplicate_files_by_bytes": 2,
+ "duplicate_files_by_pcm": 0,
+ "duplicate_sample_ids": 0,
+ "duplicates_excluded": [
+  {
+   "relative_path": "28 People with Parkinson's disease/17-28/Giulia P/B2GPIUUGLL63F100220171021.wav",
+   "sample_id": "S_8e53a900435a743e",
+   "sha256_original": "ddb51a2e07a518177b9dd2cc554e1a34526ada9f01c6111ea48afe586001555c",
+   "speaker_id": "PD_009",
+   "task_code": "B2"
+  }
+ ],
+ "files_excluded_young": 45,
+ "files_included": 785,
+ "files_total": 831,
+ "files_total_group_pd_hc": 786,
+ "merged_speakers": [
+  {
+   "folder_name_hash": "6dc531b045",
+   "group": "PD",
+   "label": 1,
+   "merged_sources": 2,
+   "source_keys": "11-16/Nicola S/NSICCHOI/M;6-10/Nicola S/SNCIHCIO/M",
+   "speaker_id": "PD_017"
+  },
+  {
+   "folder_name_hash": "e827a5648c",
+   "group": "PD",
+   "label": 1,
+   "merged_sources": 2,
+   "source_keys": "1-5/Roberto R/RRIOVBIE/M;11-16/Roberto R/RROIBVEI/M",
+   "speaker_id": "PD_020"
+  },
+  {
+   "folder_name_hash": "33ef9bf3dd",
+   "group": "PD",
+   "label": 1,
+   "merged_sources": 2,
+   "source_keys": "11-16/Vito S/VSIPTIOZ/M;6-10/Vito S/VSIPTIOZ/M",
+   "speaker_id": "PD_024"
+  }
+ ],
+ "non_finite_or_empty": 0,
+ "recordings_hc": 349,
+ "recordings_pd": 436,
+ "sample_rates": {
+  "16000": 625,
+  "44100": 160
+ },
+ "speakers_hc": 22,
+ "speakers_pd": 25,
+ "speakers_total": 47,
+ "speakers_with_fewer_than_16_recordings": [
+  {
+   "n_recordings": 15,
+   "speaker_id": "PD_003"
+  },
+  {
+   "n_recordings": 15,
+   "speaker_id": "PD_009"
+  },
+  {
+   "n_recordings": 10,
+   "speaker_id": "PD_010"
+  },
+  {
+   "n_recordings": 14,
+   "speaker_id": "PD_016"
+  },
+  {
+   "n_recordings": 14,
+   "speaker_id": "PD_018"
+  },
+  {
+   "n_recordings": 13,
+   "speaker_id": "HC_020"
+  }
+ ],
+ "sr_44100_all_pd": true,
+ "tasks": {
+  "B1": 49,
+  "B2": 44,
+  "D1": 50,
+  "D2": 50,
+  "FB1": 47,
+  "PR1": 50,
+  "VA1": 50,
+  "VA2": 49,
+  "VE1": 50,
+  "VE2": 49,
+  "VI1": 50,
+  "VI2": 49,
+  "VO1": 50,
+  "VO2": 49,
+  "VU1": 50,
+  "VU2": 49
+ }
+}

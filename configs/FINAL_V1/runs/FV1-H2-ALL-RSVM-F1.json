@@ -1,0 +1,135 @@
+{
+ "condition_id": "FV1-H2-ALL-RSVM",
+ "feature_count": null,
+ "feature_selection": "ALL",
+ "grid": [
+  {
+   "C": 0.1,
+   "class_weight": null,
+   "gamma_mult": 0.1
+  },
+  {
+   "C": 0.1,
+   "class_weight": "balanced",
+   "gamma_mult": 0.1
+  },
+  {
+   "C": 0.1,
+   "class_weight": null,
+   "gamma_mult": 1
+  },
+  {
+   "C": 0.1,
+   "class_weight": "balanced",
+   "gamma_mult": 1
+  },
+  {
+   "C": 0.1,
+   "class_weight": null,
+   "gamma_mult": 10
+  },
+  {
+   "C": 0.1,
+   "class_weight": "balanced",
+   "gamma_mult": 10
+  },
+  {
+   "C": 1,
+   "class_weight": null,
+   "gamma_mult": 0.1
+  },
+  {
+   "C": 1,
+   "class_weight": "balanced",
+   "gamma_mult": 0.1
+  },
+  {
+   "C": 1,
+   "class_weight": null,
+   "gamma_mult": 1
+  },
+  {
+   "C": 1,
+   "class_weight": "balanced",
+   "gamma_mult": 1
+  },
+  {
+   "C": 1,
+   "class_weight": null,
+   "gamma_mult": 10
+  },
+  {
+   "C": 1,
+   "class_weight": "balanced",
+   "gamma_mult": 10
+  },
+  {
+   "C": 10,
+   "class_weight": null,
+   "gamma_mult": 0.1
+  },
+  {
+   "C": 10,
+   "class_weight": "balanced",
+   "gamma_mult": 0.1
+  },
+  {
+   "C": 10,
+   "class_weight": null,
+   "gamma_mult": 1
+  },
+  {
+   "C": 10,
+   "class_weight": "balanced",
+   "gamma_mult": 1
+  },
+  {
+   "C": 10,
+   "class_weight": null,
+   "gamma_mult": 10
+  },
+  {
+   "C": 10,
+   "class_weight": "balanced",
+   "gamma_mult": 10
+  },
+  {
+   "C": 100,
+   "class_weight": null,
+   "gamma_mult": 0.1
+  },
+  {
+   "C": 100,
+   "class_weight": "balanced",
+   "gamma_mult": 0.1
+  },
+  {
+   "C": 100,
+   "class_weight": null,
+   "gamma_mult": 1
+  },
+  {
+   "C": 100,
+   "class_weight": "balanced",
+   "gamma_mult": 1
+  },
+  {
+   "C": 100,
+   "class_weight": null,
+   "gamma_mult": 10
+  },
+  {
+   "C": 100,
+   "class_weight": "balanced",
+   "gamma_mult": 10
+  }
+ ],
+ "inner_seed": 143,
+ "model": "RSVM",
+ "outer_fold": 1,
+ "protocol_hash": "5535d1a440a57005fa05d474f5e2d1016df36712b5696f2d1f667569582287c0",
+ "representation": "H2",
+ "run_id": "FV1-H2-ALL-RSVM-F1",
+ "seed": 42,
+ "selection_seed": 243
+}

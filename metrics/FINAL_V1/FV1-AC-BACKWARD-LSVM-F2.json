@@ -1,0 +1,149 @@
+{
+ "run_id": "FV1-AC-BACKWARD-LSVM-F2",
+ "condition_id": "FV1-AC-BACKWARD-LSVM",
+ "outer_fold": 2,
+ "status": "COMPLETED",
+ "started_utc": "2026-10-20T09:43:24Z",
+ "configuration_hash": "1a0f3bc5f68205bcc1698d75c9dbec2d7559bd818e147ff3b398e93ef8cbb8e4",
+ "protocol_hash": "5535d1a440a57005fa05d474f5e2d1016df36712b5696f2d1f667569582287c0",
+ "split_manifest_hash": "31c40ed902165aff483dd8e3ab246e028c985bed029074f4588804c7c8def837",
+ "gates": {
+  "no_speaker_overlap_train_test": true,
+  "every_test_sample_predicted_exactly_once": true,
+  "probabilities_finite_in_0_1": true,
+  "labels_match_manifest": true,
+  "folds_match_split_manifest": true,
+  "protocol_and_split_hashes_match_freeze": true
+ },
+ "selected_hyperparameters": {
+  "C": 100,
+  "class_weight": "balanced"
+ },
+ "selected_features": [
+  "ac_zcr_p10",
+  "ac_rolloff85_hz_std",
+  "ac_band2_log_p90",
+  "ac_band3_log_std",
+  "ac_band3_log_p10",
+  "ac_band3_log_p90",
+  "ac_band4_log_mean",
+  "ac_band4_log_std",
+  "ac_band4_log_p10",
+  "ac_band4_log_p90"
+ ],
+ "n_features_used": 10,
+ "inner_table": [
+  {
+   "config_index": 0,
+   "params": {
+    "C": 0.01,
+    "class_weight": null
+   },
+   "inner_speaker_auprc": 0.9634027135575125
+  },
+  {
+   "config_index": 1,
+   "params": {
+    "C": 0.01,
+    "class_weight": "balanced"
+   },
+   "inner_speaker_auprc": 0.9615252432017813
+  },
+  {
+   "config_index": 2,
+   "params": {
+    "C": 0.1,
+    "class_weight": null
+   },
+   "inner_speaker_auprc": 0.9761184210526319
+  },
+  {
+   "config_index": 3,
+   "params": {
+    "C": 0.1,
+    "class_weight": "balanced"
+   },
+   "inner_speaker_auprc": 0.9729095465937574
+  },
+  {
+   "config_index": 4,
+   "params": {
+    "C": 1,
+    "class_weight": null
+   },
+   "inner_speaker_auprc": 0.9916666666666669
+  },
+  {
+   "config_index": 5,
+   "params": {
+    "C": 1,
+    "class_weight": "balanced"
+   },
+   "inner_speaker_auprc": 0.9916666666666669
+  },
+  {
+   "config_index": 6,
+   "params": {
+    "C": 10,
+    "class_weight": null
+   },
+   "inner_speaker_auprc": 0.9916666666666669
+  },
+  {
+   "config_index": 7,
+   "params": {
+    "C": 10,
+    "class_weight": "balanced"
+   },
+   "inner_speaker_auprc": 0.9916666666666669
+  },
+  {
+   "config_index": 8,
+   "params": {
+    "C": 100,
+    "class_weight": null
+   },
+   "inner_speaker_auprc": 0.9916666666666669
+  },
+  {
+   "config_index": 9,
+   "params": {
+    "C": 100,
+    "class_weight": "balanced"
+   },
+   "inner_speaker_auprc": 0.9934782608695654
+  }
+ ],
+ "runtime_seconds": 65.73285222053528,
+ "finished_utc": "2026-10-20T09:44:30Z",
+ "n_train_speakers": 38,
+ "n_test_speakers": 9,
+ "speaker_level": {
+  "tp": 5,
+  "fn": 0,
+  "tn": 4,
+  "fp": 0,
+  "sensitivity": 1.0,
+  "specificity": 1.0,
+  "precision": 1.0,
+  "f1": 1.0,
+  "accuracy": 1.0,
+  "balanced_accuracy": 1.0,
+  "auroc": 1.0,
+  "auprc": 1.0
+ },
+ "sample_level": {
+  "tp": 71,
+  "fn": 9,
+  "tn": 52,
+  "fp": 12,
+  "sensitivity": 0.8875,
+  "specificity": 0.8125,
+  "precision": 0.8554216867469879,
+  "f1": 0.8711656441717791,
+  "accuracy": 0.8541666666666666,
+  "balanced_accuracy": 0.85,
+  "auroc": 0.9101562499999999,
+  "auprc": 0.9437303877551493
+ }
+}

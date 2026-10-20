@@ -1,0 +1,55 @@
+{
+ "condition_id": "FV1-H4-ALL-LSVM",
+ "feature_count": null,
+ "feature_selection": "ALL",
+ "grid": [
+  {
+   "C": 0.01,
+   "class_weight": null
+  },
+  {
+   "C": 0.01,
+   "class_weight": "balanced"
+  },
+  {
+   "C": 0.1,
+   "class_weight": null
+  },
+  {
+   "C": 0.1,
+   "class_weight": "balanced"
+  },
+  {
+   "C": 1,
+   "class_weight": null
+  },
+  {
+   "C": 1,
+   "class_weight": "balanced"
+  },
+  {
+   "C": 10,
+   "class_weight": null
+  },
+  {
+   "C": 10,
+   "class_weight": "balanced"
+  },
+  {
+   "C": 100,
+   "class_weight": null
+  },
+  {
+   "C": 100,
+   "class_weight": "balanced"
+  }
+ ],
+ "inner_seed": 146,
+ "model": "LSVM",
+ "outer_fold": 4,
+ "protocol_hash": "5535d1a440a57005fa05d474f5e2d1016df36712b5696f2d1f667569582287c0",
+ "representation": "H4",
+ "run_id": "FV1-H4-ALL-LSVM-F4",
+ "seed": 42,
+ "selection_seed": 246
+}

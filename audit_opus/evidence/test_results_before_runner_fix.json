@@ -1,0 +1,132 @@
+{
+ "all_passed": true,
+ "label": "SMOKE_TESTS_NOT_EXPERIMENT_RESULTS",
+ "results": [
+  {
+   "detail": "",
+   "passed": true,
+   "test": "T01 label encoding: PD folder -> 1, elderly folder -> 0"
+  },
+  {
+   "detail": "",
+   "passed": true,
+   "test": "T01b positive class is PD (label 1) and counts 25/22 speakers"
+  },
+  {
+   "detail": "",
+   "passed": true,
+   "test": "T02 outer folds speaker-disjoint and cover all 47 speakers"
+  },
+  {
+   "detail": "{0: 10, 1: 10, 2: 9, 3: 9, 4: 9}",
+   "passed": true,
+   "test": "T02b every outer test fold contains both classes"
+  },
+  {
+   "detail": "",
+   "passed": true,
+   "test": "T02c every recording sits in its speaker's fold"
+  },
+  {
+   "detail": "",
+   "passed": true,
+   "test": "T02d inner folds speaker-disjoint, inside the training partition, both classes in each inner validation fold"
+  },
+  {
+   "detail": "",
+   "passed": true,
+   "test": "T02e split is reproducible (same seed -> same assignment)"
+  },
+  {
+   "detail": "",
+   "passed": true,
+   "test": "T03 sample_ids unique, no duplicated source audio, no speaker in two groups"
+  },
+  {
+   "detail": "",
+   "passed": true,
+   "test": "T04 acoustic matrix aligned by sample_id, 40 columns, no missing"
+  },
+  {
+   "detail": "",
+   "passed": true,
+   "test": "T04b acoustic file sample_id order equals manifest"
+  },
+  {
+   "detail": "{'tp': 2, 'fn': 1, 'tn': 1, 'fp': 1, 'sensitivity': 0.6666666666666666, 'specificity': 0.5, 'precision': 0.6666666666666666, 'f1': 0.6666666666666666, 'accuracy': 0.6, 'balanced_accuracy': 0.5833333333333333, 'auroc': 0.8333333333333333, 'auprc': 0.9166666666666665}",
+   "passed": true,
+   "test": "T05 metrics toy example (TP2 FN1 TN1 FP1)"
+  },
+  {
+   "detail": "",
+   "passed": true,
+   "test": "T05b average precision toy"
+  },
+  {
+   "detail": "",
+   "passed": true,
+   "test": "T05c speaker score is the mean of recording probabilities"
+  },
+  {
+   "detail": "",
+   "passed": true,
+   "test": "T06 changing one test row leaves the other test predictions unchanged (no test statistics in scaling)"
+  },
+  {
+   "detail": "",
+   "passed": true,
+   "test": "T07 outer-test rows appear only as the prediction target of the single final fit"
+  },
+  {
+   "detail": "n tuning fits 60",
+   "passed": true,
+   "test": "T07b every tuning fit trains and validates on outer-training rows only; inner train/validation disjoint"
+  },
+  {
+   "detail": "",
+   "passed": true,
+   "test": "T07c feature selection never sees an outer-test speaker (4 selections: 3 inner + 1 final)"
+  },
+  {
+   "detail": "37",
+   "passed": true,
+   "test": "T07d the selector for the final model used the whole outer-training partition"
+  },
+  {
+   "detail": "[]",
+   "passed": true,
+   "test": "T08 all 78 frozen configurations fit and return finite probabilities in [0,1]"
+  },
+  {
+   "detail": "0.4272727272727273",
+   "passed": true,
+   "test": "T09 null control (random features, true labels): pooled speaker AUROC near chance"
+  },
+  {
+   "detail": "1.0",
+   "passed": true,
+   "test": "T09b positive control (label-informative feature): pooled AUROC high"
+  },
+  {
+   "detail": "",
+   "passed": true,
+   "test": "T10 checkpoint/resume: completed run is reused, not recomputed"
+  },
+  {
+   "detail": "integrity gate failed: no_speaker_overlap_train_test,every_test_sample_predicted_exactly_once,folds_match_split_manifest",
+   "passed": true,
+   "test": "T11 corrupted prediction file fails the gates and is quarantined (not repaired)"
+  },
+  {
+   "detail": "",
+   "passed": true,
+   "test": "T12 hashing is stable; registry has 280 fold runs, 56 condition rows and the blocked FWL row"
+  },
+  {
+   "detail": "",
+   "passed": true,
+   "test": "T12b frozen hashes equal the files on disk"
+  }
+ ],
+ "run_utc": "2026-10-20T09:41:38Z"
+}

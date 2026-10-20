@@ -1,0 +1,30 @@
+{
+ "raw_included_files": 785,
+ "manifest_files": 785,
+ "merge_status": {
+  "both": 785,
+  "left_only": 0,
+  "right_only": 0
+ },
+ "label_mismatches": 0,
+ "indep_speakers": 47,
+ "manifest_speakers": 47,
+ "speaker_partition_identical": true,
+ "identity_collisions_ignoring_folder": {
+  "('M', 'AFILOOTV')": [
+   20,
+   21
+  ]
+ },
+ "max_cosine_cross_speaker_WLM": 0.9947977783080124,
+ "max_cosine_within_speaker_WLM": 0.997558761149574,
+ "most_similar_cross_speaker_pair": [
+  "S_87dbb7d105bddd93",
+  "S_0a10d97abea2a840",
+  "PD_015",
+  "PD_017"
+ ],
+ "cross_speaker_pairs_cosine_ge_0.999": 0,
+ "min_acoustic_distance_cross_speaker": 0.46491228178575694,
+ "min_acoustic_distance_within_speaker": 0.051574092890671455
+}

@@ -1,0 +1,12 @@
+id,analysis,code,outputs,models_fitted,status
+S0,"Univariate speaker-level statistics of the 40 acoustic features (incl. 16-kHz-only AUROC, Cohen d, within-class date effect, correlations)",supplementary/code/s0_univariate.py,supplementary/results/S0_*.csv,no,COMPLETED
+S1,"Acoustic family / statistic ablations (33 subsets x LR, XGBoost; frozen folds, nested tuning)",supplementary/code/s1_ablation.py,"supplementary/results/S1_ablation.csv, S1_preds/",yes (330 runs),COMPLETED (coverage verified for all 66 conditions)
+S2,"Feature importance: LR coefficients, XGBoost gain, permutation importance (features, families, statistics); hybrid block importance",supplementary/code/s2_importance.py,supplementary/results/S2_*.csv,refits with officially selected hyperparameters,COMPLETED
+S3,"Hyperparameter analysis: selected configurations, tie degeneracy, outer-fold landscape of every grid configuration (5 representations x 4 models)",supplementary/code/s3_tuning.py,supplementary/results/S3_*.csv,"yes (1,950 fits, descriptive only)",COMPLETED
+S5,"Operating characteristics: exact Clopper-Pearson intervals, ROC points, predictive values, sample-size planning",supplementary/code/s5_s7_operating_and_tasks.py,supplementary/results/S5_*.csv,no,COMPLETED
+S6,Session predictability within one class (T1 PD Jan vs Feb 2017; T2 controls early vs late March; T3 PD 2016 vs 2017),supplementary/code/s6_session.py,supplementary/results/S6_session_predictability.csv,"yes (nested, speaker-disjoint)",COMPLETED
+S7,Task-family analysis from the official out-of-fold predictions,supplementary/code/s5_s7_operating_and_tasks.py,supplementary/results/S7_task_families.csv,no,COMPLETED
+S8,"CPU inference benchmark (encoders 1/4/8 threads, acoustic features)",supplementary/code/s8_compute.py,supplementary/results/S8_compute.csv,no,COMPLETED
+S9,"Exact digital silence in the raw files (leading/trailing zero blocks, near-silent frames) and its link to 10th-percentile features (descriptive)",supplementary/code/s9_digital_silence.py,"supplementary/results/S9_digital_silence.csv, S9_digital_silence_summary.json",no,COMPLETED
+S10,Out-of-fold SHAP values for the acoustic LR (linear SHAP) and XGBoost (TreeSHAP) models,supplementary/code/s10_shap.py,supplementary/results/S10_*,refits with officially selected hyperparameters,COMPLETED
+WP,"Venture whitepaper built from FINAL_V1, audit and S0-S8 results","supplementary/code/wp_figures.py, supplementary/code/build_whitepaper.py","reports/FINAL_V1/WHITEPAPER_VC.pdf, supplementary/WHITEPAPER_VC.tex",no,COMPLETED

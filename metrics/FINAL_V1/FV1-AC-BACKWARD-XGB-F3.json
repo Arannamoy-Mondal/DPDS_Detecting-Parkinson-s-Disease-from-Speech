@@ -1,0 +1,411 @@
+{
+ "run_id": "FV1-AC-BACKWARD-XGB-F3",
+ "condition_id": "FV1-AC-BACKWARD-XGB",
+ "outer_fold": 3,
+ "status": "COMPLETED",
+ "started_utc": "2026-10-20T09:45:40Z",
+ "configuration_hash": "1868d1980e836df47b09938b7ea40ca915c585eb92b54f70a6c4e47f12eea406",
+ "protocol_hash": "5535d1a440a57005fa05d474f5e2d1016df36712b5696f2d1f667569582287c0",
+ "split_manifest_hash": "31c40ed902165aff483dd8e3ab246e028c985bed029074f4588804c7c8def837",
+ "gates": {
+  "no_speaker_overlap_train_test": true,
+  "every_test_sample_predicted_exactly_once": true,
+  "probabilities_finite_in_0_1": true,
+  "labels_match_manifest": true,
+  "folds_match_split_manifest": true,
+  "protocol_and_split_hashes_match_freeze": true
+ },
+ "selected_hyperparameters": {
+  "learning_rate": 0.03,
+  "max_depth": 4,
+  "n_estimators": 100,
+  "min_child_weight": 1,
+  "subsample": 0.7,
+  "colsample_bytree": 1.0,
+  "reg_lambda": 1,
+  "scale_pos_weight": 1
+ },
+ "selected_features": [
+  "ac_centroid_hz_p90",
+  "ac_rolloff85_hz_p90",
+  "ac_band1_log_mean",
+  "ac_band2_log_p90",
+  "ac_band3_log_p10",
+  "ac_band3_log_p90",
+  "ac_band4_log_mean",
+  "ac_band4_log_std",
+  "ac_band4_log_p10",
+  "ac_band4_log_p90"
+ ],
+ "n_features_used": 10,
+ "inner_table": [
+  {
+   "config_index": 0,
+   "params": {
+    "learning_rate": 0.03,
+    "max_depth": 2,
+    "n_estimators": 100,
+    "min_child_weight": 1,
+    "subsample": 0.7,
+    "colsample_bytree": 1.0,
+    "reg_lambda": 10,
+    "scale_pos_weight": 1
+   },
+   "inner_speaker_auprc": 0.9954545454545458
+  },
+  {
+   "config_index": 1,
+   "params": {
+    "learning_rate": 0.03,
+    "max_depth": 2,
+    "n_estimators": 100,
+    "min_child_weight": 1,
+    "subsample": 1.0,
+    "colsample_bytree": 0.3,
+    "reg_lambda": 1,
+    "scale_pos_weight": "balanced"
+   },
+   "inner_speaker_auprc": 0.9689915743011721
+  },
+  {
+   "config_index": 2,
+   "params": {
+    "learning_rate": 0.03,
+    "max_depth": 2,
+    "n_estimators": 100,
+    "min_child_weight": 1,
+    "subsample": 1.0,
+    "colsample_bytree": 1.0,
+    "reg_lambda": 10,
+    "scale_pos_weight": "balanced"
+   },
+   "inner_speaker_auprc": 0.9976190476190478
+  },
+  {
+   "config_index": 3,
+   "params": {
+    "learning_rate": 0.03,
+    "max_depth": 2,
+    "n_estimators": 100,
+    "min_child_weight": 5,
+    "subsample": 0.7,
+    "colsample_bytree": 0.3,
+    "reg_lambda": 10,
+    "scale_pos_weight": "balanced"
+   },
+   "inner_speaker_auprc": 0.962741574301172
+  },
+  {
+   "config_index": 4,
+   "params": {
+    "learning_rate": 0.03,
+    "max_depth": 2,
+    "n_estimators": 100,
+    "min_child_weight": 5,
+    "subsample": 1.0,
+    "colsample_bytree": 0.3,
+    "reg_lambda": 1,
+    "scale_pos_weight": 1
+   },
+   "inner_speaker_auprc": 0.9560749076345054
+  },
+  {
+   "config_index": 5,
+   "params": {
+    "learning_rate": 0.03,
+    "max_depth": 2,
+    "n_estimators": 100,
+    "min_child_weight": 5,
+    "subsample": 1.0,
+    "colsample_bytree": 1.0,
+    "reg_lambda": 10,
+    "scale_pos_weight": 1
+   },
+   "inner_speaker_auprc": 0.9954545454545458
+  },
+  {
+   "config_index": 6,
+   "params": {
+    "learning_rate": 0.03,
+    "max_depth": 4,
+    "n_estimators": 100,
+    "min_child_weight": 1,
+    "subsample": 0.7,
+    "colsample_bytree": 1.0,
+    "reg_lambda": 1,
+    "scale_pos_weight": 1
+   },
+   "inner_speaker_auprc": 1.0000000000000002
+  },
+  {
+   "config_index": 7,
+   "params": {
+    "learning_rate": 0.03,
+    "max_depth": 4,
+    "n_estimators": 100,
+    "min_child_weight": 1,
+    "subsample": 1.0,
+    "colsample_bytree": 1.0,
+    "reg_lambda": 10,
+    "scale_pos_weight": "balanced"
+   },
+   "inner_speaker_auprc": 1.0000000000000002
+  },
+  {
+   "config_index": 8,
+   "params": {
+    "learning_rate": 0.03,
+    "max_depth": 4,
+    "n_estimators": 300,
+    "min_child_weight": 1,
+    "subsample": 0.7,
+    "colsample_bytree": 0.3,
+    "reg_lambda": 1,
+    "scale_pos_weight": 1
+   },
+   "inner_speaker_auprc": 0.9792171074969065
+  },
+  {
+   "config_index": 9,
+   "params": {
+    "learning_rate": 0.03,
+    "max_depth": 4,
+    "n_estimators": 300,
+    "min_child_weight": 5,
+    "subsample": 0.7,
+    "colsample_bytree": 1.0,
+    "reg_lambda": 1,
+    "scale_pos_weight": "balanced"
+   },
+   "inner_speaker_auprc": 1.0000000000000002
+  },
+  {
+   "config_index": 10,
+   "params": {
+    "learning_rate": 0.03,
+    "max_depth": 4,
+    "n_estimators": 300,
+    "min_child_weight": 5,
+    "subsample": 1.0,
+    "colsample_bytree": 0.3,
+    "reg_lambda": 1,
+    "scale_pos_weight": 1
+   },
+   "inner_speaker_auprc": 0.9852832839674948
+  },
+  {
+   "config_index": 11,
+   "params": {
+    "learning_rate": 0.1,
+    "max_depth": 2,
+    "n_estimators": 100,
+    "min_child_weight": 1,
+    "subsample": 1.0,
+    "colsample_bytree": 0.3,
+    "reg_lambda": 1,
+    "scale_pos_weight": 1
+   },
+   "inner_speaker_auprc": 0.9880610617452725
+  },
+  {
+   "config_index": 12,
+   "params": {
+    "learning_rate": 0.1,
+    "max_depth": 2,
+    "n_estimators": 100,
+    "min_child_weight": 5,
+    "subsample": 1.0,
+    "colsample_bytree": 0.3,
+    "reg_lambda": 1,
+    "scale_pos_weight": 1
+   },
+   "inner_speaker_auprc": 0.9929545454545456
+  },
+  {
+   "config_index": 13,
+   "params": {
+    "learning_rate": 0.1,
+    "max_depth": 2,
+    "n_estimators": 300,
+    "min_child_weight": 1,
+    "subsample": 0.7,
+    "colsample_bytree": 1.0,
+    "reg_lambda": 10,
+    "scale_pos_weight": "balanced"
+   },
+   "inner_speaker_auprc": 1.0000000000000002
+  },
+  {
+   "config_index": 14,
+   "params": {
+    "learning_rate": 0.1,
+    "max_depth": 2,
+    "n_estimators": 300,
+    "min_child_weight": 5,
+    "subsample": 0.7,
+    "colsample_bytree": 1.0,
+    "reg_lambda": 1,
+    "scale_pos_weight": 1
+   },
+   "inner_speaker_auprc": 1.0000000000000002
+  },
+  {
+   "config_index": 15,
+   "params": {
+    "learning_rate": 0.1,
+    "max_depth": 2,
+    "n_estimators": 300,
+    "min_child_weight": 5,
+    "subsample": 1.0,
+    "colsample_bytree": 0.3,
+    "reg_lambda": 1,
+    "scale_pos_weight": "balanced"
+   },
+   "inner_speaker_auprc": 0.9976190476190478
+  },
+  {
+   "config_index": 16,
+   "params": {
+    "learning_rate": 0.1,
+    "max_depth": 4,
+    "n_estimators": 100,
+    "min_child_weight": 1,
+    "subsample": 0.7,
+    "colsample_bytree": 1.0,
+    "reg_lambda": 10,
+    "scale_pos_weight": "balanced"
+   },
+   "inner_speaker_auprc": 1.0000000000000002
+  },
+  {
+   "config_index": 17,
+   "params": {
+    "learning_rate": 0.1,
+    "max_depth": 4,
+    "n_estimators": 100,
+    "min_child_weight": 1,
+    "subsample": 1.0,
+    "colsample_bytree": 1.0,
+    "reg_lambda": 10,
+    "scale_pos_weight": 1
+   },
+   "inner_speaker_auprc": 1.0000000000000002
+  },
+  {
+   "config_index": 18,
+   "params": {
+    "learning_rate": 0.1,
+    "max_depth": 4,
+    "n_estimators": 100,
+    "min_child_weight": 5,
+    "subsample": 1.0,
+    "colsample_bytree": 0.3,
+    "reg_lambda": 1,
+    "scale_pos_weight": "balanced"
+   },
+   "inner_speaker_auprc": 0.9976190476190478
+  },
+  {
+   "config_index": 19,
+   "params": {
+    "learning_rate": 0.1,
+    "max_depth": 4,
+    "n_estimators": 100,
+    "min_child_weight": 5,
+    "subsample": 1.0,
+    "colsample_bytree": 1.0,
+    "reg_lambda": 10,
+    "scale_pos_weight": 1
+   },
+   "inner_speaker_auprc": 1.0000000000000002
+  },
+  {
+   "config_index": 20,
+   "params": {
+    "learning_rate": 0.1,
+    "max_depth": 4,
+    "n_estimators": 300,
+    "min_child_weight": 1,
+    "subsample": 0.7,
+    "colsample_bytree": 1.0,
+    "reg_lambda": 1,
+    "scale_pos_weight": 1
+   },
+   "inner_speaker_auprc": 1.0000000000000002
+  },
+  {
+   "config_index": 21,
+   "params": {
+    "learning_rate": 0.1,
+    "max_depth": 4,
+    "n_estimators": 300,
+    "min_child_weight": 1,
+    "subsample": 0.7,
+    "colsample_bytree": 1.0,
+    "reg_lambda": 10,
+    "scale_pos_weight": 1
+   },
+   "inner_speaker_auprc": 1.0000000000000002
+  },
+  {
+   "config_index": 22,
+   "params": {
+    "learning_rate": 0.1,
+    "max_depth": 4,
+    "n_estimators": 300,
+    "min_child_weight": 1,
+    "subsample": 1.0,
+    "colsample_bytree": 0.3,
+    "reg_lambda": 10,
+    "scale_pos_weight": "balanced"
+   },
+   "inner_speaker_auprc": 0.9906926406926411
+  },
+  {
+   "config_index": 23,
+   "params": {
+    "learning_rate": 0.1,
+    "max_depth": 4,
+    "n_estimators": 300,
+    "min_child_weight": 5,
+    "subsample": 0.7,
+    "colsample_bytree": 0.3,
+    "reg_lambda": 10,
+    "scale_pos_weight": 1
+   },
+   "inner_speaker_auprc": 0.9976190476190478
+  }
+ ],
+ "runtime_seconds": 69.47935581207275,
+ "finished_utc": "2026-10-20T09:46:50Z",
+ "n_train_speakers": 38,
+ "n_test_speakers": 9,
+ "speaker_level": {
+  "tp": 4,
+  "fn": 1,
+  "tn": 4,
+  "fp": 0,
+  "sensitivity": 0.8,
+  "specificity": 1.0,
+  "precision": 1.0,
+  "f1": 0.888888888888889,
+  "accuracy": 0.8888888888888888,
+  "balanced_accuracy": 0.9,
+  "auroc": 1.0,
+  "auprc": 1.0
+ },
+ "sample_level": {
+  "tp": 77,
+  "fn": 19,
+  "tn": 64,
+  "fp": 0,
+  "sensitivity": 0.8020833333333334,
+  "specificity": 1.0,
+  "precision": 1.0,
+  "f1": 0.8901734104046243,
+  "accuracy": 0.88125,
+  "balanced_accuracy": 0.9010416666666667,
+  "auroc": 0.9565429687499999,
+  "auprc": 0.9763156677200496
+ }
+}

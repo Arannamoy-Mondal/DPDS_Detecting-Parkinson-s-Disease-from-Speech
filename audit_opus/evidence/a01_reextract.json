@@ -1,0 +1,128 @@
+{
+ "WLM": [
+  {
+   "sample_id": "S_f9a2c1488dd55bf4",
+   "seconds": 250.312,
+   "windows": 26,
+   "max_abs_diff": 5.345791578292847e-07,
+   "cosine": 0.9999999403953552,
+   "mean_abs_value": 0.05317940562963486
+  },
+  {
+   "sample_id": "S_65ecb815befc63ca",
+   "seconds": 248.156,
+   "windows": 25,
+   "max_abs_diff": 4.470348358154297e-07,
+   "cosine": 1.0,
+   "mean_abs_value": 0.04925251007080078
+  },
+  {
+   "sample_id": "S_928c7dde48a74e88",
+   "seconds": 236.094,
+   "windows": 24,
+   "max_abs_diff": 4.76837158203125e-07,
+   "cosine": 1.0,
+   "mean_abs_value": 0.056355349719524384
+  },
+  {
+   "sample_id": "S_1ff5044499ed5bdc",
+   "seconds": 10.449,
+   "windows": 2,
+   "max_abs_diff": 1.3113021850585938e-06,
+   "cosine": 1.0,
+   "mean_abs_value": 0.11332324147224426
+  },
+  {
+   "sample_id": "S_1af4b45497b8291c",
+   "seconds": 3.375,
+   "windows": 1,
+   "max_abs_diff": 3.069639205932617e-06,
+   "cosine": 1.0,
+   "mean_abs_value": 0.08500999957323074
+  }
+ ],
+ "W2V": [
+  {
+   "sample_id": "S_f9a2c1488dd55bf4",
+   "seconds": 250.312,
+   "windows": 26,
+   "max_abs_diff": 4.76837158203125e-07,
+   "cosine": 1.0,
+   "mean_abs_value": 0.08102764189243317
+  },
+  {
+   "sample_id": "S_65ecb815befc63ca",
+   "seconds": 248.156,
+   "windows": 25,
+   "max_abs_diff": 2.384185791015625e-07,
+   "cosine": 0.9999998807907104,
+   "mean_abs_value": 0.08092963695526123
+  },
+  {
+   "sample_id": "S_928c7dde48a74e88",
+   "seconds": 236.094,
+   "windows": 24,
+   "max_abs_diff": 5.960464477539062e-07,
+   "cosine": 1.0,
+   "mean_abs_value": 0.08074884861707687
+  },
+  {
+   "sample_id": "S_1ff5044499ed5bdc",
+   "seconds": 10.449,
+   "windows": 2,
+   "max_abs_diff": 4.76837158203125e-07,
+   "cosine": 1.0000001192092896,
+   "mean_abs_value": 0.08053120970726013
+  },
+  {
+   "sample_id": "S_1af4b45497b8291c",
+   "seconds": 3.375,
+   "windows": 1,
+   "max_abs_diff": 1.9073486328125e-06,
+   "cosine": 1.0,
+   "mean_abs_value": 0.08082494884729385
+  }
+ ],
+ "XLSR": [
+  {
+   "sample_id": "S_f9a2c1488dd55bf4",
+   "seconds": 250.312,
+   "windows": 26,
+   "max_abs_diff": 2.384185791015625e-07,
+   "cosine": 1.0,
+   "mean_abs_value": 0.1198236346244812
+  },
+  {
+   "sample_id": "S_65ecb815befc63ca",
+   "seconds": 248.156,
+   "windows": 25,
+   "max_abs_diff": 2.086162567138672e-07,
+   "cosine": 1.0,
+   "mean_abs_value": 0.11699193716049194
+  },
+  {
+   "sample_id": "S_928c7dde48a74e88",
+   "seconds": 236.094,
+   "windows": 24,
+   "max_abs_diff": 4.172325134277344e-07,
+   "cosine": 0.9999999403953552,
+   "mean_abs_value": 0.12051624059677124
+  },
+  {
+   "sample_id": "S_1ff5044499ed5bdc",
+   "seconds": 10.449,
+   "windows": 2,
+   "max_abs_diff": 2.682209014892578e-07,
+   "cosine": 0.9999998807907104,
+   "mean_abs_value": 0.11082401126623154
+  },
+  {
+   "sample_id": "S_1af4b45497b8291c",
+   "seconds": 3.375,
+   "windows": 1,
+   "max_abs_diff": 5.364418029785156e-07,
+   "cosine": 0.9999998807907104,
+   "mean_abs_value": 0.11157086491584778
+  }
+ ]
+}

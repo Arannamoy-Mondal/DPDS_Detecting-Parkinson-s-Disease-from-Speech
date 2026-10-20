@@ -1,0 +1,115 @@
+{
+ "condition_id": "FV1-H7-ALL-LR",
+ "feature_count": null,
+ "feature_selection": "ALL",
+ "grid": [
+  {
+   "C": 0.01,
+   "class_weight": null,
+   "penalty": "l1"
+  },
+  {
+   "C": 0.01,
+   "class_weight": "balanced",
+   "penalty": "l1"
+  },
+  {
+   "C": 0.01,
+   "class_weight": null,
+   "penalty": "l2"
+  },
+  {
+   "C": 0.01,
+   "class_weight": "balanced",
+   "penalty": "l2"
+  },
+  {
+   "C": 0.1,
+   "class_weight": null,
+   "penalty": "l1"
+  },
+  {
+   "C": 0.1,
+   "class_weight": "balanced",
+   "penalty": "l1"
+  },
+  {
+   "C": 0.1,
+   "class_weight": null,
+   "penalty": "l2"
+  },
+  {
+   "C": 0.1,
+   "class_weight": "balanced",
+   "penalty": "l2"
+  },
+  {
+   "C": 1,
+   "class_weight": null,
+   "penalty": "l1"
+  },
+  {
+   "C": 1,
+   "class_weight": "balanced",
+   "penalty": "l1"
+  },
+  {
+   "C": 1,
+   "class_weight": null,
+   "penalty": "l2"
+  },
+  {
+   "C": 1,
+   "class_weight": "balanced",
+   "penalty": "l2"
+  },
+  {
+   "C": 10,
+   "class_weight": null,
+   "penalty": "l1"
+  },
+  {
+   "C": 10,
+   "class_weight": "balanced",
+   "penalty": "l1"
+  },
+  {
+   "C": 10,
+   "class_weight": null,
+   "penalty": "l2"
+  },
+  {
+   "C": 10,
+   "class_weight": "balanced",
+   "penalty": "l2"
+  },
+  {
+   "C": 100,
+   "class_weight": null,
+   "penalty": "l1"
+  },
+  {
+   "C": 100,
+   "class_weight": "balanced",
+   "penalty": "l1"
+  },
+  {
+   "C": 100,
+   "class_weight": null,
+   "penalty": "l2"
+  },
+  {
+   "C": 100,
+   "class_weight": "balanced",
+   "penalty": "l2"
+  }
+ ],
+ "inner_seed": 143,
+ "model": "LR",
+ "outer_fold": 1,
+ "protocol_hash": "5535d1a440a57005fa05d474f5e2d1016df36712b5696f2d1f667569582287c0",
+ "representation": "H7",
+ "run_id": "FV1-H7-ALL-LR-F1",
+ "seed": 42,
+ "selection_seed": 243
+}

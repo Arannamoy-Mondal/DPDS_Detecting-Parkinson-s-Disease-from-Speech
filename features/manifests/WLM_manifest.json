@@ -1,0 +1,22 @@
+{
+ "checkpoint_file_sha256": {
+  "config.json": "a3d8fe831aaf63d725b54a8ac36f3549cd4365c5086774b2c89cabbc6f9e129d",
+  "preprocessor_config.json": "60ca5a31e13f69ee2fbf147504c8676db5f6398fd7a6b12294341dff838edfcf",
+  "pytorch_model.bin": "fdee460e529396ddb2f8c8e8ce0ad74cfb747b726bc6f612e666c7c1e1963c9d"
+ },
+ "code_sha256": "93baf85f2ff9aae7019daa02710f237ceb4bb655430f2e20c74e69df14471d15",
+ "created_utc": "2026-10-20T10:41:17Z",
+ "dtype": "float32",
+ "file_sha256": "6bb38a4a731237548c162ff7486cc07926cbaff58fb24a3824914479eb51bb0a",
+ "key": "WLM",
+ "model_id": "microsoft/wavlm-large",
+ "pooling": "mean over time of last_hidden_state, then mean over 10-s windows",
+ "revision": "c1423ed94bb01d80a3f5ce5bc39f6026a0f4828c",
+ "shape": [
+  785,
+  1024
+ ],
+ "total_windows": 2158,
+ "validation": "all 785 samples present, finite, hashes verified",
+ "window_seconds": 10.0
+}

@@ -1,0 +1,1305 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.1cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern,microtype}
+\usepackage{booktabs,longtable,float,graphicx,amsmath,amssymb,array,enumitem,xcolor,tcolorbox}
+\usepackage[colorlinks=true,linkcolor=blue!50!black,urlcolor=blue!50!black,citecolor=blue!50!black]{hyperref}
+\setlist{itemsep=2pt,topsep=3pt}\setlength{\parskip}{5pt}\setlength{\parindent}{0pt}\linespread{1.08}
+\usepackage{titlesec}\titleformat{\section}{\Large\bfseries}{\thesection.}{.5em}{}\titleformat{\subsection}{\large\bfseries}{\thesubsection}{.5em}{}
+\usepackage{fancyhdr}\pagestyle{fancy}\fancyhf{}\fancyfoot[C]{\small\thepage}\fancyhead[L]{\small Detecting Parkinson's disease from speech}\fancyhead[R]{\small FINAL\_V1 project report}\renewcommand{\headrulewidth}{.3pt}
+\begin{document}
+\begin{center}{\LARGE\bfseries Detecting Parkinson's Disease from Speech\par}\vspace{6pt}
+{\Large Final project report (FINAL\_V1, study edition)\par}\vspace{4pt}
+{\large Version 1.2 \textperiodcentered{} 20 October 2026\par}\vspace{6pt}
+{\normalsize CSE 431 Machine Learning and Deep Learning, topic 4a: detecting neurodegenerative disorders from speech\par}\vspace{3pt}
+{\small Evidence: frozen protocol FINAL\_V1 (SHA-256 5535d1a440a57005\ldots), 280 runs, independent audit \textperiodcentered{} 2026-10-20\par}\end{center}
+\vspace{4pt}\hrule\vspace{6pt}
+\tableofcontents
+\newpage
+\begin{tcolorbox}[colback=gray!5,colframe=gray!60!black,boxrule=0.5pt,arc=2pt,left=5pt,right=5pt,top=3pt,bottom=3pt,title={\small\bfseries Note}]\small This report covers \textbf{one study only}: the FINAL\_V1 experiment in the isolated workspace \texttt{Project4a\_\allowbreak{}FINAL\_\allowbreak{}V1\_\allowbreak{}ISOLATED}. It follows the order of the course guideline (Project Guidelines.pdf), so each part can be carried into the final report. Every number is produced by code from the saved result files. The team-contribution section is intentionally left for the team to write. Boxes called \emph{In plain words} restate a technical idea simply; boxes called \emph{What this tells us} explain how to read a result.\end{tcolorbox}
+\section*{Key numbers at a glance}\addcontentsline{toc}{section}{Key numbers at a glance}
+\begin{center}\small\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{>{\raggedright\arraybackslash}p{3.17cm}>{\raggedright\arraybackslash}p{12.49cm}}
+\caption{The study in nine lines.}\\
+\toprule
+\textbf{\hspace{0pt}Item} & \textbf{\hspace{0pt}Value}\\\midrule\endfirsthead
+\toprule
+\textbf{\hspace{0pt}Item} & \textbf{\hspace{0pt}Value}\\\midrule\endhead
+\bottomrule\endfoot
+\hspace{0pt}Question & \hspace{0pt}Parkinson's disease (PD) versus age-comparable healthy controls, from speech\\
+\hspace{0pt}Data & \hspace{0pt}785 recordings from 47 speakers (25 PD, 22 controls), 16 speech tasks, 5.0 hours of audio\\
+\hspace{0pt}Evaluation & \hspace{0pt}5-fold cross-validation in which no person is ever in both training and test data; tuning inside each training part only\\
+\hspace{0pt}Experiments & \hspace{0pt}56 configurations (12 representations $\times$ 4 classifiers, plus feature selection), 280 training runs, all completed\\
+\hspace{0pt}Baseline & \hspace{0pt}WavLM-large embeddings +\allowbreak{} logistic regression: AUROC 0.995, AUPRC 0.996, sensitivity 0.96, specificity 1.00\\
+\hspace{0pt}All configurations & \hspace{0pt}median AUROC 0.995 (range 0.867 to 1.000); 40 of 56 make at most one speaker error\\
+\hspace{0pt}Simplest model & \hspace{0pt}40 hand-made acoustic numbers +\allowbreak{} logistic regression: AUROC 1.000\\
+\hspace{0pt}Integrity & \hspace{0pt}20 of 20 leakage and integrity checks passed; independent audit found no result-changing bug\\
+\hspace{0pt}Main caveat & \hspace{0pt}patients and controls were recorded in different sessions, and their audio files differ in technical details (sampling rate, digital silence), so the high scores cannot be read as proof that the models detect the disease\\
+\end{longtable}\end{center}
+\section*{How this report follows the course guideline}\addcontentsline{toc}{section}{How this report follows the course guideline}
+The headings follow the \emph{Final Report} column of Project Guidelines.pdf (CSE 431), in the same order. The table shows where each rubric item is answered. The team-contribution item is left for the team. Analyses that go beyond the minimum (feature importance, tuning, tasks, recording conditions) sit inside \emph{Results and analysis}.
+
+\begin{center}\small\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{>{\raggedright\arraybackslash}p{3.91cm}>{\raggedright\arraybackslash}p{8.40cm}>{\raggedright\arraybackslash}p{2.93cm}}
+\caption{Guideline rubric item and the section of this report that answers it.}\\
+\toprule
+\textbf{\hspace{0pt}Guideline part} & \textbf{\hspace{0pt}Rubric item} & \textbf{\hspace{0pt}Where}\\\midrule\endfirsthead
+\toprule
+\textbf{\hspace{0pt}Guideline part} & \textbf{\hspace{0pt}Rubric item} & \textbf{\hspace{0pt}Where}\\\midrule\endhead
+\bottomrule\endfoot
+\hspace{0pt}Overview and context & \hspace{0pt}Abstract & \hspace{0pt}section~\ref{sec:abstract}\\
+\hspace{0pt} & \hspace{0pt}Motivation and objectives & \hspace{0pt}section~\ref{sec:motivation}\\
+\hspace{0pt}Related work and background & \hspace{0pt}Literature review & \hspace{0pt}section~\ref{sec:related}\\
+\hspace{0pt} & \hspace{0pt}Background (metric and baseline linked to the problem) & \hspace{0pt}section~\ref{sec:background}\\
+\hspace{0pt}Methodology & \hspace{0pt}Model description (diagrams, output shapes, parameter counts) & \hspace{0pt}section~\ref{sec:model}\\
+\hspace{0pt} & \hspace{0pt}Dataset (citation; training and evaluation steps incl. batch sampling) & \hspace{0pt}section~\ref{sec:dataset}\\
+\hspace{0pt} & \hspace{0pt}Evaluation metric (mathematical definitions) & \hspace{0pt}section~\ref{sec:metrics}\\
+\hspace{0pt} & \hspace{0pt}Loss function and optimisation & \hspace{0pt}section~\ref{sec:loss}\\
+\hspace{0pt} & \hspace{0pt}Experimental depth and iteration & \hspace{0pt}section~\ref{sec:experiments}\\
+\hspace{0pt}Baseline and extensions & \hspace{0pt}Baseline selection and evaluation (mandatory) & \hspace{0pt}section~\ref{sec:baseline}\\
+\hspace{0pt} & \hspace{0pt}Implemented extensions /\allowbreak{} experiments & \hspace{0pt}section~\ref{sec:extensions}\\
+\hspace{0pt} & \hspace{0pt}Baseline outputs confirming reproduction & \hspace{0pt}section~\ref{sec:reproduction}\\
+\hspace{0pt}Results and analysis & \hspace{0pt}Results (training and validation separately; key findings visualised) & \hspace{0pt}section~\ref{sec:results}\\
+\hspace{0pt} & \hspace{0pt}Error /\allowbreak{} failure-case analysis & \hspace{0pt}section~\ref{sec:errors}\\
+\hspace{0pt} & \hspace{0pt}Sensitivity /\allowbreak{} ablation analysis & \hspace{0pt}section~\ref{sec:sensitivity}\\
+\hspace{0pt}Discussion & \hspace{0pt}Significance, risks, sensitivity to input changes, limitations & \hspace{0pt}section~\ref{sec:discussion}\\
+\hspace{0pt}Future directions & \hspace{0pt}Areas for future work & \hspace{0pt}section~\ref{sec:future}\\
+\hspace{0pt}Conclusion & \hspace{0pt}Summary of findings and objectives & \hspace{0pt}section~\ref{sec:conclusion}\\
+\hspace{0pt}Team contribution & \hspace{0pt}Breakdown by members & \hspace{0pt}to be added by the team\\
+\end{longtable}\end{center}
+\section*{Revision history}\addcontentsline{toc}{section}{Revision history}
+Each version is kept unchanged in \texttt{reports/FINAL\_\allowbreak{}V1/study\_\allowbreak{}report/versions/}; later versions only add material unless stated otherwise. Version 1.1 added section~\ref{sec:dictionary} (feature dictionary) and section~\ref{sec:importance-tables} (feature-importance tables); version 1.2 added section~\ref{sec:shap} (SHAP explanations) and redrew the importance figure.
+
+\begin{center}\small\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{>{\raggedright\arraybackslash}p{1.56cm}>{\raggedright\arraybackslash}p{2.74cm}>{\raggedright\arraybackslash}p{10.94cm}}
+\caption{Versions of this report.}\\
+\toprule
+\textbf{\hspace{0pt}Version} & \textbf{\hspace{0pt}Date} & \textbf{\hspace{0pt}Changes}\\\midrule\endfirsthead
+\toprule
+\textbf{\hspace{0pt}Version} & \textbf{\hspace{0pt}Date} & \textbf{\hspace{0pt}Changes}\\\midrule\endhead
+\bottomrule\endfoot
+\hspace{0pt}1.0 & \hspace{0pt}20 October 2026 & \hspace{0pt}First study edition: FINAL\_\allowbreak{}V1 only, structured by the Final Report column of Project Guidelines.pdf.\\
+\hspace{0pt}1.1 & \hspace{0pt}20 October 2026 & \hspace{0pt}Extension only (no earlier text changed): new section 'Feature dictionary' (what every acoustic feature name means, with formulas, units and typical values); new section 'Feature importance in numbers' (tables for families, statistics, all 40 features and the hybrid blocks); this revision history; all pages now A4 portrait (the wide appendix tables are split into two portrait tables each, with the same numbers); one typo corrected in section 2 ('89\%\%' shown as '89\%').\\
+\hspace{0pt}1.2 & \hspace{0pt}20 October 2026 & \hspace{0pt}Extension of 1.1: the acoustic importance figure was redrawn without overlapping labels (split into two figures, same numbers); new section 'SHAP explanations' (out-of-fold SHAP values for the acoustic logistic-regression and XGBoost models, with figures and a table).\\
+\end{longtable}\end{center}
+\section{Abstract}\label{sec:abstract}
+Parkinson's disease often changes the way people speak: the voice can become quieter, flatter and less precise. Because speech is cheap to record, a computer that recognises these changes could one day help doctors find the disease earlier. In this project we asked whether short speech recordings can tell people with Parkinson's disease apart from healthy people of the same age, when the computer is always tested on people it has never heard before.
+
+We used a public Italian dataset with 785 recordings from 47 people (25 with Parkinson's, 22 healthy older adults) performing 16 short speaking tasks such as reading, repeating syllables and holding a vowel. We turned each recording into numbers in two ways: 40 simple acoustic measurements (loudness, spectral shape and the energy in different frequency bands), and the outputs of three large pretrained speech models (WavLM-large, wav2vec2 and XLS-R). We then trained four kinds of classifiers on these numbers and tested 56 combinations under one fixed, pre-registered plan.
+
+Almost every combination separated the two groups very well: the median area under the ROC curve (AUROC) was 0.995, and the baseline (WavLM-large with logistic regression) missed one patient and raised no false alarm. However, 40 simple acoustic numbers did just as well as the large models, the tree-based models relied most on numbers that describe the quiet background between words, and the two groups were recorded on different days, with audio files that differ in technical details such as digital silence at the start or end. The scores are therefore real for this dataset but cannot be taken as proof that the models hear the disease. A test on independent recordings made under the same conditions for both groups is the necessary next step.
+
+\section{Motivation and objectives}\label{sec:motivation}
+About 11.8 million people were living with Parkinson's disease worldwide in 2021 [1]. Changes in speech and voice affect around 89\% of people with the disease, yet only a small minority receive speech treatment [2]. Diagnosis still relies mainly on clinical examination, and it is hardest in the early stages and outside specialist clinics [3]. Speech offers something rare in medicine: a signal that can be recorded in a few minutes with any phone, at home, as often as needed. If a reliable speech marker existed it could support screening, referral decisions and the follow-up of patients in clinical trials.
+
+The danger in this field is over-optimism. Many published speech studies report very high accuracies on small datasets, and those numbers often do not survive a stricter test. So our project had two aims at once: build good classifiers, and measure them honestly.
+
+\textbf{Qualitative objectives.}
+
+\begin{itemize}\item Build a pipeline that predicts Parkinson's disease from a person's speech recordings and is always evaluated on unseen speakers.
+\item Compare different ways of describing speech (hand-made acoustic features versus pretrained deep speech models, and their combinations), different classifiers and feature selection under identical conditions.
+\item Understand \emph{why} the models work or fail: which features matter, which recordings are misclassified, how sensitive the results are to design choices, and whether recording conditions could explain the results.
+\end{itemize}
+\textbf{Quantitative objectives.}
+
+\begin{itemize}\item Estimate, for each of the 56 configurations, the pooled speaker-level AUROC and AUPRC (primary metrics) and the sensitivity, specificity, F1 score and balanced accuracy at a fixed threshold of 0.5, with 95\% confidence intervals.
+\item Test whether any extension (other encoders, hybrids, other classifiers, feature selection) improves on the baseline by more than the statistical uncertainty, using paired bootstrap comparisons on the same people.
+\item Verify that no information from test speakers reached training (zero speaker overlap in all 280 runs) and that every reported number can be reproduced.
+\end{itemize}
+\section{Related work (literature review)}\label{sec:related}
+Speech-based detection of Parkinson's disease has been studied with very different tools. We group recent work (2022 to 2025) into four lines and explain how each connects to our project. The accuracies quoted below come from different datasets, languages and evaluation designs, so they cannot be compared with our numbers directly.
+
+\subsection{Deep networks trained on spectrograms or raw speech}
+Quan et al. (2022) [4] built an end-to-end network in which time-distributed 2D convolutional blocks turn the speech spectrogram into a sequence of features and a 1D convolutional block learns how they change over time; they tested it on Chinese and Spanish recordings. Iyer et al. (2023) [5] recorded the sustained vowel /a/ over the telephone from 50 people with Parkinson's and 50 controls and classified spectrogram images with a pretrained convolutional network (Inception V3) using transfer learning. \textbf{Connection:} both train deep networks on relatively small datasets. With only 47 speakers we chose instead to \emph{reuse} large pretrained speech models without training them, which needs far less data.
+
+\subsection{Hand-crafted acoustic features with classical classifiers}
+Wang et al. (2022) [6] collected a Mandarin dataset, compared three feature-selection methods (LASSO, mRMR and Relief-F) with four classifiers, and reported their best result as 75.8\% accuracy with 82.4\% sensitivity and 73.2\% specificity. Egbo et al. (2025) [7] used XGBoost to select the ten most useful acoustic features from sustained phonations of 31 people and then a tuned XGBoost classifier, reporting 98\% accuracy on a held-out test set, while noting the small sample. \textbf{Connection:} these studies motivate three parts of our design: hand-crafted acoustic features, forward and backward feature selection, and XGBoost as one of our classifiers. Wang et al. also show why sensitivity and specificity must be reported side by side.
+
+\subsection{Pretrained self-supervised speech embeddings}
+Self-supervised speech models learn from very large amounts of unlabelled audio. wav2vec 2.0 [8] learns by predicting masked parts of the speech signal; XLS-R [9] applies the same idea to many languages; WavLM [10] adds denoising and was trained on about 94,000 hours of speech. Klempir and Krupicka (2024) [11] used \emph{non-fine-tuned} (frozen) wav2vec embeddings on three Parkinson's datasets in different languages and found them better than classical MFCC features when a model trained on one database was tested on another. \textbf{Connection:} this is the closest design to ours. We use frozen embeddings from three newer models (WavLM-large, wav2vec2-large and XLS-R) and compare them with each other, with acoustic features and with their combinations.
+
+\subsection{Linguistic content}
+Crawford (2025) [12] analysed \emph{what} people say rather than \emph{how} they sound: spontaneous speech was transcribed and language-model features were used to detect Parkinson's disease with up to 78\% accuracy. \textbf{Connection:} our models use only the audio signal and ignore the words, so linguistic cues are outside our scope; they are a possible future extension.
+
+\subsection{Recording conditions}
+Vaiciukynas et al. (2017) [13] recorded the same people simultaneously with two different microphones and found that the error rate depended on the microphone (for the fused system, about 19\% with a cardioid microphone versus 23\% with a smartphone). \textbf{Connection:} recording conditions change the signal that a classifier sees. This turned out to be central in our project (section~\ref{sec:confound}).
+
+\section{Background: the ideas behind our design}\label{sec:background}
+\subsection{How Parkinson's disease changes speech}
+The speech disorder typical of Parkinson's disease is called hypokinetic dysarthria. People may speak more softly, with less variation in pitch and loudness, with less precise consonants and sometimes with a breathy or hoarse voice. Such changes are reported in most people with the disease [2]. This is why loudness, spectral shape and the fine structure of the voice are reasonable things to measure, and why we did not normalise the loudness of the recordings.
+
+\subsection{Two ways to turn sound into numbers}
+\textbf{Hand-crafted acoustic features} are formulas chosen by people: for example the energy of each short frame, how often the waveform crosses zero, or where the centre of mass of the spectrum lies. They are easy to interpret but describe only what we thought of measuring. \textbf{Learned embeddings} come from large neural networks trained on thousands of hours of speech. They describe the sound with 1,024 numbers per moment, capturing patterns no one designed by hand, but the numbers have no individual meaning. We use both and compare them.
+
+\begin{tcolorbox}[colback=green!3,colframe=green!40!black,boxrule=0.5pt,arc=2pt,left=5pt,right=5pt,top=3pt,bottom=3pt,title={\small\bfseries In plain words}]\small Think of the pretrained speech model as a very experienced listener who has heard tens of thousands of hours of speech. We never teach this listener anything about Parkinson's disease; we only ask it to describe each recording in its own language (1,024 numbers). A small, simple classifier then learns which descriptions belong to patients.\end{tcolorbox}
+\subsection{Why the person, not the recording, is the unit}
+Each person contributes about 16 recordings. If some recordings of a person were used for training and others for testing, the model could recognise \emph{the person's voice} rather than the disease and still look accurate. We therefore always keep all recordings of a person on the same side of every split (speaker-disjoint evaluation), and we score people rather than recordings: a person's score is the average of the probabilities of their recordings. Our estimate is thus about \textbf{new people}, not about new recordings of people the model already knows.
+
+\subsection{Why these metrics}
+A screening tool can make two different mistakes: missing a patient (low sensitivity) or alarming a healthy person (low specificity). Studies in this field report both [6], and so do we. AUROC and AUPRC summarise how well the model ranks patients above controls over all possible thresholds; they are our primary metrics because they do not depend on one chosen threshold. We also report F1, which balances precision and sensitivity, and balanced accuracy, the average of sensitivity and specificity.
+
+\subsection{Why this baseline}
+Our baseline is the simplest strong design: frozen WavLM-large embeddings and logistic regression. With only 47 people, a model with few trainable parameters is far less likely to overfit than a deep network trained from scratch; frozen pretrained embeddings with simple classifiers are an established design for Parkinson's speech [11]; WavLM is a state-of-the-art general speech model [10]; and logistic regression has a convex training problem, so it always reaches the same solution. Every other configuration is compared with this baseline on exactly the same people and folds.
+
+\section{Methodology}\label{sec:method}
+\subsection{Model description}\label{sec:model}
+\subsubsection{Overview of the pipeline}
+\begin{figure}[H]\centering\includegraphics[width=0.95\linewidth]{pipeline.pdf}\caption{The pipeline. The grey part is frozen and never sees a label; only the standardisation and the classifier are fitted, and only on the training speakers of each fold.}\label{fig:pipeline}\end{figure}
+Each recording goes through the same steps: resampling, conversion into a fixed-length vector of numbers (the \emph{representation}), standardisation, a classifier that outputs the probability of Parkinson's disease, and finally the average over all recordings of a person. A person is called a patient if this average is at least 0.5.
+
+\subsubsection{Representation 1: forty acoustic features}
+We cut each recording into short frames of 25 ms (400 samples) that start every 10 ms, and compute ten measurements per frame. Over all frames of a recording we then take four statistics: the mean, the standard deviation, the 10th percentile and the 90th percentile. This gives 10 $\times$ 4 = 40 numbers per recording.
+
+\begin{center}\small\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{>{\raggedright\arraybackslash}p{3.32cm}>{\raggedright\arraybackslash}p{5.86cm}>{\raggedright\arraybackslash}p{6.06cm}}
+\caption{The ten frame-level measurements and why they could matter.}\\
+\toprule
+\textbf{\hspace{0pt}Measurement} & \textbf{\hspace{0pt}What it measures} & \textbf{\hspace{0pt}Possible link to PD or to recording conditions}\\\midrule\endfirsthead
+\toprule
+\textbf{\hspace{0pt}Measurement} & \textbf{\hspace{0pt}What it measures} & \textbf{\hspace{0pt}Possible link to PD or to recording conditions}\\\midrule\endhead
+\bottomrule\endfoot
+\hspace{0pt}log energy (dB) & \hspace{0pt}loudness of the frame & \hspace{0pt}softer voice in PD; also microphone gain and distance\\
+\hspace{0pt}zero-crossing rate & \hspace{0pt}how often the waveform changes sign; high for noisy or high-frequency sounds & \hspace{0pt}breathiness, consonants, background hiss\\
+\hspace{0pt}spectral centroid (Hz) & \hspace{0pt}'centre of mass' of the spectrum; a brightness measure & \hspace{0pt}changes in voice quality and articulation; microphone colouring\\
+\hspace{0pt}spectral roll-off 85\% (Hz) & \hspace{0pt}frequency below which 85\% of the energy lies & \hspace{0pt}similar to the centroid\\
+\hspace{0pt}spectral flatness & \hspace{0pt}how noise-like (flat) versus tonal (peaky) the spectrum is & \hspace{0pt}breathy or hoarse voice; noise\\
+\hspace{0pt}band energy 0-500 Hz & \hspace{0pt}energy of low frequencies (pitch region) & \hspace{0pt}voicing, hum, room noise\\
+\hspace{0pt}band energy 0.5-1 kHz & \hspace{0pt}first-formant region & \hspace{0pt}vowel quality\\
+\hspace{0pt}band energy 1-2 kHz & \hspace{0pt}second-formant region & \hspace{0pt}articulation\\
+\hspace{0pt}band energy 2-4 kHz & \hspace{0pt}upper formants and consonants & \hspace{0pt}articulation, clarity\\
+\hspace{0pt}band energy 4-8 kHz & \hspace{0pt}high frequencies (fricatives, hiss) & \hspace{0pt}consonants, noise\\
+\end{longtable}\end{center}
+\begin{tcolorbox}[colback=green!3,colframe=green!40!black,boxrule=0.5pt,arc=2pt,left=5pt,right=5pt,top=3pt,bottom=3pt,title={\small\bfseries In plain words}]\small The four statistics describe different parts of a recording. The \textbf{mean} describes the typical frame, the \textbf{standard deviation} how much the frames vary, the \textbf{90th percentile} the loudest or brightest moments (usually the voice), and the \textbf{10th percentile} the quietest moments, which are mostly pauses and background. This last point becomes important in section~\ref{sec:importance}.\end{tcolorbox}
+\subsubsection{Feature dictionary: what every acoustic feature name means}\label{sec:dictionary}
+Every acoustic feature has a name of the form \texttt{ac\_\allowbreak{}<measurement>\_\allowbreak{}<statistic>}. The \emph{measurement} is computed on each 25-ms frame of the recording, and the \emph{statistic} summarises that measurement over all frames of the recording. For example, \texttt{ac\_\allowbreak{}centroid\_\allowbreak{}hz\_\allowbreak{}p10} is the 10th percentile (statistic \texttt{p10}) of the spectral centroid in Hz (measurement \texttt{centroid\_\allowbreak{}hz}) over all frames of one recording. The three tables below explain the measurements, the statistics and then every one of the 40 names.
+
+\textbf{How a frame is analysed.} The 16-kHz signal is cut into frames of 400 samples (25 ms) that start every 160 samples (10 ms). Each frame $x_1,\dots,x_{400}$ gives its root-mean-square amplitude, and, after a Hann window and a 512-point Fourier transform, a power spectrum $P_k$ at the 257 frequencies $f_k = k \cdot 31.25$ Hz (0 to 8,000 Hz). Nothing is removed: silent pauses are frames too.
+
+\begin{align*}
+\text{log energy} &= 20\log_{10}\!\Big(\sqrt{\tfrac{1}{400}\textstyle\sum_{n} x_n^2}+10^{-10}\Big)\ \text{dB}\\[3pt]
+\text{zero-crossing rate} &= \tfrac{1}{399}\textstyle\sum_{n=1}^{399}\mathbf{1}\big[\operatorname{sign}(x_{n+1})\neq\operatorname{sign}(x_n)\big]\\[3pt]
+\text{spectral centroid} &= \frac{\sum_k f_k P_k}{\sum_k P_k}\ \text{Hz}\\[3pt]
+\text{spectral roll-off} &= \min\Big\{f_m : \textstyle\sum_{k\le m}P_k \ge 0.85\sum_k P_k\Big\}\ \text{Hz}\\[3pt]
+\text{spectral flatness} &= \frac{\exp\big(\frac{1}{257}\sum_k \ln P_k\big)}{\frac{1}{257}\sum_k P_k}\\[3pt]
+\text{band energy in }[a,b) &= \log_{10}\textstyle\sum_{a\le f_k<b} P_k
+\end{align*}
+\begin{center}\small\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{>{\raggedright\arraybackslash}p{2.14cm}>{\raggedright\arraybackslash}p{2.23cm}>{\raggedright\arraybackslash}p{5.95cm}>{\raggedright\arraybackslash}p{1.67cm}>{\raggedright\arraybackslash}p{2.42cm}}
+\caption{The ten frame measurements (the middle part of every feature name).}\\
+\toprule
+\textbf{\hspace{0pt}Name part} & \textbf{\hspace{0pt}Measurement} & \textbf{\hspace{0pt}What it means} & \textbf{\hspace{0pt}Unit} & \textbf{\hspace{0pt}A higher value means}\\\midrule\endfirsthead
+\toprule
+\textbf{\hspace{0pt}Name part} & \textbf{\hspace{0pt}Measurement} & \textbf{\hspace{0pt}What it means} & \textbf{\hspace{0pt}Unit} & \textbf{\hspace{0pt}A higher value means}\\\midrule\endhead
+\bottomrule\endfoot
+\hspace{0pt}log\_\allowbreak{}energy\_\allowbreak{}db & \hspace{0pt}Log energy & \hspace{0pt}Loudness of the frame: root-mean-square amplitude in decibels (0 dB = full-scale amplitude 1). A completely silent frame (digital zeros) gives the floor value -200 dB. & \hspace{0pt}dB & \hspace{0pt}Louder frame\\
+\hspace{0pt}zcr & \hspace{0pt}Zero-crossing rate & \hspace{0pt}Share of neighbouring samples where the waveform changes sign. Noise, hiss and consonants like /\allowbreak{}s/\allowbreak{} cross zero often; voiced vowels with low pitch cross rarely. & \hspace{0pt}fraction, 0 to 1 & \hspace{0pt}More noise-like or high-frequency sound\\
+\hspace{0pt}centroid\_\allowbreak{}hz & \hspace{0pt}Spectral centroid & \hspace{0pt}Centre of mass of the power spectrum, i.e. where the energy is on average along the frequency axis; often described as brightness. & \hspace{0pt}Hz & \hspace{0pt}Brighter, more high-frequency energy\\
+\hspace{0pt}rolloff85\_\allowbreak{}hz & \hspace{0pt}Spectral roll-off (85\%) & \hspace{0pt}Frequency below which 85\% of the frame's spectral energy lies. & \hspace{0pt}Hz & \hspace{0pt}Energy reaches higher frequencies\\
+\hspace{0pt}flatness & \hspace{0pt}Spectral flatness & \hspace{0pt}Geometric mean divided by arithmetic mean of the power spectrum: close to 1 for white noise, close to 0 for a clear tone with harmonics. & \hspace{0pt}ratio, 0 to 1 & \hspace{0pt}More noise-like, less tonal\\
+\hspace{0pt}band0\_\allowbreak{}log & \hspace{0pt}Band energy 0-500 Hz & \hspace{0pt}Log10 of the spectral energy between 0 and 500 Hz: the region of the voice pitch, hum and low room noise. & \hspace{0pt}log10 power & \hspace{0pt}More low-frequency energy\\
+\hspace{0pt}band1\_\allowbreak{}log & \hspace{0pt}Band energy 500-1000 Hz & \hspace{0pt}Log10 of the energy between 500 and 1,000 Hz: around the first vowel resonance (first formant). & \hspace{0pt}log10 power & \hspace{0pt}More energy in this band\\
+\hspace{0pt}band2\_\allowbreak{}log & \hspace{0pt}Band energy 1-2 kHz & \hspace{0pt}Log10 of the energy between 1 and 2 kHz: second-formant region, important for vowel identity and articulation. & \hspace{0pt}log10 power & \hspace{0pt}More energy in this band\\
+\hspace{0pt}band3\_\allowbreak{}log & \hspace{0pt}Band energy 2-4 kHz & \hspace{0pt}Log10 of the energy between 2 and 4 kHz: upper formants and many consonant cues; important for clarity. & \hspace{0pt}log10 power & \hspace{0pt}More energy in this band\\
+\hspace{0pt}band4\_\allowbreak{}log & \hspace{0pt}Band energy 4-8 kHz & \hspace{0pt}Log10 of the energy between 4 and 8 kHz: fricatives (/\allowbreak{}s/\allowbreak{}, /\allowbreak{}f/\allowbreak{}), breath noise and electronic hiss. & \hspace{0pt}log10 power & \hspace{0pt}More high-frequency energy\\
+\end{longtable}\end{center}
+\begin{center}\small\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{>{\raggedright\arraybackslash}p{1.76cm}>{\raggedright\arraybackslash}p{4.10cm}>{\raggedright\arraybackslash}p{9.38cm}}
+\caption{The four statistics (the last part of every feature name).}\\
+\toprule
+\textbf{\hspace{0pt}Name part} & \textbf{\hspace{0pt}Statistic} & \textbf{\hspace{0pt}What it describes}\\\midrule\endfirsthead
+\toprule
+\textbf{\hspace{0pt}Name part} & \textbf{\hspace{0pt}Statistic} & \textbf{\hspace{0pt}What it describes}\\\midrule\endhead
+\bottomrule\endfoot
+\hspace{0pt}mean & \hspace{0pt}Mean over all frames & \hspace{0pt}The typical value of the measurement in the recording.\\
+\hspace{0pt}std & \hspace{0pt}Standard deviation over all frames & \hspace{0pt}How much the measurement changes from frame to frame (between speech and pauses, between sounds).\\
+\hspace{0pt}p10 & \hspace{0pt}10th percentile over all frames & \hspace{0pt}The low end: only 10\% of frames have a lower value. For loudness these are the quietest frames, i.e. pauses and background; for the spectral measurements they are usually also pause or background frames.\\
+\hspace{0pt}p90 & \hspace{0pt}90th percentile over all frames & \hspace{0pt}The high end: only 10\% of frames have a higher value. For loudness these are the loudest frames, i.e. the strongest voiced parts.\\
+\end{longtable}\end{center}
+\begin{center}\small\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{>{\raggedright\arraybackslash}p{3.70cm}>{\raggedright\arraybackslash}p{6.65cm}>{\raggedright\arraybackslash}p{1.90cm}>{\raggedright\arraybackslash}p{2.56cm}}
+\caption{All 40 acoustic features: name, meaning, unit and typical range (5th to 95th percentile over the 785 recordings).}\\
+\toprule
+\textbf{\hspace{0pt}Feature name} & \textbf{\hspace{0pt}What it means} & \textbf{\hspace{0pt}Unit} & \textbf{\hspace{0pt}Typical range}\\\midrule\endfirsthead
+\toprule
+\textbf{\hspace{0pt}Feature name} & \textbf{\hspace{0pt}What it means} & \textbf{\hspace{0pt}Unit} & \textbf{\hspace{0pt}Typical range}\\\midrule\endhead
+\bottomrule\endfoot
+\hspace{0pt}ac\_\allowbreak{}log\_\allowbreak{}energy\_\allowbreak{}db\_\allowbreak{}mean & \hspace{0pt}Average loudness of the recording & \hspace{0pt}dB & \hspace{0pt}-61.8 to -21.7\\
+\hspace{0pt}ac\_\allowbreak{}log\_\allowbreak{}energy\_\allowbreak{}db\_\allowbreak{}std & \hspace{0pt}How much the loudness varies (speech versus pauses) & \hspace{0pt}dB & \hspace{0pt}1.6 to 51.3\\
+\hspace{0pt}ac\_\allowbreak{}log\_\allowbreak{}energy\_\allowbreak{}db\_\allowbreak{}p10 & \hspace{0pt}Loudness of the quietest 10\% of frames (pauses, background) & \hspace{0pt}dB & \hspace{0pt}-179.3 to -23.9\\
+\hspace{0pt}ac\_\allowbreak{}log\_\allowbreak{}energy\_\allowbreak{}db\_\allowbreak{}p90 & \hspace{0pt}Loudness of the loudest 10\% of frames (strongest voice) & \hspace{0pt}dB & \hspace{0pt}-36.3 to -15.0\\
+\hspace{0pt}ac\_\allowbreak{}zcr\_\allowbreak{}mean & \hspace{0pt}Average zero-crossing rate & \hspace{0pt}fraction, 0 to 1 & \hspace{0pt}0.026 to 0.164\\
+\hspace{0pt}ac\_\allowbreak{}zcr\_\allowbreak{}std & \hspace{0pt}Variation of the zero-crossing rate between frames & \hspace{0pt}fraction, 0 to 1 & \hspace{0pt}0.005 to 0.134\\
+\hspace{0pt}ac\_\allowbreak{}zcr\_\allowbreak{}p10 & \hspace{0pt}Low end (10th percentile) of the zero-crossing rate & \hspace{0pt}fraction, 0 to 1 & \hspace{0pt}0.001 to 0.095\\
+\hspace{0pt}ac\_\allowbreak{}zcr\_\allowbreak{}p90 & \hspace{0pt}High end (90th percentile) of the zero-crossing rate & \hspace{0pt}fraction, 0 to 1 & \hspace{0pt}0.030 to 0.369\\
+\hspace{0pt}ac\_\allowbreak{}centroid\_\allowbreak{}hz\_\allowbreak{}mean & \hspace{0pt}Average spectral centroid & \hspace{0pt}Hz & \hspace{0pt}208 to 1030\\
+\hspace{0pt}ac\_\allowbreak{}centroid\_\allowbreak{}hz\_\allowbreak{}std & \hspace{0pt}Variation of the spectral centroid between frames & \hspace{0pt}Hz & \hspace{0pt}19 to 1089\\
+\hspace{0pt}ac\_\allowbreak{}centroid\_\allowbreak{}hz\_\allowbreak{}p10 & \hspace{0pt}Low end (10th percentile) of the spectral centroid & \hspace{0pt}Hz & \hspace{0pt}5 to 666\\
+\hspace{0pt}ac\_\allowbreak{}centroid\_\allowbreak{}hz\_\allowbreak{}p90 & \hspace{0pt}High end (90th percentile) of the spectral centroid & \hspace{0pt}Hz & \hspace{0pt}233 to 2164\\
+\hspace{0pt}ac\_\allowbreak{}rolloff85\_\allowbreak{}hz\_\allowbreak{}mean & \hspace{0pt}Average spectral roll-off (85\%) & \hspace{0pt}Hz & \hspace{0pt}279 to 1640\\
+\hspace{0pt}ac\_\allowbreak{}rolloff85\_\allowbreak{}hz\_\allowbreak{}std & \hspace{0pt}Variation of the spectral roll-off (85\%) between frames & \hspace{0pt}Hz & \hspace{0pt}24 to 1706\\
+\hspace{0pt}ac\_\allowbreak{}rolloff85\_\allowbreak{}hz\_\allowbreak{}p10 & \hspace{0pt}Low end (10th percentile) of the spectral roll-off (85\%) & \hspace{0pt}Hz & \hspace{0pt}6 to 906\\
+\hspace{0pt}ac\_\allowbreak{}rolloff85\_\allowbreak{}hz\_\allowbreak{}p90 & \hspace{0pt}High end (90th percentile) of the spectral roll-off (85\%) & \hspace{0pt}Hz & \hspace{0pt}319 to 4050\\
+\hspace{0pt}ac\_\allowbreak{}flatness\_\allowbreak{}mean & \hspace{0pt}Average spectral flatness & \hspace{0pt}ratio, 0 to 1 & \hspace{0pt}0.000 to 0.143\\
+\hspace{0pt}ac\_\allowbreak{}flatness\_\allowbreak{}std & \hspace{0pt}Variation of the spectral flatness between frames & \hspace{0pt}ratio, 0 to 1 & \hspace{0pt}0.000 to 0.308\\
+\hspace{0pt}ac\_\allowbreak{}flatness\_\allowbreak{}p10 & \hspace{0pt}Low end (10th percentile) of the spectral flatness & \hspace{0pt}ratio, 0 to 1 & \hspace{0pt}0.000 to 0.002\\
+\hspace{0pt}ac\_\allowbreak{}flatness\_\allowbreak{}p90 & \hspace{0pt}High end (90th percentile) of the spectral flatness & \hspace{0pt}ratio, 0 to 1 & \hspace{0pt}0.000 to 0.913\\
+\hspace{0pt}ac\_\allowbreak{}band0\_\allowbreak{}log\_\allowbreak{}mean & \hspace{0pt}Average band energy 0-500 Hz & \hspace{0pt}log10 power & \hspace{0pt}-2.09 to 2.26\\
+\hspace{0pt}ac\_\allowbreak{}band0\_\allowbreak{}log\_\allowbreak{}std & \hspace{0pt}Variation of the band energy 0-500 Hz between frames & \hspace{0pt}log10 power & \hspace{0pt}0.16 to 6.48\\
+\hspace{0pt}ac\_\allowbreak{}band0\_\allowbreak{}log\_\allowbreak{}p10 & \hspace{0pt}Low end (10th percentile) of the band energy 0-500 Hz & \hspace{0pt}log10 power & \hspace{0pt}-17.25 to 2.09\\
+\hspace{0pt}ac\_\allowbreak{}band0\_\allowbreak{}log\_\allowbreak{}p90 & \hspace{0pt}High end (90th percentile) of the band energy 0-500 Hz & \hspace{0pt}log10 power & \hspace{0pt}0.60 to 2.88\\
+\hspace{0pt}ac\_\allowbreak{}band1\_\allowbreak{}log\_\allowbreak{}mean & \hspace{0pt}Average band energy 500-1000 Hz & \hspace{0pt}log10 power & \hspace{0pt}-3.24 to 1.68\\
+\hspace{0pt}ac\_\allowbreak{}band1\_\allowbreak{}log\_\allowbreak{}std & \hspace{0pt}Variation of the band energy 500-1000 Hz between frames & \hspace{0pt}log10 power & \hspace{0pt}0.21 to 6.13\\
+\hspace{0pt}ac\_\allowbreak{}band1\_\allowbreak{}log\_\allowbreak{}p10 & \hspace{0pt}Low end (10th percentile) of the band energy 500-1000 Hz & \hspace{0pt}log10 power & \hspace{0pt}-17.25 to 1.36\\
+\hspace{0pt}ac\_\allowbreak{}band1\_\allowbreak{}log\_\allowbreak{}p90 & \hspace{0pt}High end (90th percentile) of the band energy 500-1000 Hz & \hspace{0pt}log10 power & \hspace{0pt}-0.79 to 2.62\\
+\hspace{0pt}ac\_\allowbreak{}band2\_\allowbreak{}log\_\allowbreak{}mean & \hspace{0pt}Average band energy 1-2 kHz & \hspace{0pt}log10 power & \hspace{0pt}-4.26 to 0.70\\
+\hspace{0pt}ac\_\allowbreak{}band2\_\allowbreak{}log\_\allowbreak{}std & \hspace{0pt}Variation of the band energy 1-2 kHz between frames & \hspace{0pt}log10 power & \hspace{0pt}0.30 to 5.78\\
+\hspace{0pt}ac\_\allowbreak{}band2\_\allowbreak{}log\_\allowbreak{}p10 & \hspace{0pt}Low end (10th percentile) of the band energy 1-2 kHz & \hspace{0pt}log10 power & \hspace{0pt}-17.19 to 0.17\\
+\hspace{0pt}ac\_\allowbreak{}band2\_\allowbreak{}log\_\allowbreak{}p90 & \hspace{0pt}High end (90th percentile) of the band energy 1-2 kHz & \hspace{0pt}log10 power & \hspace{0pt}-2.85 to 1.78\\
+\hspace{0pt}ac\_\allowbreak{}band3\_\allowbreak{}log\_\allowbreak{}mean & \hspace{0pt}Average band energy 2-4 kHz & \hspace{0pt}log10 power & \hspace{0pt}-4.34 to 0.07\\
+\hspace{0pt}ac\_\allowbreak{}band3\_\allowbreak{}log\_\allowbreak{}std & \hspace{0pt}Variation of the band energy 2-4 kHz between frames & \hspace{0pt}log10 power & \hspace{0pt}0.28 to 5.71\\
+\hspace{0pt}ac\_\allowbreak{}band3\_\allowbreak{}log\_\allowbreak{}p10 & \hspace{0pt}Low end (10th percentile) of the band energy 2-4 kHz & \hspace{0pt}log10 power & \hspace{0pt}-17.14 to -0.43\\
+\hspace{0pt}ac\_\allowbreak{}band3\_\allowbreak{}log\_\allowbreak{}p90 & \hspace{0pt}High end (90th percentile) of the band energy 2-4 kHz & \hspace{0pt}log10 power & \hspace{0pt}-2.78 to 1.13\\
+\hspace{0pt}ac\_\allowbreak{}band4\_\allowbreak{}log\_\allowbreak{}mean & \hspace{0pt}Average band energy 4-8 kHz & \hspace{0pt}log10 power & \hspace{0pt}-4.52 to -0.86\\
+\hspace{0pt}ac\_\allowbreak{}band4\_\allowbreak{}log\_\allowbreak{}std & \hspace{0pt}Variation of the band energy 4-8 kHz between frames & \hspace{0pt}log10 power & \hspace{0pt}0.27 to 5.52\\
+\hspace{0pt}ac\_\allowbreak{}band4\_\allowbreak{}log\_\allowbreak{}p10 & \hspace{0pt}Low end (10th percentile) of the band energy 4-8 kHz & \hspace{0pt}log10 power & \hspace{0pt}-17.07 to -1.35\\
+\hspace{0pt}ac\_\allowbreak{}band4\_\allowbreak{}log\_\allowbreak{}p90 & \hspace{0pt}High end (90th percentile) of the band energy 4-8 kHz & \hspace{0pt}log10 power & \hspace{0pt}-3.33 to 0.09\\
+\end{longtable}\end{center}
+\begin{tcolorbox}[colback=green!3,colframe=green!40!black,boxrule=0.5pt,arc=2pt,left=5pt,right=5pt,top=3pt,bottom=3pt,title={\small\bfseries In plain words}]\small Two examples. \texttt{ac\_\allowbreak{}log\_\allowbreak{}energy\_\allowbreak{}db\_\allowbreak{}p10} = how loud the quietest tenth of a recording is; values far below -100 dB mean the recording contains stretches of exact digital silence. \texttt{ac\_\allowbreak{}zcr\_\allowbreak{}mean} = on average, how often the waveform crosses zero; a breathier or noisier recording has a higher value. The PD and control means of every feature, and how well each feature separates the groups, are in appendix~\ref{sec:app-features}.\end{tcolorbox}
+\subsubsection{Representation 2: three frozen speech models}
+The three encoders share the same architecture: a stack of seven convolutional layers turns the 16-kHz waveform into one vector every 20 ms, and 24 transformer layers with 1,024 hidden units refine these vectors using the context of the whole window. We cut each recording into 10-second windows (the last window is aligned with the end of the file), pass each window through the encoder, average the 499 output vectors over time and then average the windows. Every recording therefore becomes one vector of 1,024 numbers. The encoders are never trained in this project.
+
+\begin{center}\small\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{>{\raggedright\arraybackslash}p{2.58cm}>{\raggedright\arraybackslash}p{3.97cm}>{\raggedleft\arraybackslash}p{1.55cm}>{\raggedright\arraybackslash}p{2.78cm}>{\raggedleft\arraybackslash}p{1.55cm}>{\raggedleft\arraybackslash}p{1.55cm}}
+\caption{The frozen encoders: size, output map shape and CPU time per 10-s window (8 threads).}\\
+\toprule
+\textbf{\hspace{0pt}Encoder} & \textbf{\hspace{0pt}Checkpoint} & \textbf{\hspace{0pt}Parameters (frozen)} & \textbf{\hspace{0pt}Output map} & \textbf{\hspace{0pt}Vector} & \textbf{\hspace{0pt}CPU time}\\\midrule\endfirsthead
+\toprule
+\textbf{\hspace{0pt}Encoder} & \textbf{\hspace{0pt}Checkpoint} & \textbf{\hspace{0pt}Parameters (frozen)} & \textbf{\hspace{0pt}Output map} & \textbf{\hspace{0pt}Vector} & \textbf{\hspace{0pt}CPU time}\\\midrule\endhead
+\bottomrule\endfoot
+\hspace{0pt}WavLM-large & \hspace{0pt}microsoft/\allowbreak{}wavlm-large & \hspace{0pt}315,453,120 & \hspace{0pt}499 $\times$ 1,024 per 10-s window & \hspace{0pt}1,024 & \hspace{0pt}1.52 s\\
+\hspace{0pt}wav2vec2-large-lv60 & \hspace{0pt}facebook/\allowbreak{}wav2vec2-large-lv60 & \hspace{0pt}315,438,720 & \hspace{0pt}499 $\times$ 1,024 per 10-s window & \hspace{0pt}1,024 & \hspace{0pt}1.42 s\\
+\hspace{0pt}XLS-R 300M & \hspace{0pt}facebook/\allowbreak{}wav2vec2-xls-r-300m & \hspace{0pt}315,438,720 & \hspace{0pt}499 $\times$ 1,024 per 10-s window & \hspace{0pt}1,024 & \hspace{0pt}1.40 s\\
+\end{longtable}\end{center}
+WavLM-large was trained on about 94,000 hours of English speech with a denoising objective [10]; wav2vec2-large-lv60 on about 60,000 hours of English audiobooks [8]; XLS-R 300M on speech in many languages [9]. Using three different encoders lets us see whether the result depends on one particular model.
+
+\subsubsection{Representation 3: hybrids}
+A hybrid simply places two or more representations side by side in one longer vector (for example WavLM's 1,024 numbers followed by the 40 acoustic features). We built the eight hybrids listed in the table below. Because every column is standardised before the classifier, each feature starts on the same scale.
+
+\begin{center}\small\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{>{\raggedright\arraybackslash}p{2.88cm}>{\raggedright\arraybackslash}p{2.88cm}>{\raggedright\arraybackslash}p{2.88cm}>{\raggedright\arraybackslash}p{2.88cm}>{\raggedleft\arraybackslash}p{2.88cm}}
+\caption{All twelve representations, their size and the number of trainable parameters of a logistic-regression classifier on top (one weight per input plus a bias).}\\
+\toprule
+\textbf{\hspace{0pt}Key} & \textbf{\hspace{0pt}Representation} & \textbf{\hspace{0pt}Components} & \textbf{\hspace{0pt}Input size d} & \textbf{\hspace{0pt}LR parameters (d+\allowbreak{}1)}\\\midrule\endfirsthead
+\toprule
+\textbf{\hspace{0pt}Key} & \textbf{\hspace{0pt}Representation} & \textbf{\hspace{0pt}Components} & \textbf{\hspace{0pt}Input size d} & \textbf{\hspace{0pt}LR parameters (d+\allowbreak{}1)}\\\midrule\endhead
+\bottomrule\endfoot
+\hspace{0pt}AC & \hspace{0pt}Acoustic (40 features) & \hspace{0pt}AC & \hspace{0pt}40 & \hspace{0pt}41\\
+\hspace{0pt}WLM & \hspace{0pt}WavLM-large & \hspace{0pt}WLM & \hspace{0pt}1024 & \hspace{0pt}1025\\
+\hspace{0pt}W2V & \hspace{0pt}wav2vec2-large-lv60 & \hspace{0pt}W2V & \hspace{0pt}1024 & \hspace{0pt}1025\\
+\hspace{0pt}XLSR & \hspace{0pt}XLS-R 300M & \hspace{0pt}XLSR & \hspace{0pt}1024 & \hspace{0pt}1025\\
+\hspace{0pt}H1 & \hspace{0pt}WavLM +\allowbreak{} acoustic & \hspace{0pt}WLM+\allowbreak{}AC & \hspace{0pt}1064 & \hspace{0pt}1065\\
+\hspace{0pt}H2 & \hspace{0pt}wav2vec2 +\allowbreak{} acoustic & \hspace{0pt}W2V+\allowbreak{}AC & \hspace{0pt}1064 & \hspace{0pt}1065\\
+\hspace{0pt}H3 & \hspace{0pt}XLS-R +\allowbreak{} acoustic & \hspace{0pt}XLSR+\allowbreak{}AC & \hspace{0pt}1064 & \hspace{0pt}1065\\
+\hspace{0pt}H4 & \hspace{0pt}WavLM +\allowbreak{} wav2vec2 & \hspace{0pt}WLM+\allowbreak{}W2V & \hspace{0pt}2048 & \hspace{0pt}2049\\
+\hspace{0pt}H5 & \hspace{0pt}WavLM +\allowbreak{} XLS-R & \hspace{0pt}WLM+\allowbreak{}XLSR & \hspace{0pt}2048 & \hspace{0pt}2049\\
+\hspace{0pt}H6 & \hspace{0pt}wav2vec2 +\allowbreak{} XLS-R & \hspace{0pt}W2V+\allowbreak{}XLSR & \hspace{0pt}2048 & \hspace{0pt}2049\\
+\hspace{0pt}H7 & \hspace{0pt}All three encoders & \hspace{0pt}WLM+\allowbreak{}W2V+\allowbreak{}XLSR & \hspace{0pt}3072 & \hspace{0pt}3073\\
+\hspace{0pt}H8 & \hspace{0pt}All three encoders +\allowbreak{} acoustic & \hspace{0pt}WLM+\allowbreak{}W2V+\allowbreak{}XLSR+\allowbreak{}AC & \hspace{0pt}3112 & \hspace{0pt}3113\\
+\end{longtable}\end{center}
+\subsubsection{Classifiers}
+\textbf{Logistic regression} draws a straight boundary (a weighted sum of the inputs) and turns its distance from the boundary into a probability. \textbf{Linear SVM} also draws a straight boundary but places it to maximise the margin between the classes. \textbf{RBF SVM} can draw curved boundaries by comparing each recording with the training recordings through a Gaussian similarity. \textbf{XGBoost} builds many small decision trees one after another, each correcting the errors of the previous ones. The first three need standardised inputs; XGBoost does not.
+
+\begin{center}\small\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{>{\raggedright\arraybackslash}p{3.08cm}>{\raggedright\arraybackslash}p{4.04cm}>{\raggedright\arraybackslash}p{4.23cm}>{\raggedright\arraybackslash}p{3.46cm}}
+\caption{Model description: inputs, outputs and trainable parameters of every stage.}\\
+\toprule
+\textbf{\hspace{0pt}Stage} & \textbf{\hspace{0pt}Input} & \textbf{\hspace{0pt}Output} & \textbf{\hspace{0pt}Trainable parameters}\\\midrule\endfirsthead
+\toprule
+\textbf{\hspace{0pt}Stage} & \textbf{\hspace{0pt}Input} & \textbf{\hspace{0pt}Output} & \textbf{\hspace{0pt}Trainable parameters}\\\midrule\endhead
+\bottomrule\endfoot
+\hspace{0pt}Resampling and windowing & \hspace{0pt}WAV file at 16 or 44.1 kHz & \hspace{0pt}10-s windows of 160,000 samples at 16 kHz & \hspace{0pt}0\\
+\hspace{0pt}Acoustic feature extractor & \hspace{0pt}16-kHz audio & \hspace{0pt}40 numbers per recording & \hspace{0pt}0\\
+\hspace{0pt}Frozen encoder & \hspace{0pt}one 10-s window & \hspace{0pt}499 $\times$ 1,024 output map & \hspace{0pt}0 of about 315 million\\
+\hspace{0pt}Pooling & \hspace{0pt}output maps of all windows & \hspace{0pt}1,024 numbers per recording & \hspace{0pt}0\\
+\hspace{0pt}Standardisation & \hspace{0pt}d numbers & \hspace{0pt}d numbers & \hspace{0pt}0 (2d statistics stored)\\
+\hspace{0pt}Logistic regression & \hspace{0pt}d numbers & \hspace{0pt}probability of PD & \hspace{0pt}d +\allowbreak{} 1 (41 to 3,113)\\
+\hspace{0pt}Linear /\allowbreak{} RBF SVM & \hspace{0pt}d numbers & \hspace{0pt}score mapped to (0, 1) & \hspace{0pt}one weight per support vector\\
+\hspace{0pt}XGBoost & \hspace{0pt}d numbers & \hspace{0pt}probability of PD & \hspace{0pt}100 or 300 trees of depth 2 or 4\\
+\hspace{0pt}Person score & \hspace{0pt}probabilities of one person's recordings & \hspace{0pt}their mean & \hspace{0pt}0\\
+\hspace{0pt}Decision & \hspace{0pt}person score & \hspace{0pt}PD if at least 0.5 & \hspace{0pt}0\\
+\end{longtable}\end{center}
+\subsection{Dataset}\label{sec:dataset}
+\subsubsection{Source and content}
+We used the \emph{Italian Parkinson's Voice and Speech} corpus by Dimauro and Girardi, published on IEEE DataPort (doi:10.21227/aw6b-tg17) [14] and described in Dimauro et al. (2017) [15]. It contains recordings of people with Parkinson's disease, elderly healthy controls and young healthy controls, made in 2016 and 2017. Every person performed up to 16 short tasks (table below).
+
+\begin{center}\small\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{>{\raggedright\arraybackslash}p{2.07cm}>{\raggedright\arraybackslash}p{8.60cm}>{\raggedleft\arraybackslash}p{2.07cm}>{\raggedleft\arraybackslash}p{2.07cm}}
+\caption{The 16 speech tasks in the cohort we analysed (recordings and median duration).}\\
+\toprule
+\textbf{\hspace{0pt}Code} & \textbf{\hspace{0pt}Task} & \textbf{\hspace{0pt}Recordings} & \textbf{\hspace{0pt}Median seconds}\\\midrule\endfirsthead
+\toprule
+\textbf{\hspace{0pt}Code} & \textbf{\hspace{0pt}Task} & \textbf{\hspace{0pt}Recordings} & \textbf{\hspace{0pt}Median seconds}\\\midrule\endhead
+\bottomrule\endfoot
+\hspace{0pt}B1 & \hspace{0pt}reading a phonetically balanced text (first reading) & \hspace{0pt}49 & \hspace{0pt}69.7\\
+\hspace{0pt}B2 & \hspace{0pt}reading the same text again & \hspace{0pt}44 & \hspace{0pt}61.9\\
+\hspace{0pt}D1 & \hspace{0pt}repeating the syllable /\allowbreak{}pa/\allowbreak{} for about 5 s & \hspace{0pt}50 & \hspace{0pt}6.5\\
+\hspace{0pt}D2 & \hspace{0pt}repeating the syllable /\allowbreak{}ta/\allowbreak{} for about 5 s & \hspace{0pt}50 & \hspace{0pt}6.2\\
+\hspace{0pt}FB1 & \hspace{0pt}reading phrases & \hspace{0pt}47 & \hspace{0pt}30.3\\
+\hspace{0pt}PR1 & \hspace{0pt}reading a list of words & \hspace{0pt}50 & \hspace{0pt}55.8\\
+\hspace{0pt}VA1 & \hspace{0pt}sustained vowel /\allowbreak{}a/\allowbreak{} (first) & \hspace{0pt}50 & \hspace{0pt}12.3\\
+\hspace{0pt}VA2 & \hspace{0pt}sustained vowel /\allowbreak{}a/\allowbreak{} (second) & \hspace{0pt}49 & \hspace{0pt}6.0\\
+\hspace{0pt}VE1 & \hspace{0pt}sustained vowel /\allowbreak{}e/\allowbreak{} (first) & \hspace{0pt}50 & \hspace{0pt}12.4\\
+\hspace{0pt}VE2 & \hspace{0pt}sustained vowel /\allowbreak{}e/\allowbreak{} (second) & \hspace{0pt}49 & \hspace{0pt}6.1\\
+\hspace{0pt}VI1 & \hspace{0pt}sustained vowel /\allowbreak{}i/\allowbreak{} (first) & \hspace{0pt}50 & \hspace{0pt}13.7\\
+\hspace{0pt}VI2 & \hspace{0pt}sustained vowel /\allowbreak{}i/\allowbreak{} (second) & \hspace{0pt}49 & \hspace{0pt}6.2\\
+\hspace{0pt}VO1 & \hspace{0pt}sustained vowel /\allowbreak{}o/\allowbreak{} (first) & \hspace{0pt}50 & \hspace{0pt}13.2\\
+\hspace{0pt}VO2 & \hspace{0pt}sustained vowel /\allowbreak{}o/\allowbreak{} (second) & \hspace{0pt}49 & \hspace{0pt}6.2\\
+\hspace{0pt}VU1 & \hspace{0pt}sustained vowel /\allowbreak{}u/\allowbreak{} (first) & \hspace{0pt}50 & \hspace{0pt}12.9\\
+\hspace{0pt}VU2 & \hspace{0pt}sustained vowel /\allowbreak{}u/\allowbreak{} (second) & \hspace{0pt}49 & \hspace{0pt}6.4\\
+\end{longtable}\end{center}
+\subsubsection{Who is included}
+We kept the people with Parkinson's disease and the elderly healthy controls, and excluded the 15 young controls (aged 19 to 29), because their age alone would separate them from the patients and they recorded only three tasks. One recording was a byte-for-byte copy of another recording of the same person and was removed. Three people with Parkinson's were recorded in two sessions (under the same or a slightly reordered name code); we merged each of them into one speaker so that a person can never appear on both sides of a split. The final cohort has \textbf{785 recordings from 47 speakers (25 PD, 22 controls)}, about 5.0 hours of audio.
+
+\begin{center}\small\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{>{\raggedright\arraybackslash}p{4.30cm}>{\raggedright\arraybackslash}p{5.47cm}>{\raggedright\arraybackslash}p{5.47cm}}
+\caption{The analysed cohort. Ages and sex are from the corpus spreadsheets.}\\
+\toprule
+\textbf{\hspace{0pt}} & \textbf{\hspace{0pt}Parkinson's disease} & \textbf{\hspace{0pt}Controls}\\\midrule\endfirsthead
+\toprule
+\textbf{\hspace{0pt}} & \textbf{\hspace{0pt}Parkinson's disease} & \textbf{\hspace{0pt}Controls}\\\midrule\endhead
+\bottomrule\endfoot
+\hspace{0pt}People & \hspace{0pt}25 & \hspace{0pt}22\\
+\hspace{0pt}Recordings & \hspace{0pt}436 & \hspace{0pt}349\\
+\hspace{0pt}Age in years, mean $\pm$ SD (range) & \hspace{0pt}66.8 $\pm$ 9.1 (40 to 80) & \hspace{0pt}67.1 $\pm$ 5.2 (60 to 77)\\
+\hspace{0pt}Men /\allowbreak{} women & \hspace{0pt}16 /\allowbreak{} 9 & \hspace{0pt}10 /\allowbreak{} 12\\
+\hspace{0pt}Recordings at 44.1 kHz /\allowbreak{} 16 kHz & \hspace{0pt}160 /\allowbreak{} 276 & \hspace{0pt}0 /\allowbreak{} 349\\
+\hspace{0pt}Recording dates & \hspace{0pt}2016-05-26, 2016-06-16, 2017-01-24, 2017-02-10 & \hspace{0pt}2017-03-17, 2017-03-21, 2017-03-23, 2017-03-30, 2017-04-02\\
+\end{longtable}\end{center}
+Two details matter later. First, the corpus spreadsheet marks four of the controls with an asterisk and explains that their recordings are of poor quality or that they had reading difficulties (one of them has no reading-passage or phrase recordings). We kept them, as planned, and report their effect in the error analysis. Second, the two-digit number inside the file names is the year of birth, not the age; ages come from the spreadsheets and are never given to the models.
+
+\subsubsection{How the recording sessions are arranged}
+\begin{figure}[H]\centering\includegraphics[width=0.85\linewidth]{wp_confound_timeline.pdf}\caption{Recording sessions by date. Every date contains only one group; all audio recorded at 44.1 kHz belongs to patients.}\label{fig:wp_confound_timeline}\end{figure}
+This is the single most important property of the dataset. The patients were recorded on four dates (two in 2016, two in early 2017) and the controls on five other dates in March and April 2017. No recording session contains both groups, and all recordings at 44.1 kHz are from patients. Anything that differs between recording sessions (room, microphone placement, background noise, recording software) is therefore perfectly aligned with the diagnosis.
+
+\subsubsection{What the recordings look like}
+\begin{figure}[H]\centering\includegraphics[width=0.95\linewidth]{dataset_examples.pdf}\caption{Representative recordings: the sustained vowel /a/ and the phrase task for one person with Parkinson's disease and one control, as waveforms (left) and spectrograms (right; brighter = more energy).}\label{fig:dataset_examples}\end{figure}
+The examples show the kind of material the models receive. Both people produce a clear vowel and clearly separated phrases. Differences in overall level and in the background between words are visible, which is exactly the kind of information that can come from the disease (softer voice) \emph{or} from the recording set-up.
+
+\subsubsection{Preparation of the audio}
+\begin{itemize}\item All recordings were converted to mono and resampled to 16 kHz with a polyphase filter, so that the original sample rate (which differs between the groups) is not directly visible.
+\item We did \textbf{not} normalise the loudness and did \textbf{not} cut silences, because a softer voice is a symptom of the disease.
+\item No statistic from other recordings, other people or the labels is used during this step.
+\end{itemize}
+\subsubsection{Training and evaluation steps (including batch sampling)}\label{sec:training}
+\begin{figure}[H]\centering\includegraphics[width=0.95\linewidth]{nested_cv.pdf}\caption{Nested, speaker-disjoint cross-validation: tuning happens inside the training part of each outer fold, and the test fold is touched only once.}\label{fig:nested_cv}\end{figure}
+The 47 speakers were split once, with a fixed random seed, into five outer folds of 10, 10, 9, 9 and 9 speakers, each containing both patients and controls (stratified). For each outer fold the procedure was:
+
+\begin{enumerate}\item Take the recordings of the speakers in the four training folds (between 611 and 644 recordings).
+\item Split these training speakers again into three inner folds (also speaker-disjoint and stratified).
+\item For every hyperparameter configuration of the classifier, train on two inner folds and predict the third, rotating until each inner fold has been predicted once. Average the predictions per speaker and compute the speaker-level AUPRC. Keep the configuration with the highest value (ties go to the first configuration in the list).
+\item If the configuration uses feature selection, repeat the selection inside every inner training part, and once more on the full training part.
+\item Retrain the chosen configuration on all training speakers, predict the recordings of the test fold, average them per speaker and apply the threshold 0.5.
+\item After all five folds, every speaker has exactly one out-of-fold prediction; we compute the metrics once on all 47 speakers (pooled) and also per fold.
+\end{enumerate}
+\textbf{Batch sampling.} None of our classifiers uses mini-batches or stochastic gradient descent. Each model is fitted on all training recordings at once (full-batch), with no data augmentation and no resampling of the data. Class imbalance (55\% of recordings are from patients) is handled through the hyperparameter \emph{class weight}, which is part of every search space.
+
+\begin{tcolorbox}[colback=blue!3,colframe=blue!50!black,boxrule=0.5pt,arc=2pt,left=5pt,right=5pt,top=3pt,bottom=3pt,title={\small\bfseries What this tells us}]\small Because the test speakers are never used for scaling, feature selection, tuning or training, the scores estimate how the pipeline would do on new people recorded under the conditions of this corpus.\end{tcolorbox}
+\subsection{Evaluation metrics}\label{sec:metrics}
+Let TP be the number of patients predicted as patients, FN the patients predicted as controls, TN the controls predicted as controls and FP the controls predicted as patients (all counted over speakers). Then:
+
+\begin{align*}
+\text{sensitivity (recall)} &= \frac{TP}{TP+FN}, & \text{specificity} &= \frac{TN}{TN+FP},\\[4pt]
+\text{precision} &= \frac{TP}{TP+FP}, & F_1 &= \frac{2\cdot\text{precision}\cdot\text{sensitivity}}{\text{precision}+\text{sensitivity}},\\[4pt]
+\text{balanced accuracy} &= \frac{\text{sensitivity}+\text{specificity}}{2}. &&
+\end{align*}
+For the threshold-free metrics, let $s_i$ be the score of speaker $i$, $P$ the set of patients and $C$ the set of controls:
+
+\begin{align*}
+\text{AUROC} &= \frac{1}{|P|\,|C|}\sum_{i\in P}\sum_{j\in C}\Big(\mathbf{1}[s_i>s_j]+\tfrac12\,\mathbf{1}[s_i=s_j]\Big), &
+\text{AUPRC} &= \sum_{n}\,(R_n-R_{n-1})\,P_n,
+\end{align*}
+where $R_n$ and $P_n$ are the recall and precision when everyone with a score of at least the $n$-th highest score is called a patient. AUROC is the probability that a randomly chosen patient gets a higher score than a randomly chosen control (0.5 = guessing, 1 = perfect). AUPRC is the area under the precision-recall curve; its guessing level equals the share of patients, 25/47 = 0.53.
+
+\textbf{Uncertainty.} With 47 people every estimate is uncertain. For AUROC and AUPRC we resampled the 47 speakers with replacement 2,000 times and took the 2.5th and 97.5th percentiles (bootstrap interval). For sensitivity and specificity we also give exact (Clopper-Pearson) binomial intervals. When AUROC is exactly 1, every resample is also perfect, so the bootstrap interval collapses to [1, 1]; this does not mean there is no uncertainty.
+
+\subsection{Loss functions and optimisation}\label{sec:loss}
+\textbf{Logistic regression} (solver LIBLINEAR [16]). With inputs $x_i$, labels $y_i \in \{-1,+1\}$ (+1 = Parkinson's) and optional class weights $c_i$, the weights $w$ and the bias $b$ minimise
+
+\[\min_{w,b}\;\; \Omega(w,b) \;+\; C\sum_{i=1}^{n} c_i\,\log\!\big(1+e^{-y_i\,(w^\top x_i+b)}\big),\qquad \Omega=\tfrac12\lVert (w,b)\rVert_2^2\;\;\text{(L2)}\;\;\text{or}\;\;\lVert (w,b)\rVert_1\;\;\text{(L1)},\]
+and the probability of Parkinson's disease is $\hat p(x) = 1/\big(1+e^{-(w^\top x+b)}\big)$. The first term keeps the weights small (regularisation; L1 can set weights exactly to zero), the second penalises wrong or uncertain predictions, and $C$ sets the balance between them. The problem is convex, so there is a single best solution and no random initialisation.
+
+\textbf{Support vector machines} (LIBSVM [17]) minimise the hinge loss with a margin term,
+
+\[\min_{w,b,\xi}\;\tfrac12\lVert w\rVert^2 + C\sum_i c_i\,\xi_i\quad\text{s.t.}\quad y_i\big(w^\top\phi(x_i)+b\big)\ge 1-\xi_i,\;\;\xi_i\ge 0,\]
+where $\xi_i$ measures how far recording $i$ is on the wrong side of the margin, $\phi$ is the identity for the linear SVM, and for the RBF SVM it is defined implicitly by the kernel $k(x,x') = \exp(-\gamma\lVert x-x'\rVert^2)$ with $\gamma = m/d$, $m \in \{0.1, 1, 10\}$ and $d$ the number of inputs. The SVM score $f(x)$ is mapped to $1/(1+e^{-f(x)})$, so the threshold 0.5 corresponds to the SVM margin $f(x)=0$; this mapping is not a calibrated probability.
+
+\textbf{XGBoost} [18] adds trees $f_k$ one at a time and minimises the regularised logistic loss
+
+\[\mathcal{L}=\sum_i \ell\big(y_i,\hat y_i\big)+\sum_k\Big(\gamma T_k+\tfrac12\lambda\lVert w_k\rVert^2\Big),\qquad \hat y_i=\sum_k f_k(x_i),\]
+where $\ell$ is the logistic loss, $T_k$ the number of leaves and $w_k$ the leaf weights of tree $k$; each new tree is found with a second-order (gradient and Hessian) approximation of the loss. The learning rate, the depth, the number of trees, the minimum child weight, the row and column subsampling, the L2 penalty $\lambda$ and the positive-class weight are the tuned hyperparameters.
+
+\subsection{Experimental depth and iteration}\label{sec:experiments}
+The study is not a single training run. We varied four design choices on identical folds:
+
+\begin{itemize}\item \textbf{Representation} - 4 single representations (acoustic, WavLM, wav2vec2, XLS-R) and 8 hybrids.
+\item \textbf{Classifier} - logistic regression, linear SVM, RBF SVM and XGBoost, each with its own frozen search space (20, 10, 24 and 24 configurations).
+\item \textbf{Feature selection} - for the 40 acoustic features only: all features, forward selection to 10 features, backward elimination to 10 features.
+\item \textbf{Hyperparameters} - tuned in every run by nested cross-validation.
+\end{itemize}
+Together this gives 12 acoustic configurations (3 selection settings $\times$ 4 classifiers) plus 44 encoder and hybrid configurations (11 $\times$ 4), i.e. \textbf{56 configurations and 280 outer-fold runs}, each with its own inner tuning (several thousand model fits in total). One further planned comparison, an adjustment method called Frisch-Waugh-Lovell (FWL), was not run because its exact procedure had not been defined before the experiments; we recorded it as blocked rather than inventing it afterwards.
+
+\begin{center}\small\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{>{\raggedright\arraybackslash}p{2.98cm}>{\raggedleft\arraybackslash}p{1.55cm}>{\raggedright\arraybackslash}p{10.71cm}}
+\caption{Frozen hyperparameter search spaces.}\\
+\toprule
+\textbf{\hspace{0pt}Classifier} & \textbf{\hspace{0pt}Configurations} & \textbf{\hspace{0pt}Search space}\\\midrule\endfirsthead
+\toprule
+\textbf{\hspace{0pt}Classifier} & \textbf{\hspace{0pt}Configurations} & \textbf{\hspace{0pt}Search space}\\\midrule\endhead
+\bottomrule\endfoot
+\hspace{0pt}Logistic regression & \hspace{0pt}20 & \hspace{0pt}C in \{0.01, 0.1, 1, 10, 100\}; penalty L1 or L2; class weight none or balanced\\
+\hspace{0pt}Linear SVM & \hspace{0pt}10 & \hspace{0pt}C in \{0.01, 0.1, 1, 10, 100\}; class weight\\
+\hspace{0pt}RBF SVM & \hspace{0pt}24 & \hspace{0pt}C in \{0.1, 1, 10, 100\}; gamma = m/\allowbreak{}d with m in \{0.1, 1, 10\}; class weight\\
+\hspace{0pt}XGBoost & \hspace{0pt}24 & \hspace{0pt}24 fixed configurations drawn from a 256-point grid: learning rate \{0.03, 0.1\}, depth \{2, 4\}, trees \{100, 300\}, min child weight \{1, 5\}, subsample \{0.7, 1\}, column sample \{0.3, 1\}, lambda \{1, 10\}, positive weight \{1, balanced\}\\
+\end{longtable}\end{center}
+To understand the results better we also ran a set of clearly labelled \textbf{exploratory analyses} inside the same workspace (amendment A1): statistics of every acoustic feature, 66 feature-family ablations, feature importance, a map of how every hyperparameter configuration would have performed, an analysis of the speech tasks, a check of whether recording sessions can be recognised, and a timing benchmark. They use the same folds, never change the main results and are reported as exploratory.
+
+\subsection{Protecting the evaluation from leakage}
+\begin{itemize}\item \textbf{Frozen plan.} The protocol (representations, models, search spaces, folds, metrics, threshold) was written and fixed with a SHA-256 hash before any model was trained; nothing was changed after seeing results.
+\item \textbf{Gates on every run.} Each of the 280 runs was checked automatically: no speaker in both training and test, every test recording predicted exactly once, valid probabilities, correct labels and folds, unchanged protocol and split files. A run failing any check would have been quarantined; none failed.
+\item \textbf{Code tests.} Before the real runs, 25 tests on synthetic data proved, for example, that every fit sees only its own training rows and that random features give chance-level results while an informative feature gives near-perfect results.
+\item \textbf{Audit.} After the runs, 20 further checks and an independent audit recomputed the features, the nested cross-validation and every metric with separate code; all agreed.
+\end{itemize}
+\section{Baseline and extensions}\label{sec:baseline-ext}
+\subsection{Baseline selection and evaluation}\label{sec:baseline}
+\textbf{Choice.} Frozen WavLM-large embeddings with logistic regression (section~\ref{sec:background}). It is justified by the small number of people, by prior work with frozen embeddings for Parkinson's speech [11], by WavLM's strength as a general speech model [10] and by the convex, deterministic training of logistic regression.
+
+\textbf{Systematic evaluation.} The baseline went through exactly the same pipeline as every other configuration: the same five outer folds, the same nested tuning, the same threshold and metrics. The table shows its result on each held-out fold and overall.
+
+\begin{center}\small\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{>{\raggedright\arraybackslash}p{1.28cm}>{\raggedleft\arraybackslash}p{1.55cm}>{\raggedright\arraybackslash}p{2.56cm}>{\raggedleft\arraybackslash}p{1.55cm}>{\raggedleft\arraybackslash}p{1.55cm}>{\raggedleft\arraybackslash}p{1.55cm}>{\raggedleft\arraybackslash}p{1.55cm}>{\raggedleft\arraybackslash}p{1.55cm}}
+\caption{Baseline (WavLM-large + logistic regression) on each held-out fold and pooled. FN/FP = missed patients / false alarms.}\\
+\toprule
+\textbf{\hspace{0pt}Fold} & \textbf{\hspace{0pt}Test people} & \textbf{\hspace{0pt}Chosen configuration} & \textbf{\hspace{0pt}AUPRC} & \textbf{\hspace{0pt}AUROC} & \textbf{\hspace{0pt}Sens.} & \textbf{\hspace{0pt}Spec.} & \textbf{\hspace{0pt}FN/\allowbreak{}FP}\\\midrule\endfirsthead
+\toprule
+\textbf{\hspace{0pt}Fold} & \textbf{\hspace{0pt}Test people} & \textbf{\hspace{0pt}Chosen configuration} & \textbf{\hspace{0pt}AUPRC} & \textbf{\hspace{0pt}AUROC} & \textbf{\hspace{0pt}Sens.} & \textbf{\hspace{0pt}Spec.} & \textbf{\hspace{0pt}FN/\allowbreak{}FP}\\\midrule\endhead
+\bottomrule\endfoot
+\hspace{0pt}Fold 0 & \hspace{0pt}10 & \hspace{0pt}C=0.01, L1, class weight none & \hspace{0pt}1.000 & \hspace{0pt}1.000 & \hspace{0pt}1.00 & \hspace{0pt}1.00 & \hspace{0pt}0/\allowbreak{}0\\
+\hspace{0pt}Fold 1 & \hspace{0pt}10 & \hspace{0pt}C=0.1, L1, class weight none & \hspace{0pt}1.000 & \hspace{0pt}1.000 & \hspace{0pt}1.00 & \hspace{0pt}1.00 & \hspace{0pt}0/\allowbreak{}0\\
+\hspace{0pt}Fold 2 & \hspace{0pt}9 & \hspace{0pt}C=0.1, L1, class weight none & \hspace{0pt}1.000 & \hspace{0pt}1.000 & \hspace{0pt}1.00 & \hspace{0pt}1.00 & \hspace{0pt}0/\allowbreak{}0\\
+\hspace{0pt}Fold 3 & \hspace{0pt}9 & \hspace{0pt}C=0.01, L1, class weight none & \hspace{0pt}0.967 & \hspace{0pt}0.950 & \hspace{0pt}0.80 & \hspace{0pt}1.00 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}Fold 4 & \hspace{0pt}9 & \hspace{0pt}C=0.1, L1, class weight none & \hspace{0pt}1.000 & \hspace{0pt}1.000 & \hspace{0pt}1.00 & \hspace{0pt}1.00 & \hspace{0pt}0/\allowbreak{}0\\
+\hspace{0pt}\textbf{Pooled (47 people)} & \hspace{0pt}47 & \hspace{0pt} & \hspace{0pt}0.996 & \hspace{0pt}0.995 & \hspace{0pt}0.96 & \hspace{0pt}1.00 & \hspace{0pt}1/\allowbreak{}0\\
+\end{longtable}\end{center}
+Pooled over all 47 people, the baseline reaches \textbf{AUROC 0.995} (bootstrap 95\% interval 0.977 to 1.000), \textbf{AUPRC 0.996}, \textbf{sensitivity 0.96} (exact interval 0.80 to 1.00), \textbf{specificity 1.00} (exact interval 0.85 to 1.00) and F1 0.980. It misses one patient and raises no false alarm.
+
+\subsection{Implemented extensions and experiments}\label{sec:extensions}
+Beyond the baseline we implemented four kinds of extensions, all evaluated on the same people and folds:
+
+\begin{itemize}\item \textbf{Other encoders}: wav2vec2-large-lv60 (English) and XLS-R 300M (multilingual), to see whether the result depends on WavLM.
+\item \textbf{Hand-crafted features}: 40 acoustic measurements, as an interpretable and very cheap alternative.
+\item \textbf{Hybrids}: eight combinations of encoders with each other and with the acoustic features.
+\item \textbf{Classifiers and feature selection}: linear SVM, RBF SVM and XGBoost; forward and backward selection of 10 acoustic features.
+\end{itemize}
+\textbf{Did they improve on the baseline?} No extension improved on the baseline by more than the uncertainty (the numbers are in section~\ref{sec:results}). This is not a failure of the extensions but a consequence of the ceiling: the baseline already makes a single error out of 47 people, so the largest possible gain is one or two people (about 2 to 4 points of F1), which is within the statistical noise of a 47-person test. The error analysis (section~\ref{sec:errors}) adds a second explanation: almost all configurations fail on the same few people, so the remaining errors seem to come from these people's recordings rather than from the choice of model.
+
+\subsection{Baseline outputs and reproduction}\label{sec:reproduction}
+All original outputs are saved: the prediction files (one row per test recording, with the run, fold, configuration hash and probability), the per-run metric files with the full tuning log, and the run configurations. We confirmed that the baseline can be reproduced in three independent ways: (1) re-executing the saved configurations gave bit-identical predictions; (2) a separately written implementation of the whole nested cross-validation chose the same configuration in all five folds and produced the same predictions (largest difference 1.3e-14); (3) re-executing all 70 logistic-regression runs with a single BLAS thread reproduced every selected configuration, probability and metric exactly. (With many BLAS threads, the L2-regularised solver can move probabilities in the fourth decimal place without changing any decision.)
+
+\section{Results and analysis}\label{sec:results-analysis}
+\subsection{Results}\label{sec:results}
+\subsubsection{Training, validation and held-out results}
+\begin{center}\small\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{>{\raggedright\arraybackslash}p{3.71cm}>{\raggedright\arraybackslash}p{3.71cm}>{\raggedright\arraybackslash}p{3.71cm}>{\raggedright\arraybackslash}p{3.71cm}}
+\caption{Training, inner-validation and held-out scores, kept separate (means over the five outer folds).}\\
+\toprule
+\textbf{\hspace{0pt}Configuration} & \textbf{\hspace{0pt}Training AUPRC /\allowbreak{} AUROC} & \textbf{\hspace{0pt}Inner-validation AUPRC} & \textbf{\hspace{0pt}Held-out AUPRC}\\\midrule\endfirsthead
+\toprule
+\textbf{\hspace{0pt}Configuration} & \textbf{\hspace{0pt}Training AUPRC /\allowbreak{} AUROC} & \textbf{\hspace{0pt}Inner-validation AUPRC} & \textbf{\hspace{0pt}Held-out AUPRC}\\\midrule\endhead
+\bottomrule\endfoot
+\hspace{0pt}AC LR & \hspace{0pt}1.000 /\allowbreak{} 1.000 & \hspace{0pt}0.998 (SD 0.003) & \hspace{0pt}1.000 (SD 0.000)\\
+\hspace{0pt}WLM LR & \hspace{0pt}1.000 /\allowbreak{} 1.000 & \hspace{0pt}0.999 (SD 0.001) & \hspace{0pt}0.993 (SD 0.015)\\
+\hspace{0pt}W2V LR & \hspace{0pt}1.000 /\allowbreak{} 1.000 & \hspace{0pt}0.988 (SD 0.008) & \hspace{0pt}0.982 (SD 0.040)\\
+\hspace{0pt}XLSR LR & \hspace{0pt}1.000 /\allowbreak{} 1.000 & \hspace{0pt}0.999 (SD 0.001) & \hspace{0pt}1.000 (SD 0.000)\\
+\hspace{0pt}H3 LR & \hspace{0pt}1.000 /\allowbreak{} 1.000 & \hspace{0pt}0.999 (SD 0.001) & \hspace{0pt}1.000 (SD 0.000)\\
+\hspace{0pt}WLM XGB & \hspace{0pt}1.000 /\allowbreak{} 1.000 & \hspace{0pt}0.997 (SD 0.003) & \hspace{0pt}1.000 (SD 0.000)\\
+\end{longtable}\end{center}
+\begin{figure}[H]\centering\includegraphics[width=0.8\linewidth]{train_val_test.pdf}\caption{Training (grey), inner-validation (amber) and held-out (blue) speaker-level AUPRC for six representative configurations.}\label{fig:train_val_test}\end{figure}
+\begin{tcolorbox}[colback=blue!3,colframe=blue!50!black,boxrule=0.5pt,arc=2pt,left=5pt,right=5pt,top=3pt,bottom=3pt,title={\small\bfseries What this tells us}]\small Every model fits its own training speakers perfectly, which is expected when there are many more features than people. The useful comparison is between validation and held-out scores: they are both high and close to each other, so the tuning did not overfit the test folds. A perfect training score on its own tells us nothing about generalisation.\end{tcolorbox}
+\subsubsection{All 56 configurations}
+\begin{figure}[H]\centering\includegraphics[width=0.58\linewidth]{heatmap_auroc.pdf}\caption{Pooled speaker-level AUROC of every representation (rows) and classifier (columns).}\label{fig:heatmap_auroc}\end{figure}
+The heatmap shows the main result in one picture: almost every configuration reaches an AUROC between 0.97 and 1.00. The median over the 56 configurations is 0.995, and 40 of them make at most one speaker error at the threshold 0.5. The clear exceptions are some RBF SVM configurations (for example WavLM with RBF SVM: 0.873), which we explain in section~\ref{sec:tuning}. The full table with all metrics is in appendix~\ref{sec:app-full}.
+
+\subsubsection{Comparison by feature combination}
+\begin{center}\small\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{>{\raggedright\arraybackslash}p{1.94cm}>{\raggedleft\arraybackslash}p{1.94cm}>{\raggedleft\arraybackslash}p{1.94cm}>{\raggedleft\arraybackslash}p{1.94cm}>{\raggedleft\arraybackslash}p{1.94cm}>{\raggedleft\arraybackslash}p{1.94cm}>{\raggedleft\arraybackslash}p{1.94cm}}
+\caption{Feature combinations ranked by their median AUROC over the four classifiers.}\\
+\toprule
+\textbf{\hspace{0pt}Representation} & \textbf{\hspace{0pt}Inputs} & \textbf{\hspace{0pt}Median AUROC} & \textbf{\hspace{0pt}Range} & \textbf{\hspace{0pt}Median AUPRC} & \textbf{\hspace{0pt}Fewest errors} & \textbf{\hspace{0pt}Median errors}\\\midrule\endfirsthead
+\toprule
+\textbf{\hspace{0pt}Representation} & \textbf{\hspace{0pt}Inputs} & \textbf{\hspace{0pt}Median AUROC} & \textbf{\hspace{0pt}Range} & \textbf{\hspace{0pt}Median AUPRC} & \textbf{\hspace{0pt}Fewest errors} & \textbf{\hspace{0pt}Median errors}\\\midrule\endhead
+\bottomrule\endfoot
+\hspace{0pt}Acoustic (40 features) & \hspace{0pt}40 & \hspace{0pt}0.999 & \hspace{0pt}0.989 to 1.000 & \hspace{0pt}0.999 & \hspace{0pt}1 & \hspace{0pt}1\\
+\hspace{0pt}WavLM-large & \hspace{0pt}1024 & \hspace{0pt}0.995 & \hspace{0pt}0.873 to 0.998 & \hspace{0pt}0.996 & \hspace{0pt}1 & \hspace{0pt}1\\
+\hspace{0pt}wav2vec2-large-lv60 & \hspace{0pt}1024 & \hspace{0pt}0.985 & \hspace{0pt}0.975 to 0.996 & \hspace{0pt}0.990 & \hspace{0pt}1 & \hspace{0pt}1\\
+\hspace{0pt}XLS-R 300M & \hspace{0pt}1024 & \hspace{0pt}0.996 & \hspace{0pt}0.976 to 1.000 & \hspace{0pt}0.997 & \hspace{0pt}1 & \hspace{0pt}1\\
+\hspace{0pt}WavLM +\allowbreak{} acoustic & \hspace{0pt}1064 & \hspace{0pt}0.993 & \hspace{0pt}0.867 to 0.998 & \hspace{0pt}0.995 & \hspace{0pt}1 & \hspace{0pt}1\\
+\hspace{0pt}wav2vec2 +\allowbreak{} acoustic & \hspace{0pt}1064 & \hspace{0pt}0.989 & \hspace{0pt}0.962 to 0.998 & \hspace{0pt}0.993 & \hspace{0pt}1 & \hspace{0pt}1\\
+\hspace{0pt}XLS-R +\allowbreak{} acoustic & \hspace{0pt}1064 & \hspace{0pt}0.999 & \hspace{0pt}0.973 to 1.000 & \hspace{0pt}0.999 & \hspace{0pt}1 & \hspace{0pt}1\\
+\hspace{0pt}WavLM +\allowbreak{} wav2vec2 & \hspace{0pt}2048 & \hspace{0pt}0.991 & \hspace{0pt}0.975 to 0.995 & \hspace{0pt}0.993 & \hspace{0pt}1 & \hspace{0pt}1\\
+\hspace{0pt}WavLM +\allowbreak{} XLS-R & \hspace{0pt}2048 & \hspace{0pt}0.994 & \hspace{0pt}0.975 to 0.998 & \hspace{0pt}0.995 & \hspace{0pt}1 & \hspace{0pt}1\\
+\hspace{0pt}wav2vec2 +\allowbreak{} XLS-R & \hspace{0pt}2048 & \hspace{0pt}0.994 & \hspace{0pt}0.975 to 1.000 & \hspace{0pt}0.995 & \hspace{0pt}1 & \hspace{0pt}1\\
+\hspace{0pt}All three encoders & \hspace{0pt}3072 & \hspace{0pt}0.994 & \hspace{0pt}0.971 to 0.996 & \hspace{0pt}0.995 & \hspace{0pt}1 & \hspace{0pt}1\\
+\hspace{0pt}All three encoders +\allowbreak{} acoustic & \hspace{0pt}3112 & \hspace{0pt}0.997 & \hspace{0pt}0.975 to 0.998 & \hspace{0pt}0.998 & \hspace{0pt}1 & \hspace{0pt}1\\
+\end{longtable}\end{center}
+\begin{figure}[H]\centering\includegraphics[width=0.95\linewidth]{wp_forest_auroc.pdf}\caption{AUROC with 95\% bootstrap intervals for each representation, with logistic regression (left) and XGBoost (right).}\label{fig:wp_forest_auroc}\end{figure}
+Combining representations did not help in a reliable way. Over all 76 paired comparisons of a hybrid with each of its parts (same classifier, same people) the median change in AUROC was 0.000, ranging from -0.122 to 0.102; the 95\% interval of the difference excluded zero in only 5 comparisons (4 improvements, 1 losses), and these are differences of about one person.
+
+\begin{figure}[H]\centering\includegraphics[width=0.7\linewidth]{deltas.pdf}\caption{Paired AUROC differences for all planned comparisons; red points have a 95\% interval that excludes zero.}\label{fig:deltas}\end{figure}
+\subsubsection{Comparison by classifier}
+\begin{center}\small\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{>{\raggedright\arraybackslash}p{2.33cm}>{\raggedleft\arraybackslash}p{2.33cm}>{\raggedleft\arraybackslash}p{2.33cm}>{\raggedleft\arraybackslash}p{2.33cm}>{\raggedleft\arraybackslash}p{2.33cm}>{\raggedleft\arraybackslash}p{2.33cm}}
+\caption{Classifiers compared over all representations.}\\
+\toprule
+\textbf{\hspace{0pt}Classifier} & \textbf{\hspace{0pt}Configurations} & \textbf{\hspace{0pt}Median AUROC} & \textbf{\hspace{0pt}Range} & \textbf{\hspace{0pt}Median errors} & \textbf{\hspace{0pt}Median difference to LR}\\\midrule\endfirsthead
+\toprule
+\textbf{\hspace{0pt}Classifier} & \textbf{\hspace{0pt}Configurations} & \textbf{\hspace{0pt}Median AUROC} & \textbf{\hspace{0pt}Range} & \textbf{\hspace{0pt}Median errors} & \textbf{\hspace{0pt}Median difference to LR}\\\midrule\endhead
+\bottomrule\endfoot
+\hspace{0pt}Logistic regression & \hspace{0pt}14 & \hspace{0pt}0.996 & \hspace{0pt}0.987 to 1.000 & \hspace{0pt}1 & \hspace{0pt}reference\\
+\hspace{0pt}Linear SVM & \hspace{0pt}14 & \hspace{0pt}0.995 & \hspace{0pt}0.975 to 1.000 & \hspace{0pt}1 & \hspace{0pt}-0.001\\
+\hspace{0pt}RBF SVM & \hspace{0pt}14 & \hspace{0pt}0.975 & \hspace{0pt}0.867 to 0.996 & \hspace{0pt}3 & \hspace{0pt}-0.023\\
+\hspace{0pt}XGBoost & \hspace{0pt}14 & \hspace{0pt}0.997 & \hspace{0pt}0.982 to 1.000 & \hspace{0pt}1 & \hspace{0pt}-0.001\\
+\end{longtable}\end{center}
+Logistic regression, the linear SVM and XGBoost perform almost identically; the RBF SVM is lower on average and much less stable. More complex classifiers did not help because the simple ones already separate the people nearly perfectly.
+
+\subsubsection{Person-level scores and ROC curves}
+\begin{figure}[H]\centering\includegraphics[width=0.95\linewidth]{speaker_scores.pdf}\caption{Out-of-fold scores of all 47 people for three configurations. Red rings mark people on the wrong side of the threshold 0.5.}\label{fig:speaker_scores}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=0.5\linewidth]{wp_roc.pdf}\caption{Speaker-level ROC curves of six configurations.}\label{fig:wp_roc}\end{figure}
+\begin{tcolorbox}[colback=blue!3,colframe=blue!50!black,boxrule=0.5pt,arc=2pt,left=5pt,right=5pt,top=3pt,bottom=3pt,title={\small\bfseries What this tells us}]\small In most configurations the patients cluster near 1 and the controls near 0, with one patient (PD\_005) consistently on the wrong side. The ROC curves rise almost vertically: at very low false-alarm rates the models already find nearly all patients.\end{tcolorbox}
+\subsection{Understanding the acoustic features}\label{sec:features}
+\subsubsection{Every feature on its own}
+\begin{figure}[H]\centering\includegraphics[width=0.75\linewidth]{wp_univariate_features.pdf}\caption{How well each of the 40 acoustic features separates the groups on its own (speaker averages). Bars: all recordings; black ticks: 16-kHz recordings only.}\label{fig:wp_univariate_features}\end{figure}
+We first looked at each feature alone, averaged per speaker (a descriptive analysis on all 47 people, not used to choose anything). 12 of the 40 features separate the groups with an AUROC of at least 0.90 by themselves, and all of them are spectral-shape features: the zero-crossing rate, the spectral centroid and the roll-off, each of which is \textbf{lower in the patients}. The separation stays as strong when only recordings made at 16 kHz are used, so it is not simply a side effect of resampling. The complete list with means, effect sizes and session effects is in appendix~\ref{sec:app-features}.
+
+\begin{center}\small\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{>{\raggedright\arraybackslash}p{2.88cm}>{\raggedleft\arraybackslash}p{2.88cm}>{\raggedleft\arraybackslash}p{2.88cm}>{\raggedleft\arraybackslash}p{2.88cm}>{\raggedleft\arraybackslash}p{2.88cm}}
+\caption{Feature families: average and best single-feature AUROC (direction-free), and the share of variance explained by the recording date within each group (eta-squared).}\\
+\toprule
+\textbf{\hspace{0pt}Family} & \textbf{\hspace{0pt}Mean AUROC} & \textbf{\hspace{0pt}Best AUROC} & \textbf{\hspace{0pt}Date effect within PD} & \textbf{\hspace{0pt}Date effect within controls}\\\midrule\endfirsthead
+\toprule
+\textbf{\hspace{0pt}Family} & \textbf{\hspace{0pt}Mean AUROC} & \textbf{\hspace{0pt}Best AUROC} & \textbf{\hspace{0pt}Date effect within PD} & \textbf{\hspace{0pt}Date effect within controls}\\\midrule\endhead
+\bottomrule\endfoot
+\hspace{0pt}centroid (Hz) & \hspace{0pt}0.952 & \hspace{0pt}0.964 & \hspace{0pt}0.41 & \hspace{0pt}0.61\\
+\hspace{0pt}zcr & \hspace{0pt}0.947 & \hspace{0pt}0.956 & \hspace{0pt}0.32 & \hspace{0pt}0.45\\
+\hspace{0pt}roll-off 85\% (Hz) & \hspace{0pt}0.921 & \hspace{0pt}0.933 & \hspace{0pt}0.42 & \hspace{0pt}0.58\\
+\hspace{0pt}band0 (log) & \hspace{0pt}0.696 & \hspace{0pt}0.758 & \hspace{0pt}0.60 & \hspace{0pt}0.53\\
+\hspace{0pt}log energy (dB) & \hspace{0pt}0.662 & \hspace{0pt}0.680 & \hspace{0pt}0.54 & \hspace{0pt}0.45\\
+\hspace{0pt}flatness & \hspace{0pt}0.629 & \hspace{0pt}0.653 & \hspace{0pt}0.66 & \hspace{0pt}0.71\\
+\hspace{0pt}band4 (log) & \hspace{0pt}0.577 & \hspace{0pt}0.615 & \hspace{0pt}0.51 & \hspace{0pt}0.39\\
+\hspace{0pt}band1 (log) & \hspace{0pt}0.563 & \hspace{0pt}0.627 & \hspace{0pt}0.52 & \hspace{0pt}0.37\\
+\hspace{0pt}band2 (log) & \hspace{0pt}0.557 & \hspace{0pt}0.598 & \hspace{0pt}0.55 & \hspace{0pt}0.56\\
+\hspace{0pt}band3 (log) & \hspace{0pt}0.533 & \hspace{0pt}0.596 & \hspace{0pt}0.53 & \hspace{0pt}0.43\\
+\end{longtable}\end{center}
+\begin{tcolorbox}[colback=orange!5,colframe=orange!70!black,boxrule=0.5pt,arc=2pt,left=5pt,right=5pt,top=3pt,bottom=3pt,title={\small\bfseries Key point}]\small The same features that separate patients from controls also differ strongly \textbf{between recording dates of the same group} (eta-squared up to 0.95 within the controls). A feature that changes from one session to another inside a group is partly measuring the session. This is the first sign of the recording-condition problem discussed in section~\ref{sec:confound}.\end{tcolorbox}
+\subsubsection{Which feature families are needed (ablation)}
+\begin{figure}[H]\centering\includegraphics[width=0.95\linewidth]{wp_ablation.pdf}\caption{Exploratory ablations with the full nested protocol: one family alone (left), all families except one (middle) and one statistic of all families (right).}\label{fig:wp_ablation}\end{figure}
+We retrained logistic regression and XGBoost on subsets of the 40 features. Three findings stand out. First, no family is necessary: removing any single family leaves AUROC at 0.993 or higher. Second, many small subsets are sufficient: the four zero-crossing statistics alone give 0.989 with logistic regression, and a single band (0.5 to 1 kHz) gives 1.000 with XGBoost. Third, loudness alone is weak for a linear model (0.725) but strong for XGBoost (0.987), which can use non-linear thresholds on the quiet frames. In short, the information is spread over many redundant features (46 pairs of features have a correlation of at least 0.9).
+
+\subsubsection{Forward and backward feature selection}
+In the main experiment we also selected exactly 10 of the 40 features inside each training part: forward selection adds the feature that improves a 3-fold speaker-level AUPRC most, one at a time; backward elimination starts with all 40 and removes the least useful one at a time. The selector is a logistic regression with C = 1, so the selected features do not depend on the final classifier. Selection gave AUROC between 0.996 and 0.996 (forward) and 0.985 and 0.995 (backward), against 0.989 to 1.000 with all features; the median difference to all features was -0.004, and no difference was outside the uncertainty.
+
+\begin{center}\small\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{>{\raggedright\arraybackslash}p{1.55cm}>{\raggedleft\arraybackslash}p{1.55cm}>{\raggedleft\arraybackslash}p{1.55cm}>{\raggedright\arraybackslash}p{10.17cm}}
+\caption{Stability of the selected features over the five outer folds (selected in all 5 folds / distinct features ever selected / the six most frequent).}\\
+\toprule
+\textbf{\hspace{0pt}Method} & \textbf{\hspace{0pt}In all 5} & \textbf{\hspace{0pt}Distinct} & \textbf{\hspace{0pt}Most frequently selected (folds)}\\\midrule\endfirsthead
+\toprule
+\textbf{\hspace{0pt}Method} & \textbf{\hspace{0pt}In all 5} & \textbf{\hspace{0pt}Distinct} & \textbf{\hspace{0pt}Most frequently selected (folds)}\\\midrule\endhead
+\bottomrule\endfoot
+\hspace{0pt}forward & \hspace{0pt}0 & \hspace{0pt}18 & \hspace{0pt}log energy db mean (4), log energy db p10 (4), zcr mean (4), zcr p10 (4), centroid hz std (4), band2 log p90 (4)\\
+\hspace{0pt}backward & \hspace{0pt}3 & \hspace{0pt}18 & \hspace{0pt}band4 log mean (5), band4 log p10 (5), band4 log p90 (5), band3 log p10 (4), band4 log std (4), rolloff85 hz std (3)\\
+\end{longtable}\end{center}
+The selected sets change from fold to fold, which is typical when many features carry the same information: different but equivalent features win in different training sets.
+
+\subsubsection{Feature importance}\label{sec:importance}
+\begin{figure}[H]\centering\includegraphics[width=0.95\linewidth]{importance_acoustic_v2.pdf}\caption{Permutation importance in the acoustic models: increase in recording log-loss when a feature family (left) or a statistic (right) is shuffled in the outer test folds.}\label{fig:importance_acoustic_v2}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=0.7\linewidth]{xgb_gain_top10_v2.pdf}\caption{XGBoost: the ten acoustic features with the largest share of total gain.}\label{fig:xgb_gain_top10_v2}\end{figure}
+We measured importance in three ways on the fitted models of the main runs: the size of the logistic-regression coefficients, the share of XGBoost's total gain, and permutation importance (how much worse the predictions become when one feature or one group of features is randomly shuffled within the test folds). Logistic regression spreads its weight over many correlated features; its most important families are loudness and the spectral centroid, and some coefficients even change sign between folds, a sign of redundancy. XGBoost is much more concentrated: three \textbf{10th-percentile} features (centroid\_hz\_p10, log\_energy\_db\_p10, band0\_log\_p10) carry 72\% of its total gain, and shuffling the 10th-percentile statistic of all families hurts it more than shuffling any family.
+
+\begin{tcolorbox}[colback=green!3,colframe=green!40!black,boxrule=0.5pt,arc=2pt,left=5pt,right=5pt,top=3pt,bottom=3pt,title={\small\bfseries In plain words}]\small The 10th percentile of a frame measurement describes the quietest tenth of the recording: pauses, breathing and the background noise of the room. When a model relies mostly on these values, it is listening more to the recording conditions than to the voice.\end{tcolorbox}
+\begin{figure}[H]\centering\includegraphics[width=0.8\linewidth]{wp_block_importance.pdf}\caption{Which part of a hybrid carries the model: logistic regression (share of coefficient size) versus XGBoost (share of gain).}\label{fig:wp_block_importance}\end{figure}
+In the hybrids the two classifier families disagree about what matters. Logistic regression puts 86\% to 92\% of its weight on the encoder part, whereas XGBoost puts 74\% to 90\% of its gain on the 40 acoustic features. When the three encoders are combined, logistic regression relies mostly on WavLM (50\% of the weight), then XLS-R (35\%), then wav2vec2 (15\%); shuffling the wav2vec2 part changes nothing, so it is redundant once the other two are present.
+
+\subsubsection{Feature importance in numbers}\label{sec:importance-tables}
+The tables give the numbers behind the importance figures. Importance was measured on the five outer test folds of the official runs, with the hyperparameters chosen by nested tuning; nothing here was used to choose a model. Feature names are explained in section~\ref{sec:dictionary}.
+
+\begin{tcolorbox}[colback=blue!3,colframe=blue!50!black,boxrule=0.5pt,arc=2pt,left=5pt,right=5pt,top=3pt,bottom=3pt,title={\small\bfseries What this tells us}]\small \textbf{Permutation importance}: we shuffle one feature (or one group of features) across the test recordings, predict again, and see how much worse the predictions get, averaged over 20 shuffles. \textbf{Log-loss increase} measures how much less confident and correct the recording probabilities become (larger = more important); \textbf{AUROC drop} measures how much the ranking of people suffers. Because many features carry the same information, shuffling one feature often costs little: the model leans on its correlated twins. That is why groups (families, statistics) are more informative than single features. \textbf{Coefficient} (logistic regression): the weight of a standardised feature; positive = higher values push towards Parkinson's, negative = towards control; 'stable' means the sign was the same in all five folds. \textbf{Gain share} (XGBoost): the share of all improvements made by the trees' splits that used this feature.\end{tcolorbox}
+Reference values without any shuffling: logistic regression AUROC 1.000 and recording log-loss 0.301; XGBoost AUROC 1.000 and log-loss 0.214.
+
+\begin{center}\small\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{>{\raggedright\arraybackslash}p{4.00cm}>{\raggedleft\arraybackslash}p{2.60cm}>{\raggedleft\arraybackslash}p{2.60cm}>{\raggedleft\arraybackslash}p{2.60cm}>{\raggedleft\arraybackslash}p{2.60cm}}
+\caption{Importance of each feature family (all four statistics of a measurement shuffled together), sorted by logistic regression.}\\
+\toprule
+\textbf{\hspace{0pt}Family} & \textbf{\hspace{0pt}LR log-loss increase} & \textbf{\hspace{0pt}LR AUROC drop} & \textbf{\hspace{0pt}XGBoost log-loss increase} & \textbf{\hspace{0pt}XGBoost AUROC drop}\\\midrule\endfirsthead
+\toprule
+\textbf{\hspace{0pt}Family} & \textbf{\hspace{0pt}LR log-loss increase} & \textbf{\hspace{0pt}LR AUROC drop} & \textbf{\hspace{0pt}XGBoost log-loss increase} & \textbf{\hspace{0pt}XGBoost AUROC drop}\\\midrule\endhead
+\bottomrule\endfoot
+\hspace{0pt}log energy (loudness) & \hspace{0pt}4.00 $\pm$ 0.18 & \hspace{0pt}0.264 & \hspace{0pt}0.138 $\pm$ 0.008 & \hspace{0pt}0.003\\
+\hspace{0pt}spectral centroid & \hspace{0pt}3.56 $\pm$ 0.15 & \hspace{0pt}0.238 & \hspace{0pt}0.554 $\pm$ 0.024 & \hspace{0pt}0.052\\
+\hspace{0pt}band 500-1000 Hz & \hspace{0pt}2.79 $\pm$ 0.14 & \hspace{0pt}0.087 & \hspace{0pt}0.005 $\pm$ 0.001 & \hspace{0pt}0.000\\
+\hspace{0pt}band 2-4 kHz & \hspace{0pt}1.70 $\pm$ 0.09 & \hspace{0pt}0.072 & \hspace{0pt}0.002 $\pm$ 0.000 & \hspace{0pt}0.000\\
+\hspace{0pt}band 0-500 Hz & \hspace{0pt}1.62 $\pm$ 0.12 & \hspace{0pt}0.041 & \hspace{0pt}0.029 $\pm$ 0.008 & \hspace{0pt}0.000\\
+\hspace{0pt}zero-crossing rate & \hspace{0pt}1.27 $\pm$ 0.08 & \hspace{0pt}0.009 & \hspace{0pt}0.008 $\pm$ 0.003 & \hspace{0pt}0.000\\
+\hspace{0pt}spectral roll-off & \hspace{0pt}0.77 $\pm$ 0.07 & \hspace{0pt}0.005 & \hspace{0pt}0.010 $\pm$ 0.002 & \hspace{0pt}0.000\\
+\hspace{0pt}band 1-2 kHz & \hspace{0pt}0.60 $\pm$ 0.07 & \hspace{0pt}0.008 & \hspace{0pt}0.016 $\pm$ 0.002 & \hspace{0pt}0.000\\
+\hspace{0pt}band 4-8 kHz & \hspace{0pt}0.47 $\pm$ 0.08 & \hspace{0pt}0.000 & \hspace{0pt}-0.000 $\pm$ 0.001 & \hspace{0pt}0.000\\
+\hspace{0pt}spectral flatness & \hspace{0pt}0.46 $\pm$ 0.06 & \hspace{0pt}0.002 & \hspace{0pt}0.004 $\pm$ 0.001 & \hspace{0pt}0.000\\
+\end{longtable}\end{center}
+\begin{center}\small\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{>{\raggedright\arraybackslash}p{4.40cm}>{\raggedleft\arraybackslash}p{2.50cm}>{\raggedleft\arraybackslash}p{2.50cm}>{\raggedleft\arraybackslash}p{2.50cm}>{\raggedleft\arraybackslash}p{2.50cm}}
+\caption{Importance of each statistic (that statistic of all ten measurements shuffled together).}\\
+\toprule
+\textbf{\hspace{0pt}Statistic} & \textbf{\hspace{0pt}LR log-loss increase} & \textbf{\hspace{0pt}LR AUROC drop} & \textbf{\hspace{0pt}XGBoost log-loss increase} & \textbf{\hspace{0pt}XGBoost AUROC drop}\\\midrule\endfirsthead
+\toprule
+\textbf{\hspace{0pt}Statistic} & \textbf{\hspace{0pt}LR log-loss increase} & \textbf{\hspace{0pt}LR AUROC drop} & \textbf{\hspace{0pt}XGBoost log-loss increase} & \textbf{\hspace{0pt}XGBoost AUROC drop}\\\midrule\endhead
+\bottomrule\endfoot
+\hspace{0pt}mean (typical value) & \hspace{0pt}1.03 $\pm$ 0.07 & \hspace{0pt}0.012 & \hspace{0pt}0.044 $\pm$ 0.007 & \hspace{0pt}0.000\\
+\hspace{0pt}standard deviation (variation) & \hspace{0pt}2.39 $\pm$ 0.09 & \hspace{0pt}0.134 & \hspace{0pt}0.045 $\pm$ 0.005 & \hspace{0pt}0.004\\
+\hspace{0pt}10th percentile (low end: pauses, background) & \hspace{0pt}2.63 $\pm$ 0.11 & \hspace{0pt}0.182 & \hspace{0pt}0.690 $\pm$ 0.037 & \hspace{0pt}0.188\\
+\hspace{0pt}90th percentile (high end: strongest voice) & \hspace{0pt}1.55 $\pm$ 0.08 & \hspace{0pt}0.019 & \hspace{0pt}0.007 $\pm$ 0.001 & \hspace{0pt}0.000\\
+\end{longtable}\end{center}
+\begin{center}\small\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.76cm}>{\raggedright\arraybackslash}p{3.82cm}>{\raggedright\arraybackslash}p{2.77cm}>{\raggedleft\arraybackslash}p{1.55cm}>{\raggedleft\arraybackslash}p{1.55cm}>{\raggedleft\arraybackslash}p{1.55cm}>{\raggedleft\arraybackslash}p{1.55cm}}
+\caption{All 40 acoustic features, ranked by permutation importance in logistic regression, with the XGBoost view alongside.}\\
+\toprule
+\textbf{\hspace{0pt}Rank} & \textbf{\hspace{0pt}Feature} & \textbf{\hspace{0pt}LR coefficient (mean $\pm$ SD)} & \textbf{\hspace{0pt}Sign stable} & \textbf{\hspace{0pt}LR log-loss increase} & \textbf{\hspace{0pt}XGBoost gain share} & \textbf{\hspace{0pt}XGBoost log-loss increase}\\\midrule\endfirsthead
+\toprule
+\textbf{\hspace{0pt}Rank} & \textbf{\hspace{0pt}Feature} & \textbf{\hspace{0pt}LR coefficient (mean $\pm$ SD)} & \textbf{\hspace{0pt}Sign stable} & \textbf{\hspace{0pt}LR log-loss increase} & \textbf{\hspace{0pt}XGBoost gain share} & \textbf{\hspace{0pt}XGBoost log-loss increase}\\\midrule\endhead
+\bottomrule\endfoot
+\hspace{0pt}1 & \hspace{0pt}ac\_\allowbreak{}band3\_\allowbreak{}log\_\allowbreak{}std & \hspace{0pt}18.66 $\pm$ 17.57 & \hspace{0pt}yes & \hspace{0pt}2.258 & \hspace{0pt}<1\% & \hspace{0pt}0.002\\
+\hspace{0pt}2 & \hspace{0pt}ac\_\allowbreak{}log\_\allowbreak{}energy\_\allowbreak{}db\_\allowbreak{}std & \hspace{0pt}-22.58 $\pm$ 22.25 & \hspace{0pt}no & \hspace{0pt}2.044 & \hspace{0pt}<1\% & \hspace{0pt}0.001\\
+\hspace{0pt}3 & \hspace{0pt}ac\_\allowbreak{}log\_\allowbreak{}energy\_\allowbreak{}db\_\allowbreak{}mean & \hspace{0pt}12.63 $\pm$ 14.23 & \hspace{0pt}no & \hspace{0pt}1.779 & \hspace{0pt}3\% & \hspace{0pt}0.013\\
+\hspace{0pt}4 & \hspace{0pt}ac\_\allowbreak{}zcr\_\allowbreak{}p10 & \hspace{0pt}-9.01 $\pm$ 7.12 & \hspace{0pt}yes & \hspace{0pt}1.679 & \hspace{0pt}4\% & \hspace{0pt}0.009\\
+\hspace{0pt}5 & \hspace{0pt}ac\_\allowbreak{}centroid\_\allowbreak{}hz\_\allowbreak{}std & \hspace{0pt}-7.54 $\pm$ 3.02 & \hspace{0pt}yes & \hspace{0pt}1.536 & \hspace{0pt}5\% & \hspace{0pt}0.018\\
+\hspace{0pt}6 & \hspace{0pt}ac\_\allowbreak{}band1\_\allowbreak{}log\_\allowbreak{}mean & \hspace{0pt}-8.85 $\pm$ 5.50 & \hspace{0pt}yes & \hspace{0pt}1.395 & \hspace{0pt}<1\% & \hspace{0pt}0.001\\
+\hspace{0pt}7 & \hspace{0pt}ac\_\allowbreak{}band3\_\allowbreak{}log\_\allowbreak{}p90 & \hspace{0pt}-8.85 $\pm$ 8.19 & \hspace{0pt}yes & \hspace{0pt}1.296 & \hspace{0pt}<1\% & \hspace{0pt}0.000\\
+\hspace{0pt}8 & \hspace{0pt}ac\_\allowbreak{}band1\_\allowbreak{}log\_\allowbreak{}std & \hspace{0pt}10.89 $\pm$ 9.40 & \hspace{0pt}yes & \hspace{0pt}1.280 & \hspace{0pt}<1\% & \hspace{0pt}0.002\\
+\hspace{0pt}9 & \hspace{0pt}ac\_\allowbreak{}band0\_\allowbreak{}log\_\allowbreak{}mean & \hspace{0pt}-9.22 $\pm$ 11.48 & \hspace{0pt}yes & \hspace{0pt}1.077 & \hspace{0pt}<1\% & \hspace{0pt}-0.001\\
+\hspace{0pt}10 & \hspace{0pt}ac\_\allowbreak{}log\_\allowbreak{}energy\_\allowbreak{}db\_\allowbreak{}p90 & \hspace{0pt}7.56 $\pm$ 6.88 & \hspace{0pt}yes & \hspace{0pt}0.995 & \hspace{0pt}<1\% & \hspace{0pt}0.000\\
+\hspace{0pt}11 & \hspace{0pt}ac\_\allowbreak{}centroid\_\allowbreak{}hz\_\allowbreak{}mean & \hspace{0pt}-5.88 $\pm$ 8.12 & \hspace{0pt}no & \hspace{0pt}0.851 & \hspace{0pt}5\% & \hspace{0pt}0.011\\
+\hspace{0pt}12 & \hspace{0pt}ac\_\allowbreak{}flatness\_\allowbreak{}std & \hspace{0pt}-9.40 $\pm$ 13.16 & \hspace{0pt}no & \hspace{0pt}0.811 & \hspace{0pt}1\% & \hspace{0pt}0.004\\
+\hspace{0pt}13 & \hspace{0pt}ac\_\allowbreak{}band3\_\allowbreak{}log\_\allowbreak{}mean & \hspace{0pt}7.64 $\pm$ 7.43 & \hspace{0pt}yes & \hspace{0pt}0.767 & \hspace{0pt}<1\% & \hspace{0pt}0.000\\
+\hspace{0pt}14 & \hspace{0pt}ac\_\allowbreak{}band4\_\allowbreak{}log\_\allowbreak{}std & \hspace{0pt}8.09 $\pm$ 12.14 & \hspace{0pt}no & \hspace{0pt}0.716 & \hspace{0pt}<1\% & \hspace{0pt}-0.000\\
+\hspace{0pt}15 & \hspace{0pt}ac\_\allowbreak{}band0\_\allowbreak{}log\_\allowbreak{}p90 & \hspace{0pt}-5.92 $\pm$ 5.46 & \hspace{0pt}yes & \hspace{0pt}0.568 & \hspace{0pt}<1\% & \hspace{0pt}0.000\\
+\hspace{0pt}16 & \hspace{0pt}ac\_\allowbreak{}flatness\_\allowbreak{}p90 & \hspace{0pt}8.52 $\pm$ 9.59 & \hspace{0pt}yes & \hspace{0pt}0.546 & \hspace{0pt}<1\% & \hspace{0pt}0.000\\
+\hspace{0pt}17 & \hspace{0pt}ac\_\allowbreak{}log\_\allowbreak{}energy\_\allowbreak{}db\_\allowbreak{}p10 & \hspace{0pt}4.68 $\pm$ 1.33 & \hspace{0pt}yes & \hspace{0pt}0.433 & \hspace{0pt}22\% & \hspace{0pt}0.102\\
+\hspace{0pt}18 & \hspace{0pt}ac\_\allowbreak{}band2\_\allowbreak{}log\_\allowbreak{}mean & \hspace{0pt}3.01 $\pm$ 1.68 & \hspace{0pt}yes & \hspace{0pt}0.346 & \hspace{0pt}<1\% & \hspace{0pt}0.002\\
+\hspace{0pt}19 & \hspace{0pt}ac\_\allowbreak{}band4\_\allowbreak{}log\_\allowbreak{}p10 & \hspace{0pt}7.60 $\pm$ 14.34 & \hspace{0pt}no & \hspace{0pt}0.305 & \hspace{0pt}<1\% & \hspace{0pt}0.000\\
+\hspace{0pt}20 & \hspace{0pt}ac\_\allowbreak{}band0\_\allowbreak{}log\_\allowbreak{}std & \hspace{0pt}3.37 $\pm$ 6.17 & \hspace{0pt}no & \hspace{0pt}0.302 & \hspace{0pt}<1\% & \hspace{0pt}0.001\\
+\hspace{0pt}21 & \hspace{0pt}ac\_\allowbreak{}rolloff85\_\allowbreak{}hz\_\allowbreak{}p90 & \hspace{0pt}4.16 $\pm$ 1.53 & \hspace{0pt}yes & \hspace{0pt}0.293 & \hspace{0pt}<1\% & \hspace{0pt}0.000\\
+\hspace{0pt}22 & \hspace{0pt}ac\_\allowbreak{}centroid\_\allowbreak{}hz\_\allowbreak{}p10 & \hspace{0pt}-2.81 $\pm$ 1.16 & \hspace{0pt}yes & \hspace{0pt}0.267 & \hspace{0pt}38\% & \hspace{0pt}0.443\\
+\hspace{0pt}23 & \hspace{0pt}ac\_\allowbreak{}centroid\_\allowbreak{}hz\_\allowbreak{}p90 & \hspace{0pt}-3.05 $\pm$ 2.01 & \hspace{0pt}yes & \hspace{0pt}0.259 & \hspace{0pt}<1\% & \hspace{0pt}0.000\\
+\hspace{0pt}24 & \hspace{0pt}ac\_\allowbreak{}zcr\_\allowbreak{}mean & \hspace{0pt}5.51 $\pm$ 6.12 & \hspace{0pt}yes & \hspace{0pt}0.259 & \hspace{0pt}<1\% & \hspace{0pt}-0.002\\
+\hspace{0pt}25 & \hspace{0pt}ac\_\allowbreak{}band4\_\allowbreak{}log\_\allowbreak{}p90 & \hspace{0pt}-3.01 $\pm$ 4.56 & \hspace{0pt}no & \hspace{0pt}0.236 & \hspace{0pt}<1\% & \hspace{0pt}0.000\\
+\hspace{0pt}26 & \hspace{0pt}ac\_\allowbreak{}band2\_\allowbreak{}log\_\allowbreak{}p10 & \hspace{0pt}2.62 $\pm$ 2.96 & \hspace{0pt}no & \hspace{0pt}0.104 & \hspace{0pt}1\% & \hspace{0pt}0.004\\
+\hspace{0pt}27 & \hspace{0pt}ac\_\allowbreak{}band1\_\allowbreak{}log\_\allowbreak{}p90 & \hspace{0pt}2.40 $\pm$ 1.48 & \hspace{0pt}yes & \hspace{0pt}0.100 & \hspace{0pt}<1\% & \hspace{0pt}-0.000\\
+\hspace{0pt}28 & \hspace{0pt}ac\_\allowbreak{}rolloff85\_\allowbreak{}hz\_\allowbreak{}std & \hspace{0pt}2.37 $\pm$ 2.98 & \hspace{0pt}no & \hspace{0pt}0.098 & \hspace{0pt}2\% & \hspace{0pt}0.007\\
+\hspace{0pt}29 & \hspace{0pt}ac\_\allowbreak{}band1\_\allowbreak{}log\_\allowbreak{}p10 & \hspace{0pt}-1.72 $\pm$ 2.94 & \hspace{0pt}no & \hspace{0pt}0.075 & \hspace{0pt}<1\% & \hspace{0pt}0.001\\
+\hspace{0pt}30 & \hspace{0pt}ac\_\allowbreak{}rolloff85\_\allowbreak{}hz\_\allowbreak{}mean & \hspace{0pt}2.77 $\pm$ 3.55 & \hspace{0pt}yes & \hspace{0pt}0.074 & \hspace{0pt}<1\% & \hspace{0pt}0.000\\
+\hspace{0pt}31 & \hspace{0pt}ac\_\allowbreak{}band2\_\allowbreak{}log\_\allowbreak{}std & \hspace{0pt}-0.68 $\pm$ 3.67 & \hspace{0pt}no & \hspace{0pt}0.072 & \hspace{0pt}<1\% & \hspace{0pt}0.003\\
+\hspace{0pt}32 & \hspace{0pt}ac\_\allowbreak{}band3\_\allowbreak{}log\_\allowbreak{}p10 & \hspace{0pt}0.88 $\pm$ 1.18 & \hspace{0pt}no & \hspace{0pt}0.055 & \hspace{0pt}<1\% & \hspace{0pt}0.000\\
+\hspace{0pt}33 & \hspace{0pt}ac\_\allowbreak{}rolloff85\_\allowbreak{}hz\_\allowbreak{}p10 & \hspace{0pt}0.72 $\pm$ 1.62 & \hspace{0pt}no & \hspace{0pt}0.046 & \hspace{0pt}1\% & \hspace{0pt}0.003\\
+\hspace{0pt}34 & \hspace{0pt}ac\_\allowbreak{}zcr\_\allowbreak{}std & \hspace{0pt}0.73 $\pm$ 0.98 & \hspace{0pt}no & \hspace{0pt}0.037 & \hspace{0pt}<1\% & \hspace{0pt}0.001\\
+\hspace{0pt}35 & \hspace{0pt}ac\_\allowbreak{}band4\_\allowbreak{}log\_\allowbreak{}mean & \hspace{0pt}0.78 $\pm$ 0.78 & \hspace{0pt}no & \hspace{0pt}0.025 & \hspace{0pt}<1\% & \hspace{0pt}0.000\\
+\hspace{0pt}36 & \hspace{0pt}ac\_\allowbreak{}zcr\_\allowbreak{}p90 & \hspace{0pt}-0.14 $\pm$ 1.47 & \hspace{0pt}no & \hspace{0pt}0.024 & \hspace{0pt}<1\% & \hspace{0pt}-0.001\\
+\hspace{0pt}37 & \hspace{0pt}ac\_\allowbreak{}flatness\_\allowbreak{}p10 & \hspace{0pt}1.70 $\pm$ 1.63 & \hspace{0pt}no & \hspace{0pt}0.019 & \hspace{0pt}<1\% & \hspace{0pt}-0.002\\
+\hspace{0pt}38 & \hspace{0pt}ac\_\allowbreak{}flatness\_\allowbreak{}mean & \hspace{0pt}1.09 $\pm$ 1.14 & \hspace{0pt}no & \hspace{0pt}0.016 & \hspace{0pt}<1\% & \hspace{0pt}0.002\\
+\hspace{0pt}39 & \hspace{0pt}ac\_\allowbreak{}band0\_\allowbreak{}log\_\allowbreak{}p10 & \hspace{0pt}0.13 $\pm$ 0.26 & \hspace{0pt}no & \hspace{0pt}0.001 & \hspace{0pt}13\% & \hspace{0pt}0.023\\
+\hspace{0pt}40 & \hspace{0pt}ac\_\allowbreak{}band2\_\allowbreak{}log\_\allowbreak{}p90 & \hspace{0pt}0.95 $\pm$ 2.28 & \hspace{0pt}no & \hspace{0pt}-0.012 & \hspace{0pt}2\% & \hspace{0pt}0.006\\
+\end{longtable}\end{center}
+Reading the tables: for logistic regression the most important families are loudness and the spectral centroid, and among single features \texttt{ac\_\allowbreak{}band3\_\allowbreak{}log\_\allowbreak{}std}, \texttt{ac\_\allowbreak{}log\_\allowbreak{}energy\_\allowbreak{}db\_\allowbreak{}std}, \texttt{ac\_\allowbreak{}log\_\allowbreak{}energy\_\allowbreak{}db\_\allowbreak{}mean} lead. For XGBoost almost everything goes through three 10th-percentile features (\texttt{ac\_\allowbreak{}centroid\_\allowbreak{}hz\_\allowbreak{}p10}, \texttt{ac\_\allowbreak{}log\_\allowbreak{}energy\_\allowbreak{}db\_\allowbreak{}p10}, \texttt{ac\_\allowbreak{}band0\_\allowbreak{}log\_\allowbreak{}p10}: together 72\% of the gain), and shuffling the 10th-percentile statistic is by far the most damaging. Several logistic-regression coefficients change sign between folds (column 'Sign stable' = no), which shows that the model spreads weight across correlated features rather than relying on one stable cue.
+
+\begin{center}\small\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{>{\raggedright\arraybackslash}p{1.86cm}>{\raggedright\arraybackslash}p{3.34cm}>{\raggedleft\arraybackslash}p{1.55cm}>{\raggedleft\arraybackslash}p{1.55cm}>{\raggedleft\arraybackslash}p{1.55cm}>{\raggedleft\arraybackslash}p{1.55cm}>{\raggedright\arraybackslash}p{2.16cm}}
+\caption{Hybrid models: importance of each block (the whole block shuffled at once) and its share of the model's weight.}\\
+\toprule
+\textbf{\hspace{0pt}Model} & \textbf{\hspace{0pt}Block} & \textbf{\hspace{0pt}Columns} & \textbf{\hspace{0pt}AUROC drop} & \textbf{\hspace{0pt}Log-loss increase} & \textbf{\hspace{0pt}Weight share} & \textbf{\hspace{0pt}Share measured by}\\\midrule\endfirsthead
+\toprule
+\textbf{\hspace{0pt}Model} & \textbf{\hspace{0pt}Block} & \textbf{\hspace{0pt}Columns} & \textbf{\hspace{0pt}AUROC drop} & \textbf{\hspace{0pt}Log-loss increase} & \textbf{\hspace{0pt}Weight share} & \textbf{\hspace{0pt}Share measured by}\\\midrule\endhead
+\bottomrule\endfoot
+\hspace{0pt}H1 LR & \hspace{0pt}WavLM-large & \hspace{0pt}1024 & \hspace{0pt}0.186 & \hspace{0pt}1.329 & \hspace{0pt}87\% & \hspace{0pt}coefficient size\\
+\hspace{0pt}H1 LR & \hspace{0pt}Acoustic (40 features) & \hspace{0pt}40 & \hspace{0pt}0.011 & \hspace{0pt}0.186 & \hspace{0pt}13\% & \hspace{0pt}coefficient size\\
+\hspace{0pt}H1 XGB & \hspace{0pt}WavLM-large & \hspace{0pt}1024 & \hspace{0pt}0.002 & \hspace{0pt}0.124 & \hspace{0pt}26\% & \hspace{0pt}gain\\
+\hspace{0pt}H1 XGB & \hspace{0pt}Acoustic (40 features) & \hspace{0pt}40 & \hspace{0pt}0.127 & \hspace{0pt}0.577 & \hspace{0pt}74\% & \hspace{0pt}gain\\
+\hspace{0pt}H2 LR & \hspace{0pt}wav2vec2-large-lv60 & \hspace{0pt}1024 & \hspace{0pt}0.055 & \hspace{0pt}1.144 & \hspace{0pt}86\% & \hspace{0pt}coefficient size\\
+\hspace{0pt}H2 LR & \hspace{0pt}Acoustic (40 features) & \hspace{0pt}40 & \hspace{0pt}0.032 & \hspace{0pt}0.732 & \hspace{0pt}14\% & \hspace{0pt}coefficient size\\
+\hspace{0pt}H2 XGB & \hspace{0pt}wav2vec2-large-lv60 & \hspace{0pt}1024 & \hspace{0pt}-0.000 & \hspace{0pt}0.035 & \hspace{0pt}10\% & \hspace{0pt}gain\\
+\hspace{0pt}H2 XGB & \hspace{0pt}Acoustic (40 features) & \hspace{0pt}40 & \hspace{0pt}0.385 & \hspace{0pt}1.073 & \hspace{0pt}90\% & \hspace{0pt}gain\\
+\hspace{0pt}H3 LR & \hspace{0pt}XLS-R 300M & \hspace{0pt}1024 & \hspace{0pt}0.211 & \hspace{0pt}1.085 & \hspace{0pt}92\% & \hspace{0pt}coefficient size\\
+\hspace{0pt}H3 LR & \hspace{0pt}Acoustic (40 features) & \hspace{0pt}40 & \hspace{0pt}0.005 & \hspace{0pt}0.142 & \hspace{0pt}8\% & \hspace{0pt}coefficient size\\
+\hspace{0pt}H3 XGB & \hspace{0pt}XLS-R 300M & \hspace{0pt}1024 & \hspace{0pt}0.000 & \hspace{0pt}0.054 & \hspace{0pt}13\% & \hspace{0pt}gain\\
+\hspace{0pt}H3 XGB & \hspace{0pt}Acoustic (40 features) & \hspace{0pt}40 & \hspace{0pt}0.286 & \hspace{0pt}0.705 & \hspace{0pt}87\% & \hspace{0pt}gain\\
+\hspace{0pt}H7 LR & \hspace{0pt}WavLM-large & \hspace{0pt}1024 & \hspace{0pt}0.081 & \hspace{0pt}0.472 & \hspace{0pt}50\% & \hspace{0pt}coefficient size\\
+\hspace{0pt}H7 LR & \hspace{0pt}wav2vec2-large-lv60 & \hspace{0pt}1024 & \hspace{0pt}-0.000 & \hspace{0pt}0.015 & \hspace{0pt}15\% & \hspace{0pt}coefficient size\\
+\hspace{0pt}H7 LR & \hspace{0pt}XLS-R 300M & \hspace{0pt}1024 & \hspace{0pt}0.002 & \hspace{0pt}0.226 & \hspace{0pt}35\% & \hspace{0pt}coefficient size\\
+\hspace{0pt}H7 XGB & \hspace{0pt}WavLM-large & \hspace{0pt}1024 & \hspace{0pt}0.102 & \hspace{0pt}0.539 & \hspace{0pt}73\% & \hspace{0pt}gain\\
+\hspace{0pt}H7 XGB & \hspace{0pt}wav2vec2-large-lv60 & \hspace{0pt}1024 & \hspace{0pt}-0.000 & \hspace{0pt}0.017 & \hspace{0pt}6\% & \hspace{0pt}gain\\
+\hspace{0pt}H7 XGB & \hspace{0pt}XLS-R 300M & \hspace{0pt}1024 & \hspace{0pt}0.003 & \hspace{0pt}0.101 & \hspace{0pt}21\% & \hspace{0pt}gain\\
+\hspace{0pt}H8 LR & \hspace{0pt}WavLM-large & \hspace{0pt}1024 & \hspace{0pt}0.020 & \hspace{0pt}0.433 & \hspace{0pt}45\% & \hspace{0pt}coefficient size\\
+\hspace{0pt}H8 LR & \hspace{0pt}wav2vec2-large-lv60 & \hspace{0pt}1024 & \hspace{0pt}-0.002 & \hspace{0pt}-0.001 & \hspace{0pt}16\% & \hspace{0pt}coefficient size\\
+\hspace{0pt}H8 LR & \hspace{0pt}XLS-R 300M & \hspace{0pt}1024 & \hspace{0pt}0.018 & \hspace{0pt}0.245 & \hspace{0pt}34\% & \hspace{0pt}coefficient size\\
+\hspace{0pt}H8 LR & \hspace{0pt}Acoustic (40 features) & \hspace{0pt}40 & \hspace{0pt}0.000 & \hspace{0pt}0.041 & \hspace{0pt}4\% & \hspace{0pt}coefficient size\\
+\hspace{0pt}H8 XGB & \hspace{0pt}WavLM-large & \hspace{0pt}1024 & \hspace{0pt}0.001 & \hspace{0pt}0.111 & \hspace{0pt}25\% & \hspace{0pt}gain\\
+\hspace{0pt}H8 XGB & \hspace{0pt}wav2vec2-large-lv60 & \hspace{0pt}1024 & \hspace{0pt}-0.000 & \hspace{0pt}0.001 & \hspace{0pt}1\% & \hspace{0pt}gain\\
+\hspace{0pt}H8 XGB & \hspace{0pt}XLS-R 300M & \hspace{0pt}1024 & \hspace{0pt}-0.000 & \hspace{0pt}0.020 & \hspace{0pt}3\% & \hspace{0pt}gain\\
+\hspace{0pt}H8 XGB & \hspace{0pt}Acoustic (40 features) & \hspace{0pt}40 & \hspace{0pt}0.100 & \hspace{0pt}0.583 & \hspace{0pt}71\% & \hspace{0pt}gain\\
+\end{longtable}\end{center}
+\subsubsection{SHAP explanations}\label{sec:shap}
+SHAP values split each prediction into one contribution per feature: a positive value pushes that recording towards Parkinson's disease, a negative value towards control, and the contributions add up to the model's log-odds. We computed them out of fold, i.e. every recording is explained by the model of the fold in which it was a test recording (with the hyperparameters chosen by nested tuning). For XGBoost we used the exact TreeSHAP algorithm built into XGBoost; for logistic regression SHAP has a closed form, coefficient $\times$ (standardised value minus its training mean).
+
+\begin{figure}[H]\centering\includegraphics[width=0.85\linewidth]{shap_beeswarm_XGB.pdf}\caption{Out-of-fold SHAP values of the XGBoost acoustic model for the 12 most influential features. Each dot is one recording; colour shows the feature's value.}\label{fig:shap_beeswarm_XGB}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=0.85\linewidth]{shap_beeswarm_LR.pdf}\caption{Out-of-fold SHAP values of the logistic-regression acoustic model for its 12 most influential features.}\label{fig:shap_beeswarm_LR}\end{figure}
+\begin{center}\small\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{>{\raggedright\arraybackslash}p{4.20cm}>{\raggedleft\arraybackslash}p{2.55cm}>{\raggedleft\arraybackslash}p{2.55cm}>{\raggedleft\arraybackslash}p{2.55cm}>{\raggedleft\arraybackslash}p{2.55cm}}
+\caption{The 15 features with the largest mean absolute SHAP value in XGBoost, with the logistic-regression values alongside. 'Direction' is the correlation between a feature's value and its SHAP value: negative = higher values push towards control.}\\
+\toprule
+\textbf{\hspace{0pt}Feature} & \textbf{\hspace{0pt}XGBoost mean abs. SHAP} & \textbf{\hspace{0pt}XGBoost direction} & \textbf{\hspace{0pt}LR mean abs. SHAP} & \textbf{\hspace{0pt}LR direction}\\\midrule\endfirsthead
+\toprule
+\textbf{\hspace{0pt}Feature} & \textbf{\hspace{0pt}XGBoost mean abs. SHAP} & \textbf{\hspace{0pt}XGBoost direction} & \textbf{\hspace{0pt}LR mean abs. SHAP} & \textbf{\hspace{0pt}LR direction}\\\midrule\endhead
+\bottomrule\endfoot
+\hspace{0pt}ac\_\allowbreak{}centroid\_\allowbreak{}hz\_\allowbreak{}p10 & \hspace{0pt}1.300 & \hspace{0pt}-0.74 & \hspace{0pt}2.160 & \hspace{0pt}-0.93\\
+\hspace{0pt}ac\_\allowbreak{}log\_\allowbreak{}energy\_\allowbreak{}db\_\allowbreak{}p10 & \hspace{0pt}0.419 & \hspace{0pt}0.43 & \hspace{0pt}3.150 & \hspace{0pt}0.96\\
+\hspace{0pt}ac\_\allowbreak{}centroid\_\allowbreak{}hz\_\allowbreak{}mean & \hspace{0pt}0.325 & \hspace{0pt}-0.77 & \hspace{0pt}4.884 & \hspace{0pt}-0.59\\
+\hspace{0pt}ac\_\allowbreak{}band0\_\allowbreak{}log\_\allowbreak{}p10 & \hspace{0pt}0.271 & \hspace{0pt}0.27 & \hspace{0pt}0.139 & \hspace{0pt}0.51\\
+\hspace{0pt}ac\_\allowbreak{}log\_\allowbreak{}energy\_\allowbreak{}db\_\allowbreak{}mean & \hspace{0pt}0.135 & \hspace{0pt}0.52 & \hspace{0pt}11.110 & \hspace{0pt}0.69\\
+\hspace{0pt}ac\_\allowbreak{}zcr\_\allowbreak{}p10 & \hspace{0pt}0.128 & \hspace{0pt}-0.68 & \hspace{0pt}7.353 & \hspace{0pt}-0.79\\
+\hspace{0pt}ac\_\allowbreak{}centroid\_\allowbreak{}hz\_\allowbreak{}std & \hspace{0pt}0.113 & \hspace{0pt}-0.67 & \hspace{0pt}6.186 & \hspace{0pt}-0.92\\
+\hspace{0pt}ac\_\allowbreak{}band2\_\allowbreak{}log\_\allowbreak{}p90 & \hspace{0pt}0.100 & \hspace{0pt}0.48 & \hspace{0pt}1.233 & \hspace{0pt}0.41\\
+\hspace{0pt}ac\_\allowbreak{}rolloff85\_\allowbreak{}hz\_\allowbreak{}p10 & \hspace{0pt}0.090 & \hspace{0pt}-0.57 & \hspace{0pt}1.092 & \hspace{0pt}0.26\\
+\hspace{0pt}ac\_\allowbreak{}rolloff85\_\allowbreak{}hz\_\allowbreak{}std & \hspace{0pt}0.086 & \hspace{0pt}-0.66 & \hspace{0pt}2.176 & \hspace{0pt}0.65\\
+\hspace{0pt}ac\_\allowbreak{}band2\_\allowbreak{}log\_\allowbreak{}p10 & \hspace{0pt}0.055 & \hspace{0pt}0.27 & \hspace{0pt}1.593 & \hspace{0pt}0.70\\
+\hspace{0pt}ac\_\allowbreak{}band1\_\allowbreak{}log\_\allowbreak{}p10 & \hspace{0pt}0.042 & \hspace{0pt}0.18 & \hspace{0pt}1.606 & \hspace{0pt}-0.57\\
+\hspace{0pt}ac\_\allowbreak{}band2\_\allowbreak{}log\_\allowbreak{}std & \hspace{0pt}0.038 & \hspace{0pt}0.56 & \hspace{0pt}1.771 & \hspace{0pt}-0.22\\
+\hspace{0pt}ac\_\allowbreak{}band4\_\allowbreak{}log\_\allowbreak{}std & \hspace{0pt}0.037 & \hspace{0pt}-0.02 & \hspace{0pt}5.734 & \hspace{0pt}0.60\\
+\hspace{0pt}ac\_\allowbreak{}flatness\_\allowbreak{}std & \hspace{0pt}0.032 & \hspace{0pt}-0.31 & \hspace{0pt}7.805 & \hspace{0pt}-0.64\\
+\end{longtable}\end{center}
+\begin{tcolorbox}[colback=blue!3,colframe=blue!50!black,boxrule=0.5pt,arc=2pt,left=5pt,right=5pt,top=3pt,bottom=3pt,title={\small\bfseries What this tells us}]\small SHAP confirms the permutation results. XGBoost's predictions are driven mainly by \texttt{ac\_\allowbreak{}centroid\_\allowbreak{}hz\_\allowbreak{}p10} (mean absolute SHAP 1.30): recordings whose quietest frames have a low spectral centroid are pushed towards Parkinson's disease, and the loudness of the quietest frames (\texttt{ac\_\allowbreak{}log\_\allowbreak{}energy\_\allowbreak{}db\_\allowbreak{}p10}) comes next. Both describe pauses and background rather than the voice itself, which agrees with the recording-condition concern in section~\ref{sec:confound}. The logistic-regression SHAP values are larger in size because its coefficients are large and partly cancel each other across correlated features.\end{tcolorbox}
+\subsection{Hyperparameter tuning}\label{sec:tuning}
+Hyperparameters were tuned in every run by the nested procedure of section~\ref{sec:training}. Looking at all 280 tuning logs taught us something important about tuning on small data.
+
+\textbf{The tuning objective saturates.} Because the inner folds contain only about 12 people each, many configurations reach the same, often perfect, inner score. In logistic regression 64 of 70 runs (median 12 tied configurations); linear SVM 63 of 70 runs (median 10 tied configurations); RBF SVM 65 of 70 runs (median 6 tied configurations); XGBoost 59 of 70 runs (median 9.5 tied configurations), more than one configuration tied for the best score. The choice then falls back to the order of the list, so in practice tuning mostly chose the first, most strongly regularised configurations: logistic regression usually ended with C = 0.1 or 0.01 and an L2 penalty, the linear SVM with C = 0.01, the RBF SVM with C = 1 and a narrow kernel, and XGBoost with the first configuration of its list.
+
+\begin{center}\small\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{>{\raggedright\arraybackslash}p{2.02cm}>{\raggedright\arraybackslash}p{11.20cm}>{\raggedleft\arraybackslash}p{2.02cm}}
+\caption{The three most frequently chosen configurations of each classifier (over 70 runs each).}\\
+\toprule
+\textbf{\hspace{0pt}Classifier} & \textbf{\hspace{0pt}Configuration} & \textbf{\hspace{0pt}Runs}\\\midrule\endfirsthead
+\toprule
+\textbf{\hspace{0pt}Classifier} & \textbf{\hspace{0pt}Configuration} & \textbf{\hspace{0pt}Runs}\\\midrule\endhead
+\bottomrule\endfoot
+\hspace{0pt}Logistic regression & \hspace{0pt}C = 0.1, class\_\allowbreak{}weight = None, penalty = l2 & \hspace{0pt}15 of 70\\
+\hspace{0pt}Logistic regression & \hspace{0pt}C = 0.01, class\_\allowbreak{}weight = None, penalty = l2 & \hspace{0pt}14 of 70\\
+\hspace{0pt}Logistic regression & \hspace{0pt}C = 0.01, class\_\allowbreak{}weight = None, penalty = l1 & \hspace{0pt}8 of 70\\
+\hspace{0pt}Linear SVM & \hspace{0pt}C = 0.01, class\_\allowbreak{}weight = None & \hspace{0pt}38 of 70\\
+\hspace{0pt}Linear SVM & \hspace{0pt}C = 0.1, class\_\allowbreak{}weight = None & \hspace{0pt}15 of 70\\
+\hspace{0pt}Linear SVM & \hspace{0pt}C = 1, class\_\allowbreak{}weight = None & \hspace{0pt}6 of 70\\
+\hspace{0pt}RBF SVM & \hspace{0pt}C = 1, class\_\allowbreak{}weight = None, gamma\_\allowbreak{}mult = 10 & \hspace{0pt}26 of 70\\
+\hspace{0pt}RBF SVM & \hspace{0pt}C = 1, class\_\allowbreak{}weight = None, gamma\_\allowbreak{}mult = 1 & \hspace{0pt}9 of 70\\
+\hspace{0pt}RBF SVM & \hspace{0pt}C = 0.1, class\_\allowbreak{}weight = None, gamma\_\allowbreak{}mult = 10 & \hspace{0pt}7 of 70\\
+\hspace{0pt}XGBoost & \hspace{0pt}colsample\_\allowbreak{}bytree = 1.0, learning\_\allowbreak{}rate = 0.03, max\_\allowbreak{}depth = 2, min\_\allowbreak{}child\_\allowbreak{}weight = 1, n\_\allowbreak{}estimators = 100, reg\_\allowbreak{}lambda = 10, scale\_\allowbreak{}pos\_\allowbreak{}weight = 1, subsample = 0.7 & \hspace{0pt}28 of 70\\
+\hspace{0pt}XGBoost & \hspace{0pt}colsample\_\allowbreak{}bytree = 1.0, learning\_\allowbreak{}rate = 0.03, max\_\allowbreak{}depth = 4, min\_\allowbreak{}child\_\allowbreak{}weight = 1, n\_\allowbreak{}estimators = 100, reg\_\allowbreak{}lambda = 1, scale\_\allowbreak{}pos\_\allowbreak{}weight = 1, subsample = 0.7 & \hspace{0pt}8 of 70\\
+\hspace{0pt}XGBoost & \hspace{0pt}colsample\_\allowbreak{}bytree = 0.3, learning\_\allowbreak{}rate = 0.03, max\_\allowbreak{}depth = 4, min\_\allowbreak{}child\_\allowbreak{}weight = 1, n\_\allowbreak{}estimators = 300, reg\_\allowbreak{}lambda = 1, scale\_\allowbreak{}pos\_\allowbreak{}weight = 1, subsample = 0.7 & \hspace{0pt}6 of 70\\
+\end{longtable}\end{center}
+\begin{figure}[H]\centering\includegraphics[width=0.95\linewidth]{wp_tuning.pdf}\caption{Left: number of configurations tied at the best inner score in each run. Right: AUROC of every configuration of the grid on the outer folds (grey range, black median) and the configuration chosen by nested tuning (coloured).}\label{fig:wp_tuning}\end{figure}
+\textbf{What the grid looks like.} As an exploratory check we trained every configuration of the grid on each outer training part and scored it on the test fold (this is only for description; it was never used to choose anything). For the linear models almost every configuration performs alike. The RBF SVM is different: its results range widely (for wav2vec2 from 0.562 to 0.996), and the configuration chosen by nested tuning can be a poor one. The clearest case is WavLM-large with the RBF SVM, where nested tuning chose a configuration with AUROC 0.873 although the median configuration of the grid reaches 0.996.
+
+\begin{tcolorbox}[colback=blue!3,colframe=blue!50!black,boxrule=0.5pt,arc=2pt,left=5pt,right=5pt,top=3pt,bottom=3pt,title={\small\bfseries What this tells us}]\small The weak RBF SVM results are a tuning problem, not proof that curved boundaries are worse: with saturated inner scores, the tie-break picked a narrow kernel that does not generalise. On small datasets it is safer to use simple, strongly regularised defaults and to spend data on external testing rather than on tuning.\end{tcolorbox}
+\subsection{Which speech tasks carry the signal}\label{sec:tasks}
+\begin{figure}[H]\centering\includegraphics[width=0.92\linewidth]{wp_tasks.pdf}\caption{Speaker-level AUROC when each person's score uses only one family of tasks (the same out-of-fold models, no retraining).}\label{fig:wp_tasks}\end{figure}
+Using the existing out-of-fold predictions, we recomputed each person's score from one task family at a time. Every family on its own still separates the groups well (speaker AUROC of at least 0.961 in every case). The phrase (about 30 s) and the word list (about 56 s) reach 1.000 with wav2vec2 and XLS-R. Sustained vowels are the least reliable family when single recordings are judged, which matters because they make up 10 of a person's 16 recordings.
+
+\subsection{Error and failure-case analysis}\label{sec:errors}
+Errors are rare and concentrated. Across all 56 configurations, every missed patient is the same person: \textbf{PD\_005} is missed in 54 of the 56 configurations. Her recordings are not split between clearly 'healthy' and clearly 'Parkinson's' tasks; instead almost all of them sit just below the threshold (WavLM with logistic regression gives values between 0.19 and 0.59 for her 16 recordings), so the models are uncertain about her as a whole. The corpus gives no information on disease stage or medication that could explain this.
+
+False alarms come from a few controls. The four controls that the corpus spreadsheet flags for poor recording quality or reading difficulty produce \textbf{29 of the 44} false-alarm events counted over all configurations, although they are only 4 of 22 controls. The two most frequent false alarms, HC\_001 and HC\_020, are both flagged; HC\_020 has no reading-passage or phrase recordings at all.
+
+\begin{figure}[H]\centering\includegraphics[width=0.95\linewidth]{error_tasks.pdf}\caption{Recording probabilities (WavLM + logistic regression) of the three most frequently misclassified people.}\label{fig:error_tasks}\end{figure}
+\begin{center}\small\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{>{\raggedright\arraybackslash}p{3.71cm}>{\raggedleft\arraybackslash}p{3.71cm}>{\raggedleft\arraybackslash}p{3.71cm}>{\raggedleft\arraybackslash}p{3.71cm}}
+\caption{Recording-level errors of the baseline by task family (a person's decision uses the average of all their recordings).}\\
+\toprule
+\textbf{\hspace{0pt}Task family} & \textbf{\hspace{0pt}Recordings} & \textbf{\hspace{0pt}Wrong} & \textbf{\hspace{0pt}Error rate}\\\midrule\endfirsthead
+\toprule
+\textbf{\hspace{0pt}Task family} & \textbf{\hspace{0pt}Recordings} & \textbf{\hspace{0pt}Wrong} & \textbf{\hspace{0pt}Error rate}\\\midrule\endhead
+\bottomrule\endfoot
+\hspace{0pt}passage & \hspace{0pt}93 & \hspace{0pt}6 & \hspace{0pt}6\%\\
+\hspace{0pt}phrase & \hspace{0pt}47 & \hspace{0pt}2 & \hspace{0pt}4\%\\
+\hspace{0pt}syllable & \hspace{0pt}100 & \hspace{0pt}7 & \hspace{0pt}7\%\\
+\hspace{0pt}vowel & \hspace{0pt}495 & \hspace{0pt}59 & \hspace{0pt}12\%\\
+\hspace{0pt}word list & \hspace{0pt}50 & \hspace{0pt}2 & \hspace{0pt}4\%\\
+\hspace{0pt}all recordings & \hspace{0pt}785 & \hspace{0pt}76 & \hspace{0pt}10\%\\
+\end{longtable}\end{center}
+\begin{tcolorbox}[colback=blue!3,colframe=blue!50!black,boxrule=0.5pt,arc=2pt,left=5pt,right=5pt,top=3pt,bottom=3pt,title={\small\bfseries What this tells us}]\small Two failure modes appear: (1) a patient whose recordings all look borderline, and (2) controls whose recordings have known quality problems. A real product should therefore check recording quality and abstain rather than give a confident answer on poor recordings.\end{tcolorbox}
+\subsection{Sensitivity and ablation analysis}\label{sec:sensitivity}
+The table brings together how much the result changes when one design choice is changed while everything else is kept fixed.
+
+\begin{center}\small\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{>{\raggedright\arraybackslash}p{2.66cm}>{\raggedright\arraybackslash}p{4.18cm}>{\raggedright\arraybackslash}p{5.70cm}>{\raggedright\arraybackslash}p{2.28cm}}
+\caption{Sensitivity of the results to single design choices.}\\
+\toprule
+\textbf{\hspace{0pt}Design choice} & \textbf{\hspace{0pt}What was varied} & \textbf{\hspace{0pt}Effect} & \textbf{\hspace{0pt}Size of effect}\\\midrule\endfirsthead
+\toprule
+\textbf{\hspace{0pt}Design choice} & \textbf{\hspace{0pt}What was varied} & \textbf{\hspace{0pt}Effect} & \textbf{\hspace{0pt}Size of effect}\\\midrule\endhead
+\bottomrule\endfoot
+\hspace{0pt}Representation & \hspace{0pt}4 single representations and 8 hybrids & \hspace{0pt}median AUROC per representation between 0.985 and 0.999 & \hspace{0pt}small\\
+\hspace{0pt}Classifier & \hspace{0pt}LR, linear SVM, RBF SVM, XGBoost & \hspace{0pt}median difference to LR: linear SVM -0.001; RBF SVM -0.023; XGBoost -0.001 & \hspace{0pt}small except RBF SVM\\
+\hspace{0pt}Feature selection & \hspace{0pt}all 40 versus forward/\allowbreak{}backward 10 & \hspace{0pt}median difference -0.004 & \hspace{0pt}none detectable\\
+\hspace{0pt}Feature families & \hspace{0pt}drop one family /\allowbreak{} keep one family & \hspace{0pt}drop: AUROC at least 0.993; keep ZCR only (LR): 0.989 & \hspace{0pt}information is redundant\\
+\hspace{0pt}Statistics & \hspace{0pt}keep only mean, SD, p10 or p90 & \hspace{0pt}AUROC at least 0.967 & \hspace{0pt}small\\
+\hspace{0pt}Hyperparameters & \hspace{0pt}every grid configuration on the outer folds & \hspace{0pt}linear models stable; RBF SVM from 0.562 to 0.996 (wav2vec2) & \hspace{0pt}large for RBF SVM only\\
+\hspace{0pt}Speech task & \hspace{0pt}score from one task family only & \hspace{0pt}speaker AUROC at least 0.961 & \hspace{0pt}small\\
+\hspace{0pt}Numerical environment & \hspace{0pt}1 versus many BLAS threads & \hspace{0pt}probabilities change by at most 4e-4; no decision changes & \hspace{0pt}none\\
+\end{longtable}\end{center}
+The results are remarkably stable to every choice we could vary inside the dataset. What we could \textbf{not} vary is the recording situation, and the next section shows why that matters.
+
+\subsection{The recording-condition problem}\label{sec:confound}
+Because each recording session contains only one group, a classifier could separate the groups by recognising the \emph{session} instead of the \emph{disease}. We looked for evidence of this in three ways.
+
+\subsubsection{Can the models recognise the session inside one group?}
+\begin{figure}[H]\centering\includegraphics[width=0.9\linewidth]{wp_session.pdf}\caption{Can the same representations tell recording sessions apart within one group, for people they have not seen? (logistic regression, nested, speaker-disjoint)}\label{fig:wp_session}\end{figure}
+We trained the same pipeline to predict the recording date \emph{within} a single group, again always testing on unseen people. Among the controls, early-March and late-March sessions could be told apart with an AUROC between 0.839 and 0.929. Among the patients, the 2016 sessions (44.1 kHz) and the 2017 sessions (16 kHz) were separated with an AUROC between 0.950 and 1.000. Only the two 2017 patient sessions were hard to separate (0.500 to 0.764). So the representations clearly carry information about the session, even when the diagnosis is the same.
+
+\subsubsection{The two groups' audio files were produced differently}
+Looking at the raw samples, we found exact digital silence (samples that are exactly zero) in different places for the two groups. 272 of 349 control recordings begin with a block of about 6 ms of exact zeros, which never occurs in patient recordings; 112 of 436 patient recordings (from the 2016 sessions) end with at least half a second of exact zeros, which never occurs in control recordings. The leading zero block alone would separate the speakers with an AUROC of 0.975. The 6-ms block is too short to change the 25-ms frame features much, but the trailing silence is not: in the 2016 patient sessions it adds frames of pure digital silence, which directly change the quietest-frame (10th-percentile) statistics. Both details show that the files of the two groups went through different recording or export processes.
+
+\subsubsection{What the models rely on}
+Section~\ref{sec:importance} showed that the most important features for XGBoost describe the quietest frames, and section~\ref{sec:features} that many features vary strongly between sessions of the same group. Together with the session-recognition results, this means that a large part of the separation can be explained by recording conditions.
+
+\begin{tcolorbox}[colback=orange!5,colframe=orange!70!black,boxrule=0.5pt,arc=2pt,left=5pt,right=5pt,top=3pt,bottom=3pt,title={\small\bfseries Key point}]\small The high scores are genuine for this dataset, but this dataset cannot tell us how much of them comes from the disease and how much from the recording sessions. Some signal may be real (the spectral-shape differences remain in 16-kHz-only data, and speech changes in Parkinson's disease are well documented [2]), but its size is unknown. Only recordings in which patients and controls are recorded under the same conditions can answer this.\end{tcolorbox}
+\section{Discussion}\label{sec:discussion}
+\subsection{Significance of the results}
+Technically, the project shows that a carefully controlled pipeline - frozen pretrained speech models or even 40 simple acoustic measurements, with a simple classifier - separates people with Parkinson's disease from age-comparable controls in this corpus almost perfectly, and that this result is stable across encoders, classifiers, feature subsets, tasks and hyperparameters. Methodologically, the project shows how to evaluate such a system honestly: speaker-disjoint nested cross-validation, a frozen plan, automatic integrity checks and an independent audit. Scientifically, the most important result is negative: in this dataset the diagnosis cannot be separated from the recording session, so near-perfect scores are not evidence that speech reveals the disease.
+
+\subsection{Risks}
+\begin{itemize}\item \textbf{Shortcut learning.} The models may learn the session, not the disease (section~\ref{sec:confound}); this is the main risk.
+\item \textbf{Small sample.} With 47 people, one person changes a speaker-level metric by about two percentage points, and fold-level results (9 or 10 people per fold) are very noisy.
+\item \textbf{Selection optimism.} Choosing the best of 56 configurations after seeing their scores would overstate performance; we therefore present the baseline and the full distribution rather than the best configuration.
+\item \textbf{Label and data quality.} Clinical diagnosis itself is not perfect [3], four controls have documented recording problems, and the corpus has no information on disease stage or medication.
+\end{itemize}
+\subsection{Sensitivity of the results to input changes}
+Within the dataset, the results hardly change when the representation, classifier, feature subset, statistic, task or hyperparameters change (section~\ref{sec:sensitivity}). But the session-recognition experiment shows that the inputs carry strong recording-condition information. We could not test the most important input change, a different recording setup (microphone, room, device or language), because the corpus does not contain it. Results on new recordings could therefore be much lower.
+
+\subsection{Limitations}
+\begin{itemize}\item One corpus, one language (Italian), one site and 47 people.
+\item Recording session and diagnosis are perfectly aligned; part of the patient audio was recorded at a different sample rate.
+\item Sex balance differs between the groups (64\% of patients and 45\% of controls are men), and the patients' ages are more spread out (40 to 80) than the controls' (60 to 77).
+\item No trained neural network: the deep models are used only as frozen feature extractors.
+\item The FWL adjustment could not be run because it had not been defined in advance.
+\end{itemize}
+\section{Future directions}\label{sec:future}
+\begin{enumerate}\item \textbf{Test on independent data without retraining.} Freeze the current pipeline and apply it to a different corpus, for example NeuroVoz, a Castilian Spanish Parkinson's speech corpus with about 110 speakers [19]. Decide the success criterion in advance (for example an AUROC whose lower 95\% bound is above 0.80).
+\item \textbf{Collect or use recordings with matched conditions.} Patients and controls should be recorded in the same sessions, rooms and devices, interleaved in time, with clinical information (disease stage, medication). A classifier that sees only the background must then perform at chance level; only after that check is a disease score meaningful.
+\item \textbf{Remove recording-condition cues during training.} Options include trimming or masking pauses, matching the background noise across recordings, and training with a penalty for predicting the recording session.
+\item \textbf{Task-aware scoring and quality control.} Weight or select tasks using inner validation only (sustained vowels are the least reliable), and add a recording-quality check that abstains on poor recordings.
+\item \textbf{Trained deep models once the data allow it.} With a larger, matched dataset, fine-tuning the upper layers of the speech encoders or training a small network on spectrograms becomes realistic.
+\end{enumerate}
+\section{Conclusion}\label{sec:conclusion}
+We built and evaluated, under one frozen and audited plan, 56 ways of detecting Parkinson's disease from speech, combining hand-crafted acoustic features and three frozen pretrained speech models with four classifiers. Tested always on unseen people, almost all of them separate the 25 patients from the 22 controls in the corpus nearly perfectly; the WavLM-plus-logistic-regression baseline reaches AUROC 0.995 with one missed patient, and no extension improves on it beyond the uncertainty. The detailed analyses explain why: the information is highly redundant, the simplest acoustic measurements are enough, the models rely heavily on the quiet background of the recordings, and the recording sessions - which coincide with the diagnosis - can be recognised from the same features. We therefore met our technical objectives and our objective of honest measurement, but the central question - does the model hear the disease? - cannot be answered with this dataset. The next step is a frozen test on independent recordings in which patients and controls share the same recording conditions.
+
+\appendix
+\section{Full results of the 56 configurations}\label{sec:app-full}
+\begin{center}\small\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{>{\raggedright\arraybackslash}p{4.40cm}>{\raggedright\arraybackslash}p{2.60cm}>{\raggedleft\arraybackslash}p{1.75cm}>{\raggedleft\arraybackslash}p{1.75cm}>{\raggedleft\arraybackslash}p{1.75cm}>{\raggedleft\arraybackslash}p{1.75cm}}
+\caption{All configurations, part 1: threshold-free metrics, pooled over the 47 speakers (AUROC with its 95\% bootstrap interval; last column = recording-level AUROC).}\\
+\toprule
+\textbf{\hspace{0pt}Representation} & \textbf{\hspace{0pt}Classifier} & \textbf{\hspace{0pt}AUPRC} & \textbf{\hspace{0pt}AUROC} & \textbf{\hspace{0pt}AUROC 95\% CI} & \textbf{\hspace{0pt}Recording AUROC}\\\midrule\endfirsthead
+\toprule
+\textbf{\hspace{0pt}Representation} & \textbf{\hspace{0pt}Classifier} & \textbf{\hspace{0pt}AUPRC} & \textbf{\hspace{0pt}AUROC} & \textbf{\hspace{0pt}AUROC 95\% CI} & \textbf{\hspace{0pt}Recording AUROC}\\\midrule\endhead
+\bottomrule\endfoot
+\hspace{0pt}Acoustic (40 features) & \hspace{0pt}Logistic regression & \hspace{0pt}1.000 & \hspace{0pt}1.000 & \hspace{0pt}1.000-1.000 & \hspace{0pt}0.969\\
+\hspace{0pt}Acoustic (40 features) & \hspace{0pt}Linear SVM & \hspace{0pt}0.998 & \hspace{0pt}0.998 & \hspace{0pt}0.989-1.000 & \hspace{0pt}0.964\\
+\hspace{0pt}Acoustic (40 features) & \hspace{0pt}RBF SVM & \hspace{0pt}0.991 & \hspace{0pt}0.989 & \hspace{0pt}0.964-1.000 & \hspace{0pt}0.977\\
+\hspace{0pt}Acoustic (40 features) & \hspace{0pt}XGBoost & \hspace{0pt}1.000 & \hspace{0pt}1.000 & \hspace{0pt}1.000-1.000 & \hspace{0pt}0.975\\
+\hspace{0pt}Acoustic (40 features) /\allowbreak{} forward & \hspace{0pt}Logistic regression & \hspace{0pt}0.997 & \hspace{0pt}0.996 & \hspace{0pt}0.983-1.000 & \hspace{0pt}0.954\\
+\hspace{0pt}Acoustic (40 features) /\allowbreak{} forward & \hspace{0pt}Linear SVM & \hspace{0pt}0.997 & \hspace{0pt}0.996 & \hspace{0pt}0.983-1.000 & \hspace{0pt}0.955\\
+\hspace{0pt}Acoustic (40 features) /\allowbreak{} forward & \hspace{0pt}RBF SVM & \hspace{0pt}0.997 & \hspace{0pt}0.996 & \hspace{0pt}0.984-1.000 & \hspace{0pt}0.972\\
+\hspace{0pt}Acoustic (40 features) /\allowbreak{} forward & \hspace{0pt}XGBoost & \hspace{0pt}0.997 & \hspace{0pt}0.996 & \hspace{0pt}0.983-1.000 & \hspace{0pt}0.950\\
+\hspace{0pt}Acoustic (40 features) /\allowbreak{} backward & \hspace{0pt}Logistic regression & \hspace{0pt}0.990 & \hspace{0pt}0.987 & \hspace{0pt}0.957-1.000 & \hspace{0pt}0.902\\
+\hspace{0pt}Acoustic (40 features) /\allowbreak{} backward & \hspace{0pt}Linear SVM & \hspace{0pt}0.994 & \hspace{0pt}0.993 & \hspace{0pt}0.971-1.000 & \hspace{0pt}0.909\\
+\hspace{0pt}Acoustic (40 features) /\allowbreak{} backward & \hspace{0pt}RBF SVM & \hspace{0pt}0.990 & \hspace{0pt}0.985 & \hspace{0pt}0.947-1.000 & \hspace{0pt}0.948\\
+\hspace{0pt}Acoustic (40 features) /\allowbreak{} backward & \hspace{0pt}XGBoost & \hspace{0pt}0.996 & \hspace{0pt}0.995 & \hspace{0pt}0.978-1.000 & \hspace{0pt}0.961\\
+\hspace{0pt}WavLM-large & \hspace{0pt}Logistic regression & \hspace{0pt}0.996 & \hspace{0pt}0.995 & \hspace{0pt}0.977-1.000 & \hspace{0pt}0.959\\
+\hspace{0pt}WavLM-large & \hspace{0pt}Linear SVM & \hspace{0pt}0.996 & \hspace{0pt}0.995 & \hspace{0pt}0.977-1.000 & \hspace{0pt}0.980\\
+\hspace{0pt}WavLM-large & \hspace{0pt}RBF SVM & \hspace{0pt}0.887 & \hspace{0pt}0.873 & \hspace{0pt}0.752-0.966 & \hspace{0pt}0.869\\
+\hspace{0pt}WavLM-large & \hspace{0pt}XGBoost & \hspace{0pt}0.998 & \hspace{0pt}0.998 & \hspace{0pt}0.989-1.000 & \hspace{0pt}0.974\\
+\hspace{0pt}wav2vec2-large-lv60 & \hspace{0pt}Logistic regression & \hspace{0pt}0.992 & \hspace{0pt}0.989 & \hspace{0pt}0.960-1.000 & \hspace{0pt}0.978\\
+\hspace{0pt}wav2vec2-large-lv60 & \hspace{0pt}Linear SVM & \hspace{0pt}0.986 & \hspace{0pt}0.975 & \hspace{0pt}0.913-1.000 & \hspace{0pt}0.969\\
+\hspace{0pt}wav2vec2-large-lv60 & \hspace{0pt}RBF SVM & \hspace{0pt}0.997 & \hspace{0pt}0.996 & \hspace{0pt}0.984-1.000 & \hspace{0pt}0.973\\
+\hspace{0pt}wav2vec2-large-lv60 & \hspace{0pt}XGBoost & \hspace{0pt}0.989 & \hspace{0pt}0.982 & \hspace{0pt}0.935-1.000 & \hspace{0pt}0.957\\
+\hspace{0pt}XLS-R 300M & \hspace{0pt}Logistic regression & \hspace{0pt}1.000 & \hspace{0pt}1.000 & \hspace{0pt}1.000-1.000 & \hspace{0pt}0.985\\
+\hspace{0pt}XLS-R 300M & \hspace{0pt}Linear SVM & \hspace{0pt}0.997 & \hspace{0pt}0.996 & \hspace{0pt}0.984-1.000 & \hspace{0pt}0.980\\
+\hspace{0pt}XLS-R 300M & \hspace{0pt}RBF SVM & \hspace{0pt}0.986 & \hspace{0pt}0.976 & \hspace{0pt}0.919-1.000 & \hspace{0pt}0.963\\
+\hspace{0pt}XLS-R 300M & \hspace{0pt}XGBoost & \hspace{0pt}0.997 & \hspace{0pt}0.996 & \hspace{0pt}0.983-1.000 & \hspace{0pt}0.978\\
+\hspace{0pt}WavLM +\allowbreak{} acoustic & \hspace{0pt}Logistic regression & \hspace{0pt}0.998 & \hspace{0pt}0.998 & \hspace{0pt}0.989-1.000 & \hspace{0pt}0.984\\
+\hspace{0pt}WavLM +\allowbreak{} acoustic & \hspace{0pt}Linear SVM & \hspace{0pt}0.991 & \hspace{0pt}0.987 & \hspace{0pt}0.955-1.000 & \hspace{0pt}0.978\\
+\hspace{0pt}WavLM +\allowbreak{} acoustic & \hspace{0pt}RBF SVM & \hspace{0pt}0.901 & \hspace{0pt}0.867 & \hspace{0pt}0.749-0.954 & \hspace{0pt}0.849\\
+\hspace{0pt}WavLM +\allowbreak{} acoustic & \hspace{0pt}XGBoost & \hspace{0pt}0.998 & \hspace{0pt}0.998 & \hspace{0pt}0.989-1.000 & \hspace{0pt}0.976\\
+\hspace{0pt}wav2vec2 +\allowbreak{} acoustic & \hspace{0pt}Logistic regression & \hspace{0pt}0.997 & \hspace{0pt}0.996 & \hspace{0pt}0.984-1.000 & \hspace{0pt}0.981\\
+\hspace{0pt}wav2vec2 +\allowbreak{} acoustic & \hspace{0pt}Linear SVM & \hspace{0pt}0.989 & \hspace{0pt}0.982 & \hspace{0pt}0.935-1.000 & \hspace{0pt}0.972\\
+\hspace{0pt}wav2vec2 +\allowbreak{} acoustic & \hspace{0pt}RBF SVM & \hspace{0pt}0.956 & \hspace{0pt}0.962 & \hspace{0pt}0.891-1.000 & \hspace{0pt}0.929\\
+\hspace{0pt}wav2vec2 +\allowbreak{} acoustic & \hspace{0pt}XGBoost & \hspace{0pt}0.998 & \hspace{0pt}0.998 & \hspace{0pt}0.989-1.000 & \hspace{0pt}0.977\\
+\hspace{0pt}XLS-R +\allowbreak{} acoustic & \hspace{0pt}Logistic regression & \hspace{0pt}1.000 & \hspace{0pt}1.000 & \hspace{0pt}1.000-1.000 & \hspace{0pt}0.981\\
+\hspace{0pt}XLS-R +\allowbreak{} acoustic & \hspace{0pt}Linear SVM & \hspace{0pt}1.000 & \hspace{0pt}1.000 & \hspace{0pt}1.000-1.000 & \hspace{0pt}0.981\\
+\hspace{0pt}XLS-R +\allowbreak{} acoustic & \hspace{0pt}RBF SVM & \hspace{0pt}0.985 & \hspace{0pt}0.973 & \hspace{0pt}0.905-1.000 & \hspace{0pt}0.963\\
+\hspace{0pt}XLS-R +\allowbreak{} acoustic & \hspace{0pt}XGBoost & \hspace{0pt}0.998 & \hspace{0pt}0.998 & \hspace{0pt}0.989-1.000 & \hspace{0pt}0.978\\
+\hspace{0pt}WavLM +\allowbreak{} wav2vec2 & \hspace{0pt}Logistic regression & \hspace{0pt}0.996 & \hspace{0pt}0.995 & \hspace{0pt}0.977-1.000 & \hspace{0pt}0.975\\
+\hspace{0pt}WavLM +\allowbreak{} wav2vec2 & \hspace{0pt}Linear SVM & \hspace{0pt}0.992 & \hspace{0pt}0.989 & \hspace{0pt}0.960-1.000 & \hspace{0pt}0.978\\
+\hspace{0pt}WavLM +\allowbreak{} wav2vec2 & \hspace{0pt}RBF SVM & \hspace{0pt}0.986 & \hspace{0pt}0.975 & \hspace{0pt}0.912-1.000 & \hspace{0pt}0.958\\
+\hspace{0pt}WavLM +\allowbreak{} wav2vec2 & \hspace{0pt}XGBoost & \hspace{0pt}0.994 & \hspace{0pt}0.993 & \hspace{0pt}0.971-1.000 & \hspace{0pt}0.968\\
+\hspace{0pt}WavLM +\allowbreak{} XLS-R & \hspace{0pt}Logistic regression & \hspace{0pt}0.997 & \hspace{0pt}0.996 & \hspace{0pt}0.983-1.000 & \hspace{0pt}0.979\\
+\hspace{0pt}WavLM +\allowbreak{} XLS-R & \hspace{0pt}Linear SVM & \hspace{0pt}0.998 & \hspace{0pt}0.998 & \hspace{0pt}0.989-1.000 & \hspace{0pt}0.982\\
+\hspace{0pt}WavLM +\allowbreak{} XLS-R & \hspace{0pt}RBF SVM & \hspace{0pt}0.986 & \hspace{0pt}0.975 & \hspace{0pt}0.912-1.000 & \hspace{0pt}0.955\\
+\hspace{0pt}WavLM +\allowbreak{} XLS-R & \hspace{0pt}XGBoost & \hspace{0pt}0.993 & \hspace{0pt}0.991 & \hspace{0pt}0.964-1.000 & \hspace{0pt}0.976\\
+\hspace{0pt}wav2vec2 +\allowbreak{} XLS-R & \hspace{0pt}Logistic regression & \hspace{0pt}1.000 & \hspace{0pt}1.000 & \hspace{0pt}1.000-1.000 & \hspace{0pt}0.981\\
+\hspace{0pt}wav2vec2 +\allowbreak{} XLS-R & \hspace{0pt}Linear SVM & \hspace{0pt}0.992 & \hspace{0pt}0.989 & \hspace{0pt}0.961-1.000 & \hspace{0pt}0.979\\
+\hspace{0pt}wav2vec2 +\allowbreak{} XLS-R & \hspace{0pt}RBF SVM & \hspace{0pt}0.986 & \hspace{0pt}0.975 & \hspace{0pt}0.912-1.000 & \hspace{0pt}0.964\\
+\hspace{0pt}wav2vec2 +\allowbreak{} XLS-R & \hspace{0pt}XGBoost & \hspace{0pt}0.998 & \hspace{0pt}0.998 & \hspace{0pt}0.989-1.000 & \hspace{0pt}0.981\\
+\hspace{0pt}All three encoders & \hspace{0pt}Logistic regression & \hspace{0pt}0.997 & \hspace{0pt}0.996 & \hspace{0pt}0.983-1.000 & \hspace{0pt}0.979\\
+\hspace{0pt}All three encoders & \hspace{0pt}Linear SVM & \hspace{0pt}0.997 & \hspace{0pt}0.996 & \hspace{0pt}0.984-1.000 & \hspace{0pt}0.981\\
+\hspace{0pt}All three encoders & \hspace{0pt}RBF SVM & \hspace{0pt}0.984 & \hspace{0pt}0.971 & \hspace{0pt}0.901-1.000 & \hspace{0pt}0.956\\
+\hspace{0pt}All three encoders & \hspace{0pt}XGBoost & \hspace{0pt}0.993 & \hspace{0pt}0.991 & \hspace{0pt}0.964-1.000 & \hspace{0pt}0.973\\
+\hspace{0pt}All three encoders +\allowbreak{} acoustic & \hspace{0pt}Logistic regression & \hspace{0pt}0.997 & \hspace{0pt}0.996 & \hspace{0pt}0.984-1.000 & \hspace{0pt}0.979\\
+\hspace{0pt}All three encoders +\allowbreak{} acoustic & \hspace{0pt}Linear SVM & \hspace{0pt}0.998 & \hspace{0pt}0.998 & \hspace{0pt}0.989-1.000 & \hspace{0pt}0.980\\
+\hspace{0pt}All three encoders +\allowbreak{} acoustic & \hspace{0pt}RBF SVM & \hspace{0pt}0.986 & \hspace{0pt}0.975 & \hspace{0pt}0.912-1.000 & \hspace{0pt}0.967\\
+\hspace{0pt}All three encoders +\allowbreak{} acoustic & \hspace{0pt}XGBoost & \hspace{0pt}0.998 & \hspace{0pt}0.998 & \hspace{0pt}0.989-1.000 & \hspace{0pt}0.980\\
+\end{longtable}\end{center}
+\begin{center}\small\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{>{\raggedright\arraybackslash}p{3.08cm}>{\raggedright\arraybackslash}p{1.88cm}>{\raggedright\arraybackslash}p{1.97cm}>{\raggedright\arraybackslash}p{1.97cm}>{\raggedleft\arraybackslash}p{1.55cm}>{\raggedleft\arraybackslash}p{1.55cm}>{\raggedleft\arraybackslash}p{1.55cm}}
+\caption{All configurations, part 2: metrics at the fixed threshold 0.5 (sensitivity and specificity with exact 95\% intervals; FN/FP = missed patients / false alarms).}\\
+\toprule
+\textbf{\hspace{0pt}Representation} & \textbf{\hspace{0pt}Classifier} & \textbf{\hspace{0pt}Sensitivity} & \textbf{\hspace{0pt}Specificity} & \textbf{\hspace{0pt}F1} & \textbf{\hspace{0pt}Bal. acc.} & \textbf{\hspace{0pt}FN/\allowbreak{}FP}\\\midrule\endfirsthead
+\toprule
+\textbf{\hspace{0pt}Representation} & \textbf{\hspace{0pt}Classifier} & \textbf{\hspace{0pt}Sensitivity} & \textbf{\hspace{0pt}Specificity} & \textbf{\hspace{0pt}F1} & \textbf{\hspace{0pt}Bal. acc.} & \textbf{\hspace{0pt}FN/\allowbreak{}FP}\\\midrule\endhead
+\bottomrule\endfoot
+\hspace{0pt}Acoustic (40 features) & \hspace{0pt}Logistic regression & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}1.00 (0.85-1.00) & \hspace{0pt}0.980 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}Acoustic (40 features) & \hspace{0pt}Linear SVM & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}1.00 (0.85-1.00) & \hspace{0pt}0.980 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}Acoustic (40 features) & \hspace{0pt}RBF SVM & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}0.86 (0.65-0.97) & \hspace{0pt}0.923 & \hspace{0pt}0.912 & \hspace{0pt}1/\allowbreak{}3\\
+\hspace{0pt}Acoustic (40 features) & \hspace{0pt}XGBoost & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}1.00 (0.85-1.00) & \hspace{0pt}0.980 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}Acoustic (40 features) /\allowbreak{} forward & \hspace{0pt}Logistic regression & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}1.00 (0.85-1.00) & \hspace{0pt}0.980 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}Acoustic (40 features) /\allowbreak{} forward & \hspace{0pt}Linear SVM & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}1.00 (0.85-1.00) & \hspace{0pt}0.980 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}Acoustic (40 features) /\allowbreak{} forward & \hspace{0pt}RBF SVM & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}0.95 (0.77-1.00) & \hspace{0pt}0.960 & \hspace{0pt}0.957 & \hspace{0pt}1/\allowbreak{}1\\
+\hspace{0pt}Acoustic (40 features) /\allowbreak{} forward & \hspace{0pt}XGBoost & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}1.00 (0.85-1.00) & \hspace{0pt}0.980 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}Acoustic (40 features) /\allowbreak{} backward & \hspace{0pt}Logistic regression & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}0.91 (0.71-0.99) & \hspace{0pt}0.941 & \hspace{0pt}0.935 & \hspace{0pt}1/\allowbreak{}2\\
+\hspace{0pt}Acoustic (40 features) /\allowbreak{} backward & \hspace{0pt}Linear SVM & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}1.00 (0.85-1.00) & \hspace{0pt}0.980 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}Acoustic (40 features) /\allowbreak{} backward & \hspace{0pt}RBF SVM & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}0.86 (0.65-0.97) & \hspace{0pt}0.923 & \hspace{0pt}0.912 & \hspace{0pt}1/\allowbreak{}3\\
+\hspace{0pt}Acoustic (40 features) /\allowbreak{} backward & \hspace{0pt}XGBoost & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}1.00 (0.85-1.00) & \hspace{0pt}0.980 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}WavLM-large & \hspace{0pt}Logistic regression & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}1.00 (0.85-1.00) & \hspace{0pt}0.980 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}WavLM-large & \hspace{0pt}Linear SVM & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}1.00 (0.85-1.00) & \hspace{0pt}0.980 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}WavLM-large & \hspace{0pt}RBF SVM & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}0.77 (0.55-0.92) & \hspace{0pt}0.889 & \hspace{0pt}0.866 & \hspace{0pt}1/\allowbreak{}5\\
+\hspace{0pt}WavLM-large & \hspace{0pt}XGBoost & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}0.95 (0.77-1.00) & \hspace{0pt}0.960 & \hspace{0pt}0.957 & \hspace{0pt}1/\allowbreak{}1\\
+\hspace{0pt}wav2vec2-large-lv60 & \hspace{0pt}Logistic regression & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}1.00 (0.85-1.00) & \hspace{0pt}0.980 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}wav2vec2-large-lv60 & \hspace{0pt}Linear SVM & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}1.00 (0.85-1.00) & \hspace{0pt}0.980 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}wav2vec2-large-lv60 & \hspace{0pt}RBF SVM & \hspace{0pt}1.00 (0.86-1.00) & \hspace{0pt}0.91 (0.71-0.99) & \hspace{0pt}0.962 & \hspace{0pt}0.955 & \hspace{0pt}0/\allowbreak{}2\\
+\hspace{0pt}wav2vec2-large-lv60 & \hspace{0pt}XGBoost & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}1.00 (0.85-1.00) & \hspace{0pt}0.980 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}XLS-R 300M & \hspace{0pt}Logistic regression & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}1.00 (0.85-1.00) & \hspace{0pt}0.980 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}XLS-R 300M & \hspace{0pt}Linear SVM & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}1.00 (0.85-1.00) & \hspace{0pt}0.980 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}XLS-R 300M & \hspace{0pt}RBF SVM & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}0.91 (0.71-0.99) & \hspace{0pt}0.941 & \hspace{0pt}0.935 & \hspace{0pt}1/\allowbreak{}2\\
+\hspace{0pt}XLS-R 300M & \hspace{0pt}XGBoost & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}1.00 (0.85-1.00) & \hspace{0pt}0.980 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}WavLM +\allowbreak{} acoustic & \hspace{0pt}Logistic regression & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}1.00 (0.85-1.00) & \hspace{0pt}0.980 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}WavLM +\allowbreak{} acoustic & \hspace{0pt}Linear SVM & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}1.00 (0.85-1.00) & \hspace{0pt}0.980 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}WavLM +\allowbreak{} acoustic & \hspace{0pt}RBF SVM & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}0.59 (0.36-0.79) & \hspace{0pt}0.828 & \hspace{0pt}0.775 & \hspace{0pt}1/\allowbreak{}9\\
+\hspace{0pt}WavLM +\allowbreak{} acoustic & \hspace{0pt}XGBoost & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}1.00 (0.85-1.00) & \hspace{0pt}0.980 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}wav2vec2 +\allowbreak{} acoustic & \hspace{0pt}Logistic regression & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}1.00 (0.85-1.00) & \hspace{0pt}0.980 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}wav2vec2 +\allowbreak{} acoustic & \hspace{0pt}Linear SVM & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}1.00 (0.85-1.00) & \hspace{0pt}0.980 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}wav2vec2 +\allowbreak{} acoustic & \hspace{0pt}RBF SVM & \hspace{0pt}1.00 (0.86-1.00) & \hspace{0pt}0.73 (0.50-0.89) & \hspace{0pt}0.893 & \hspace{0pt}0.864 & \hspace{0pt}0/\allowbreak{}6\\
+\hspace{0pt}wav2vec2 +\allowbreak{} acoustic & \hspace{0pt}XGBoost & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}1.00 (0.85-1.00) & \hspace{0pt}0.980 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}XLS-R +\allowbreak{} acoustic & \hspace{0pt}Logistic regression & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}1.00 (0.85-1.00) & \hspace{0pt}0.980 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}XLS-R +\allowbreak{} acoustic & \hspace{0pt}Linear SVM & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}1.00 (0.85-1.00) & \hspace{0pt}0.980 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}XLS-R +\allowbreak{} acoustic & \hspace{0pt}RBF SVM & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}0.91 (0.71-0.99) & \hspace{0pt}0.941 & \hspace{0pt}0.935 & \hspace{0pt}1/\allowbreak{}2\\
+\hspace{0pt}XLS-R +\allowbreak{} acoustic & \hspace{0pt}XGBoost & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}1.00 (0.85-1.00) & \hspace{0pt}0.980 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}WavLM +\allowbreak{} wav2vec2 & \hspace{0pt}Logistic regression & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}1.00 (0.85-1.00) & \hspace{0pt}0.980 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}WavLM +\allowbreak{} wav2vec2 & \hspace{0pt}Linear SVM & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}1.00 (0.85-1.00) & \hspace{0pt}0.980 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}WavLM +\allowbreak{} wav2vec2 & \hspace{0pt}RBF SVM & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}0.95 (0.77-1.00) & \hspace{0pt}0.960 & \hspace{0pt}0.957 & \hspace{0pt}1/\allowbreak{}1\\
+\hspace{0pt}WavLM +\allowbreak{} wav2vec2 & \hspace{0pt}XGBoost & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}1.00 (0.85-1.00) & \hspace{0pt}0.980 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}WavLM +\allowbreak{} XLS-R & \hspace{0pt}Logistic regression & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}1.00 (0.85-1.00) & \hspace{0pt}0.980 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}WavLM +\allowbreak{} XLS-R & \hspace{0pt}Linear SVM & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}1.00 (0.85-1.00) & \hspace{0pt}0.980 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}WavLM +\allowbreak{} XLS-R & \hspace{0pt}RBF SVM & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}0.91 (0.71-0.99) & \hspace{0pt}0.941 & \hspace{0pt}0.935 & \hspace{0pt}1/\allowbreak{}2\\
+\hspace{0pt}WavLM +\allowbreak{} XLS-R & \hspace{0pt}XGBoost & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}1.00 (0.85-1.00) & \hspace{0pt}0.980 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}wav2vec2 +\allowbreak{} XLS-R & \hspace{0pt}Logistic regression & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}1.00 (0.85-1.00) & \hspace{0pt}0.980 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}wav2vec2 +\allowbreak{} XLS-R & \hspace{0pt}Linear SVM & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}1.00 (0.85-1.00) & \hspace{0pt}0.980 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}wav2vec2 +\allowbreak{} XLS-R & \hspace{0pt}RBF SVM & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}0.95 (0.77-1.00) & \hspace{0pt}0.960 & \hspace{0pt}0.957 & \hspace{0pt}1/\allowbreak{}1\\
+\hspace{0pt}wav2vec2 +\allowbreak{} XLS-R & \hspace{0pt}XGBoost & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}1.00 (0.85-1.00) & \hspace{0pt}0.980 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}All three encoders & \hspace{0pt}Logistic regression & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}1.00 (0.85-1.00) & \hspace{0pt}0.980 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}All three encoders & \hspace{0pt}Linear SVM & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}1.00 (0.85-1.00) & \hspace{0pt}0.980 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}All three encoders & \hspace{0pt}RBF SVM & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}0.91 (0.71-0.99) & \hspace{0pt}0.941 & \hspace{0pt}0.935 & \hspace{0pt}1/\allowbreak{}2\\
+\hspace{0pt}All three encoders & \hspace{0pt}XGBoost & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}1.00 (0.85-1.00) & \hspace{0pt}0.980 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}All three encoders +\allowbreak{} acoustic & \hspace{0pt}Logistic regression & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}1.00 (0.85-1.00) & \hspace{0pt}0.980 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}All three encoders +\allowbreak{} acoustic & \hspace{0pt}Linear SVM & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}1.00 (0.85-1.00) & \hspace{0pt}0.980 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}All three encoders +\allowbreak{} acoustic & \hspace{0pt}RBF SVM & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}0.91 (0.71-0.99) & \hspace{0pt}0.941 & \hspace{0pt}0.935 & \hspace{0pt}1/\allowbreak{}2\\
+\hspace{0pt}All three encoders +\allowbreak{} acoustic & \hspace{0pt}XGBoost & \hspace{0pt}0.96 (0.80-1.00) & \hspace{0pt}1.00 (0.85-1.00) & \hspace{0pt}0.980 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\end{longtable}\end{center}
+\section{The 40 acoustic features one by one}\label{sec:app-features}
+\begin{center}\small\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{>{\raggedright\arraybackslash}p{4.20cm}>{\raggedright\arraybackslash}p{2.55cm}>{\raggedleft\arraybackslash}p{2.55cm}>{\raggedleft\arraybackslash}p{2.55cm}>{\raggedleft\arraybackslash}p{2.55cm}}
+\caption{Speaker-level statistics of every acoustic feature, part 1: group means and effect size (Cohen's d = standardised mean difference, PD minus controls). Names are explained in section~\ref{sec:dictionary}.}\\
+\toprule
+\textbf{\hspace{0pt}Feature} & \textbf{\hspace{0pt}Direction} & \textbf{\hspace{0pt}Mean PD} & \textbf{\hspace{0pt}Mean controls} & \textbf{\hspace{0pt}Cohen d}\\\midrule\endfirsthead
+\toprule
+\textbf{\hspace{0pt}Feature} & \textbf{\hspace{0pt}Direction} & \textbf{\hspace{0pt}Mean PD} & \textbf{\hspace{0pt}Mean controls} & \textbf{\hspace{0pt}Cohen d}\\\midrule\endhead
+\bottomrule\endfoot
+\hspace{0pt}centroid\_\allowbreak{}hz\_\allowbreak{}p90 & \hspace{0pt}PD lower & \hspace{0pt}615.997 & \hspace{0pt}1197.133 & \hspace{0pt}-2.19\\
+\hspace{0pt}centroid\_\allowbreak{}hz\_\allowbreak{}std & \hspace{0pt}PD lower & \hspace{0pt}265.736 & \hspace{0pt}506.689 & \hspace{0pt}-1.56\\
+\hspace{0pt}zcr\_\allowbreak{}p90 & \hspace{0pt}PD lower & \hspace{0pt}0.117 & \hspace{0pt}0.199 & \hspace{0pt}-2.51\\
+\hspace{0pt}zcr\_\allowbreak{}mean & \hspace{0pt}PD lower & \hspace{0pt}0.066 & \hspace{0pt}0.111 & \hspace{0pt}-2.74\\
+\hspace{0pt}centroid\_\allowbreak{}hz\_\allowbreak{}mean & \hspace{0pt}PD lower & \hspace{0pt}405.866 & \hspace{0pt}714.395 & \hspace{0pt}-2.76\\
+\hspace{0pt}zcr\_\allowbreak{}p10 & \hspace{0pt}PD lower & \hspace{0pt}0.030 & \hspace{0pt}0.058 & \hspace{0pt}-2.31\\
+\hspace{0pt}zcr\_\allowbreak{}std & \hspace{0pt}PD lower & \hspace{0pt}0.045 & \hspace{0pt}0.076 & \hspace{0pt}-2.06\\
+\hspace{0pt}rolloff85\_\allowbreak{}hz\_\allowbreak{}std & \hspace{0pt}PD lower & \hspace{0pt}529.889 & \hspace{0pt}894.172 & \hspace{0pt}-1.44\\
+\hspace{0pt}centroid\_\allowbreak{}hz\_\allowbreak{}p10 & \hspace{0pt}PD lower & \hspace{0pt}225.041 & \hspace{0pt}421.568 & \hspace{0pt}-2.14\\
+\hspace{0pt}rolloff85\_\allowbreak{}hz\_\allowbreak{}mean & \hspace{0pt}PD lower & \hspace{0pt}637.116 & \hspace{0pt}1038.761 & \hspace{0pt}-2.08\\
+\hspace{0pt}rolloff85\_\allowbreak{}hz\_\allowbreak{}p90 & \hspace{0pt}PD lower & \hspace{0pt}1132.149 & \hspace{0pt}2016.296 & \hspace{0pt}-1.75\\
+\hspace{0pt}rolloff85\_\allowbreak{}hz\_\allowbreak{}p10 & \hspace{0pt}PD lower & \hspace{0pt}300.355 & \hspace{0pt}517.465 & \hspace{0pt}-1.79\\
+\hspace{0pt}band0\_\allowbreak{}log\_\allowbreak{}p90 & \hspace{0pt}PD higher & \hspace{0pt}2.077 & \hspace{0pt}1.605 & \hspace{0pt}0.94\\
+\hspace{0pt}band0\_\allowbreak{}log\_\allowbreak{}p10 & \hspace{0pt}PD higher & \hspace{0pt}-2.170 & \hspace{0pt}-2.102 & \hspace{0pt}-0.03\\
+\hspace{0pt}band0\_\allowbreak{}log\_\allowbreak{}mean & \hspace{0pt}PD higher & \hspace{0pt}0.426 & \hspace{0pt}-0.058 & \hspace{0pt}0.65\\
+\hspace{0pt}log\_\allowbreak{}energy\_\allowbreak{}db\_\allowbreak{}p90 & \hspace{0pt}PD higher & \hspace{0pt}-23.201 & \hspace{0pt}-26.289 & \hspace{0pt}0.62\\
+\hspace{0pt}log\_\allowbreak{}energy\_\allowbreak{}db\_\allowbreak{}p10 & \hspace{0pt}PD higher & \hspace{0pt}-62.285 & \hspace{0pt}-62.708 & \hspace{0pt}0.02\\
+\hspace{0pt}flatness\_\allowbreak{}std & \hspace{0pt}PD lower & \hspace{0pt}0.076 & \hspace{0pt}0.055 & \hspace{0pt}0.29\\
+\hspace{0pt}log\_\allowbreak{}energy\_\allowbreak{}db\_\allowbreak{}mean & \hspace{0pt}PD higher & \hspace{0pt}-38.960 & \hspace{0pt}-42.448 & \hspace{0pt}0.51\\
+\hspace{0pt}band0\_\allowbreak{}log\_\allowbreak{}std & \hspace{0pt}PD lower & \hspace{0pt}2.141 & \hspace{0pt}1.559 & \hspace{0pt}0.45\\
+\hspace{0pt}log\_\allowbreak{}energy\_\allowbreak{}db\_\allowbreak{}std & \hspace{0pt}PD lower & \hspace{0pt}18.972 & \hspace{0pt}15.062 & \hspace{0pt}0.40\\
+\hspace{0pt}flatness\_\allowbreak{}mean & \hspace{0pt}PD lower & \hspace{0pt}0.032 & \hspace{0pt}0.028 & \hspace{0pt}0.14\\
+\hspace{0pt}band1\_\allowbreak{}log\_\allowbreak{}p10 & \hspace{0pt}PD higher & \hspace{0pt}-3.384 & \hspace{0pt}-2.652 & \hspace{0pt}-0.32\\
+\hspace{0pt}flatness\_\allowbreak{}p90 & \hspace{0pt}PD lower & \hspace{0pt}0.118 & \hspace{0pt}0.088 & \hspace{0pt}0.25\\
+\hspace{0pt}band4\_\allowbreak{}log\_\allowbreak{}p10 & \hspace{0pt}PD higher & \hspace{0pt}-4.764 & \hspace{0pt}-4.057 & \hspace{0pt}-0.35\\
+\hspace{0pt}flatness\_\allowbreak{}p10 & \hspace{0pt}PD lower & \hspace{0pt}0.000 & \hspace{0pt}0.001 & \hspace{0pt}-0.25\\
+\hspace{0pt}band2\_\allowbreak{}log\_\allowbreak{}p10 & \hspace{0pt}PD higher & \hspace{0pt}-4.160 & \hspace{0pt}-3.393 & \hspace{0pt}-0.35\\
+\hspace{0pt}band3\_\allowbreak{}log\_\allowbreak{}p10 & \hspace{0pt}PD higher & \hspace{0pt}-4.437 & \hspace{0pt}-3.593 & \hspace{0pt}-0.40\\
+\hspace{0pt}band2\_\allowbreak{}log\_\allowbreak{}p90 & \hspace{0pt}PD higher & \hspace{0pt}-0.026 & \hspace{0pt}-0.245 & \hspace{0pt}0.29\\
+\hspace{0pt}band1\_\allowbreak{}log\_\allowbreak{}std & \hspace{0pt}PD lower & \hspace{0pt}2.199 & \hspace{0pt}1.547 & \hspace{0pt}0.57\\
+\hspace{0pt}band4\_\allowbreak{}log\_\allowbreak{}std & \hspace{0pt}PD lower & \hspace{0pt}1.706 & \hspace{0pt}1.047 & \hspace{0pt}0.60\\
+\hspace{0pt}band4\_\allowbreak{}log\_\allowbreak{}p90 & \hspace{0pt}PD higher & \hspace{0pt}-1.330 & \hspace{0pt}-1.474 & \hspace{0pt}0.21\\
+\hspace{0pt}band4\_\allowbreak{}log\_\allowbreak{}mean & \hspace{0pt}PD higher & \hspace{0pt}-2.764 & \hspace{0pt}-2.838 & \hspace{0pt}0.10\\
+\hspace{0pt}band2\_\allowbreak{}log\_\allowbreak{}std & \hspace{0pt}PD higher & \hspace{0pt}1.981 & \hspace{0pt}1.260 & \hspace{0pt}0.66\\
+\hspace{0pt}band3\_\allowbreak{}log\_\allowbreak{}p90 & \hspace{0pt}PD higher & \hspace{0pt}-0.610 & \hspace{0pt}-0.620 & \hspace{0pt}0.01\\
+\hspace{0pt}band1\_\allowbreak{}log\_\allowbreak{}p90 & \hspace{0pt}PD higher & \hspace{0pt}1.175 & \hspace{0pt}1.142 & \hspace{0pt}0.05\\
+\hspace{0pt}band1\_\allowbreak{}log\_\allowbreak{}mean & \hspace{0pt}PD lower & \hspace{0pt}-0.778 & \hspace{0pt}-0.636 & \hspace{0pt}-0.17\\
+\hspace{0pt}band2\_\allowbreak{}log\_\allowbreak{}mean & \hspace{0pt}PD higher & \hspace{0pt}-1.808 & \hspace{0pt}-1.803 & \hspace{0pt}-0.01\\
+\hspace{0pt}band3\_\allowbreak{}log\_\allowbreak{}std & \hspace{0pt}PD lower & \hspace{0pt}1.867 & \hspace{0pt}1.180 & \hspace{0pt}0.64\\
+\hspace{0pt}band3\_\allowbreak{}log\_\allowbreak{}mean & \hspace{0pt}PD higher & \hspace{0pt}-2.227 & \hspace{0pt}-2.120 & \hspace{0pt}-0.13\\
+\end{longtable}\end{center}
+\begin{center}\small\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{>{\raggedright\arraybackslash}p{4.20cm}>{\raggedleft\arraybackslash}p{2.55cm}>{\raggedleft\arraybackslash}p{2.55cm}>{\raggedleft\arraybackslash}p{2.55cm}>{\raggedleft\arraybackslash}p{2.55cm}}
+\caption{Speaker-level statistics of every acoustic feature, part 2: separation (AUROC above 0.5 = higher in PD; also on 16-kHz recordings only) and the share of variance explained by the recording date within each group.}\\
+\toprule
+\textbf{\hspace{0pt}Feature} & \textbf{\hspace{0pt}AUROC} & \textbf{\hspace{0pt}AUROC (16 kHz only)} & \textbf{\hspace{0pt}Date effect within PD} & \textbf{\hspace{0pt}Date effect within controls}\\\midrule\endfirsthead
+\toprule
+\textbf{\hspace{0pt}Feature} & \textbf{\hspace{0pt}AUROC} & \textbf{\hspace{0pt}AUROC (16 kHz only)} & \textbf{\hspace{0pt}Date effect within PD} & \textbf{\hspace{0pt}Date effect within controls}\\\midrule\endhead
+\bottomrule\endfoot
+\hspace{0pt}centroid\_\allowbreak{}hz\_\allowbreak{}p90 & \hspace{0pt}0.036 & \hspace{0pt}0.008 & \hspace{0pt}0.43 & \hspace{0pt}0.87\\
+\hspace{0pt}centroid\_\allowbreak{}hz\_\allowbreak{}std & \hspace{0pt}0.036 & \hspace{0pt}0.013 & \hspace{0pt}0.38 & \hspace{0pt}0.95\\
+\hspace{0pt}zcr\_\allowbreak{}p90 & \hspace{0pt}0.044 & \hspace{0pt}0.053 & \hspace{0pt}0.37 & \hspace{0pt}0.32\\
+\hspace{0pt}zcr\_\allowbreak{}mean & \hspace{0pt}0.044 & \hspace{0pt}0.025 & \hspace{0pt}0.34 & \hspace{0pt}0.37\\
+\hspace{0pt}centroid\_\allowbreak{}hz\_\allowbreak{}mean & \hspace{0pt}0.049 & \hspace{0pt}0.010 & \hspace{0pt}0.38 & \hspace{0pt}0.22\\
+\hspace{0pt}zcr\_\allowbreak{}p10 & \hspace{0pt}0.058 & \hspace{0pt}0.028 & \hspace{0pt}0.43 & \hspace{0pt}0.50\\
+\hspace{0pt}zcr\_\allowbreak{}std & \hspace{0pt}0.065 & \hspace{0pt}0.081 & \hspace{0pt}0.13 & \hspace{0pt}0.63\\
+\hspace{0pt}rolloff85\_\allowbreak{}hz\_\allowbreak{}std & \hspace{0pt}0.067 & \hspace{0pt}0.038 & \hspace{0pt}0.33 & \hspace{0pt}0.91\\
+\hspace{0pt}centroid\_\allowbreak{}hz\_\allowbreak{}p10 & \hspace{0pt}0.071 & \hspace{0pt}0.028 & \hspace{0pt}0.45 & \hspace{0pt}0.38\\
+\hspace{0pt}rolloff85\_\allowbreak{}hz\_\allowbreak{}mean & \hspace{0pt}0.075 & \hspace{0pt}0.058 & \hspace{0pt}0.40 & \hspace{0pt}0.31\\
+\hspace{0pt}rolloff85\_\allowbreak{}hz\_\allowbreak{}p90 & \hspace{0pt}0.080 & \hspace{0pt}0.081 & \hspace{0pt}0.51 & \hspace{0pt}0.77\\
+\hspace{0pt}rolloff85\_\allowbreak{}hz\_\allowbreak{}p10 & \hspace{0pt}0.095 & \hspace{0pt}0.069 & \hspace{0pt}0.43 & \hspace{0pt}0.34\\
+\hspace{0pt}band0\_\allowbreak{}log\_\allowbreak{}p90 & \hspace{0pt}0.758 & \hspace{0pt}0.798 & \hspace{0pt}0.24 & \hspace{0pt}0.61\\
+\hspace{0pt}band0\_\allowbreak{}log\_\allowbreak{}p10 & \hspace{0pt}0.691 & \hspace{0pt}0.960 & \hspace{0pt}0.83 & \hspace{0pt}0.15\\
+\hspace{0pt}band0\_\allowbreak{}log\_\allowbreak{}mean & \hspace{0pt}0.687 & \hspace{0pt}0.902 & \hspace{0pt}0.64 & \hspace{0pt}0.61\\
+\hspace{0pt}log\_\allowbreak{}energy\_\allowbreak{}db\_\allowbreak{}p90 & \hspace{0pt}0.680 & \hspace{0pt}0.699 & \hspace{0pt}0.12 & \hspace{0pt}0.53\\
+\hspace{0pt}log\_\allowbreak{}energy\_\allowbreak{}db\_\allowbreak{}p10 & \hspace{0pt}0.678 & \hspace{0pt}0.937 & \hspace{0pt}0.81 & \hspace{0pt}0.08\\
+\hspace{0pt}flatness\_\allowbreak{}std & \hspace{0pt}0.347 & \hspace{0pt}0.119 & \hspace{0pt}0.71 & \hspace{0pt}0.89\\
+\hspace{0pt}log\_\allowbreak{}energy\_\allowbreak{}db\_\allowbreak{}mean & \hspace{0pt}0.653 & \hspace{0pt}0.816 & \hspace{0pt}0.54 & \hspace{0pt}0.54\\
+\hspace{0pt}band0\_\allowbreak{}log\_\allowbreak{}std & \hspace{0pt}0.353 & \hspace{0pt}0.109 & \hspace{0pt}0.70 & \hspace{0pt}0.74\\
+\hspace{0pt}log\_\allowbreak{}energy\_\allowbreak{}db\_\allowbreak{}std & \hspace{0pt}0.362 & \hspace{0pt}0.124 & \hspace{0pt}0.69 & \hspace{0pt}0.64\\
+\hspace{0pt}flatness\_\allowbreak{}mean & \hspace{0pt}0.362 & \hspace{0pt}0.154 & \hspace{0pt}0.76 & \hspace{0pt}0.77\\
+\hspace{0pt}band1\_\allowbreak{}log\_\allowbreak{}p10 & \hspace{0pt}0.627 & \hspace{0pt}0.859 & \hspace{0pt}0.81 & \hspace{0pt}0.13\\
+\hspace{0pt}flatness\_\allowbreak{}p90 & \hspace{0pt}0.384 & \hspace{0pt}0.174 & \hspace{0pt}0.87 & \hspace{0pt}0.84\\
+\hspace{0pt}band4\_\allowbreak{}log\_\allowbreak{}p10 & \hspace{0pt}0.615 & \hspace{0pt}0.836 & \hspace{0pt}0.83 & \hspace{0pt}0.42\\
+\hspace{0pt}flatness\_\allowbreak{}p10 & \hspace{0pt}0.391 & \hspace{0pt}0.369 & \hspace{0pt}0.28 & \hspace{0pt}0.35\\
+\hspace{0pt}band2\_\allowbreak{}log\_\allowbreak{}p10 & \hspace{0pt}0.598 & \hspace{0pt}0.808 & \hspace{0pt}0.82 & \hspace{0pt}0.33\\
+\hspace{0pt}band3\_\allowbreak{}log\_\allowbreak{}p10 & \hspace{0pt}0.596 & \hspace{0pt}0.806 & \hspace{0pt}0.81 & \hspace{0pt}0.21\\
+\hspace{0pt}band2\_\allowbreak{}log\_\allowbreak{}p90 & \hspace{0pt}0.584 & \hspace{0pt}0.596 & \hspace{0pt}0.16 & \hspace{0pt}0.56\\
+\hspace{0pt}band1\_\allowbreak{}log\_\allowbreak{}std & \hspace{0pt}0.416 & \hspace{0pt}0.192 & \hspace{0pt}0.68 & \hspace{0pt}0.67\\
+\hspace{0pt}band4\_\allowbreak{}log\_\allowbreak{}std & \hspace{0pt}0.425 & \hspace{0pt}0.192 & \hspace{0pt}0.70 & \hspace{0pt}0.41\\
+\hspace{0pt}band4\_\allowbreak{}log\_\allowbreak{}p90 & \hspace{0pt}0.569 & \hspace{0pt}0.568 & \hspace{0pt}0.01 & \hspace{0pt}0.27\\
+\hspace{0pt}band4\_\allowbreak{}log\_\allowbreak{}mean & \hspace{0pt}0.551 & \hspace{0pt}0.694 & \hspace{0pt}0.50 & \hspace{0pt}0.45\\
+\hspace{0pt}band2\_\allowbreak{}log\_\allowbreak{}std & \hspace{0pt}0.533 & \hspace{0pt}0.308 & \hspace{0pt}0.69 & \hspace{0pt}0.75\\
+\hspace{0pt}band3\_\allowbreak{}log\_\allowbreak{}p90 & \hspace{0pt}0.525 & \hspace{0pt}0.538 & \hspace{0pt}0.10 & \hspace{0pt}0.42\\
+\hspace{0pt}band1\_\allowbreak{}log\_\allowbreak{}p90 & \hspace{0pt}0.522 & \hspace{0pt}0.525 & \hspace{0pt}0.09 & \hspace{0pt}0.34\\
+\hspace{0pt}band1\_\allowbreak{}log\_\allowbreak{}mean & \hspace{0pt}0.480 & \hspace{0pt}0.614 & \hspace{0pt}0.52 & \hspace{0pt}0.33\\
+\hspace{0pt}band2\_\allowbreak{}log\_\allowbreak{}mean & \hspace{0pt}0.513 & \hspace{0pt}0.626 & \hspace{0pt}0.53 & \hspace{0pt}0.59\\
+\hspace{0pt}band3\_\allowbreak{}log\_\allowbreak{}std & \hspace{0pt}0.493 & \hspace{0pt}0.301 & \hspace{0pt}0.70 & \hspace{0pt}0.61\\
+\hspace{0pt}band3\_\allowbreak{}log\_\allowbreak{}mean & \hspace{0pt}0.502 & \hspace{0pt}0.634 & \hspace{0pt}0.50 & \hspace{0pt}0.48\\
+\end{longtable}\end{center}
+\section{Feature-family ablations}\label{sec:app-ablation}
+\begin{center}\scriptsize\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{>{\raggedright\arraybackslash}p{4.26cm}>{\raggedright\arraybackslash}p{1.55cm}>{\raggedleft\arraybackslash}p{1.55cm}>{\raggedleft\arraybackslash}p{1.55cm}>{\raggedleft\arraybackslash}p{1.55cm}>{\raggedleft\arraybackslash}p{1.55cm}>{\raggedright\arraybackslash}p{1.55cm}}
+\caption{Exploratory ablations with the full nested protocol (same folds).}\\
+\toprule
+\textbf{\hspace{0pt}Feature subset} & \textbf{\hspace{0pt}Classifier} & \textbf{\hspace{0pt}Features} & \textbf{\hspace{0pt}AUROC} & \textbf{\hspace{0pt}AUPRC} & \textbf{\hspace{0pt}F1} & \textbf{\hspace{0pt}FN/\allowbreak{}FP}\\\midrule\endfirsthead
+\toprule
+\textbf{\hspace{0pt}Feature subset} & \textbf{\hspace{0pt}Classifier} & \textbf{\hspace{0pt}Features} & \textbf{\hspace{0pt}AUROC} & \textbf{\hspace{0pt}AUPRC} & \textbf{\hspace{0pt}F1} & \textbf{\hspace{0pt}FN/\allowbreak{}FP}\\\midrule\endhead
+\bottomrule\endfoot
+\hspace{0pt}without: log\_\allowbreak{}energy\_\allowbreak{}db & \hspace{0pt}Logistic regression & \hspace{0pt}36 & \hspace{0pt}0.996 & \hspace{0pt}0.997 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}without: log\_\allowbreak{}energy\_\allowbreak{}db & \hspace{0pt}XGBoost & \hspace{0pt}36 & \hspace{0pt}0.998 & \hspace{0pt}0.998 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}only: log\_\allowbreak{}energy\_\allowbreak{}db & \hspace{0pt}Logistic regression & \hspace{0pt}4 & \hspace{0pt}0.725 & \hspace{0pt}0.727 & \hspace{0pt}0.741 & \hspace{0pt}5/\allowbreak{}9\\
+\hspace{0pt}only: log\_\allowbreak{}energy\_\allowbreak{}db & \hspace{0pt}XGBoost & \hspace{0pt}4 & \hspace{0pt}0.987 & \hspace{0pt}0.990 & \hspace{0pt}0.939 & \hspace{0pt}2/\allowbreak{}1\\
+\hspace{0pt}without: zcr & \hspace{0pt}Logistic regression & \hspace{0pt}36 & \hspace{0pt}0.993 & \hspace{0pt}0.994 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}without: zcr & \hspace{0pt}XGBoost & \hspace{0pt}36 & \hspace{0pt}1.000 & \hspace{0pt}1.000 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}only: zcr & \hspace{0pt}Logistic regression & \hspace{0pt}4 & \hspace{0pt}0.989 & \hspace{0pt}0.992 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}only: zcr & \hspace{0pt}XGBoost & \hspace{0pt}4 & \hspace{0pt}0.998 & \hspace{0pt}0.998 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}without: centroid\_\allowbreak{}hz & \hspace{0pt}Logistic regression & \hspace{0pt}36 & \hspace{0pt}0.996 & \hspace{0pt}0.997 & \hspace{0pt}0.960 & \hspace{0pt}1/\allowbreak{}1\\
+\hspace{0pt}without: centroid\_\allowbreak{}hz & \hspace{0pt}XGBoost & \hspace{0pt}36 & \hspace{0pt}0.998 & \hspace{0pt}0.998 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}only: centroid\_\allowbreak{}hz & \hspace{0pt}Logistic regression & \hspace{0pt}4 & \hspace{0pt}0.982 & \hspace{0pt}0.989 & \hspace{0pt}0.958 & \hspace{0pt}2/\allowbreak{}0\\
+\hspace{0pt}only: centroid\_\allowbreak{}hz & \hspace{0pt}XGBoost & \hspace{0pt}4 & \hspace{0pt}0.998 & \hspace{0pt}0.998 & \hspace{0pt}0.958 & \hspace{0pt}2/\allowbreak{}0\\
+\hspace{0pt}without: rolloff85\_\allowbreak{}hz & \hspace{0pt}Logistic regression & \hspace{0pt}36 & \hspace{0pt}1.000 & \hspace{0pt}1.000 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}without: rolloff85\_\allowbreak{}hz & \hspace{0pt}XGBoost & \hspace{0pt}36 & \hspace{0pt}1.000 & \hspace{0pt}1.000 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}only: rolloff85\_\allowbreak{}hz & \hspace{0pt}Logistic regression & \hspace{0pt}4 & \hspace{0pt}0.980 & \hspace{0pt}0.985 & \hspace{0pt}0.939 & \hspace{0pt}2/\allowbreak{}1\\
+\hspace{0pt}only: rolloff85\_\allowbreak{}hz & \hspace{0pt}XGBoost & \hspace{0pt}4 & \hspace{0pt}0.996 & \hspace{0pt}0.997 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}without: flatness & \hspace{0pt}Logistic regression & \hspace{0pt}36 & \hspace{0pt}1.000 & \hspace{0pt}1.000 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}without: flatness & \hspace{0pt}XGBoost & \hspace{0pt}36 & \hspace{0pt}1.000 & \hspace{0pt}1.000 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}only: flatness & \hspace{0pt}Logistic regression & \hspace{0pt}4 & \hspace{0pt}0.549 & \hspace{0pt}0.654 & \hspace{0pt}0.400 & \hspace{0pt}18/\allowbreak{}3\\
+\hspace{0pt}only: flatness & \hspace{0pt}XGBoost & \hspace{0pt}4 & \hspace{0pt}0.935 & \hspace{0pt}0.959 & \hspace{0pt}0.898 & \hspace{0pt}3/\allowbreak{}2\\
+\hspace{0pt}without: band0\_\allowbreak{}log & \hspace{0pt}Logistic regression & \hspace{0pt}36 & \hspace{0pt}0.998 & \hspace{0pt}0.998 & \hspace{0pt}0.960 & \hspace{0pt}1/\allowbreak{}1\\
+\hspace{0pt}without: band0\_\allowbreak{}log & \hspace{0pt}XGBoost & \hspace{0pt}36 & \hspace{0pt}1.000 & \hspace{0pt}1.000 & \hspace{0pt}1.000 & \hspace{0pt}0/\allowbreak{}0\\
+\hspace{0pt}only: band0\_\allowbreak{}log & \hspace{0pt}Logistic regression & \hspace{0pt}4 & \hspace{0pt}0.816 & \hspace{0pt}0.800 & \hspace{0pt}0.750 & \hspace{0pt}7/\allowbreak{}5\\
+\hspace{0pt}only: band0\_\allowbreak{}log & \hspace{0pt}XGBoost & \hspace{0pt}4 & \hspace{0pt}0.969 & \hspace{0pt}0.980 & \hspace{0pt}0.939 & \hspace{0pt}2/\allowbreak{}1\\
+\hspace{0pt}without: band1\_\allowbreak{}log & \hspace{0pt}Logistic regression & \hspace{0pt}36 & \hspace{0pt}1.000 & \hspace{0pt}1.000 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}without: band1\_\allowbreak{}log & \hspace{0pt}XGBoost & \hspace{0pt}36 & \hspace{0pt}1.000 & \hspace{0pt}1.000 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}only: band1\_\allowbreak{}log & \hspace{0pt}Logistic regression & \hspace{0pt}4 & \hspace{0pt}0.587 & \hspace{0pt}0.704 & \hspace{0pt}0.545 & \hspace{0pt}13/\allowbreak{}7\\
+\hspace{0pt}only: band1\_\allowbreak{}log & \hspace{0pt}XGBoost & \hspace{0pt}4 & \hspace{0pt}1.000 & \hspace{0pt}1.000 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}without: band2\_\allowbreak{}log & \hspace{0pt}Logistic regression & \hspace{0pt}36 & \hspace{0pt}1.000 & \hspace{0pt}1.000 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}without: band2\_\allowbreak{}log & \hspace{0pt}XGBoost & \hspace{0pt}36 & \hspace{0pt}1.000 & \hspace{0pt}1.000 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}only: band2\_\allowbreak{}log & \hspace{0pt}Logistic regression & \hspace{0pt}4 & \hspace{0pt}0.698 & \hspace{0pt}0.742 & \hspace{0pt}0.591 & \hspace{0pt}12/\allowbreak{}6\\
+\hspace{0pt}only: band2\_\allowbreak{}log & \hspace{0pt}XGBoost & \hspace{0pt}4 & \hspace{0pt}0.995 & \hspace{0pt}0.996 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}without: band3\_\allowbreak{}log & \hspace{0pt}Logistic regression & \hspace{0pt}36 & \hspace{0pt}1.000 & \hspace{0pt}1.000 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}without: band3\_\allowbreak{}log & \hspace{0pt}XGBoost & \hspace{0pt}36 & \hspace{0pt}1.000 & \hspace{0pt}1.000 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}only: band3\_\allowbreak{}log & \hspace{0pt}Logistic regression & \hspace{0pt}4 & \hspace{0pt}0.655 & \hspace{0pt}0.730 & \hspace{0pt}0.524 & \hspace{0pt}14/\allowbreak{}6\\
+\hspace{0pt}only: band3\_\allowbreak{}log & \hspace{0pt}XGBoost & \hspace{0pt}4 & \hspace{0pt}0.995 & \hspace{0pt}0.996 & \hspace{0pt}0.960 & \hspace{0pt}1/\allowbreak{}1\\
+\hspace{0pt}without: band4\_\allowbreak{}log & \hspace{0pt}Logistic regression & \hspace{0pt}36 & \hspace{0pt}1.000 & \hspace{0pt}1.000 & \hspace{0pt}1.000 & \hspace{0pt}0/\allowbreak{}0\\
+\hspace{0pt}without: band4\_\allowbreak{}log & \hspace{0pt}XGBoost & \hspace{0pt}36 & \hspace{0pt}1.000 & \hspace{0pt}1.000 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}only: band4\_\allowbreak{}log & \hspace{0pt}Logistic regression & \hspace{0pt}4 & \hspace{0pt}0.751 & \hspace{0pt}0.762 & \hspace{0pt}0.591 & \hspace{0pt}12/\allowbreak{}6\\
+\hspace{0pt}only: band4\_\allowbreak{}log & \hspace{0pt}XGBoost & \hspace{0pt}4 & \hspace{0pt}0.996 & \hspace{0pt}0.997 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}only statistic: mean & \hspace{0pt}Logistic regression & \hspace{0pt}10 & \hspace{0pt}0.980 & \hspace{0pt}0.986 & \hspace{0pt}0.917 & \hspace{0pt}3/\allowbreak{}1\\
+\hspace{0pt}only statistic: mean & \hspace{0pt}XGBoost & \hspace{0pt}10 & \hspace{0pt}0.998 & \hspace{0pt}0.998 & \hspace{0pt}0.958 & \hspace{0pt}2/\allowbreak{}0\\
+\hspace{0pt}without statistic: mean & \hspace{0pt}Logistic regression & \hspace{0pt}30 & \hspace{0pt}1.000 & \hspace{0pt}1.000 & \hspace{0pt}1.000 & \hspace{0pt}0/\allowbreak{}0\\
+\hspace{0pt}without statistic: mean & \hspace{0pt}XGBoost & \hspace{0pt}30 & \hspace{0pt}0.998 & \hspace{0pt}0.998 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}only statistic: std & \hspace{0pt}Logistic regression & \hspace{0pt}10 & \hspace{0pt}0.971 & \hspace{0pt}0.969 & \hspace{0pt}0.941 & \hspace{0pt}1/\allowbreak{}2\\
+\hspace{0pt}only statistic: std & \hspace{0pt}XGBoost & \hspace{0pt}10 & \hspace{0pt}0.993 & \hspace{0pt}0.994 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}without statistic: std & \hspace{0pt}Logistic regression & \hspace{0pt}30 & \hspace{0pt}0.989 & \hspace{0pt}0.991 & \hspace{0pt}0.960 & \hspace{0pt}1/\allowbreak{}1\\
+\hspace{0pt}without statistic: std & \hspace{0pt}XGBoost & \hspace{0pt}30 & \hspace{0pt}0.996 & \hspace{0pt}0.997 & \hspace{0pt}0.958 & \hspace{0pt}2/\allowbreak{}0\\
+\hspace{0pt}only statistic: p10 & \hspace{0pt}Logistic regression & \hspace{0pt}10 & \hspace{0pt}0.967 & \hspace{0pt}0.969 & \hspace{0pt}0.920 & \hspace{0pt}2/\allowbreak{}2\\
+\hspace{0pt}only statistic: p10 & \hspace{0pt}XGBoost & \hspace{0pt}10 & \hspace{0pt}0.996 & \hspace{0pt}0.997 & \hspace{0pt}0.960 & \hspace{0pt}1/\allowbreak{}1\\
+\hspace{0pt}without statistic: p10 & \hspace{0pt}Logistic regression & \hspace{0pt}30 & \hspace{0pt}0.993 & \hspace{0pt}0.994 & \hspace{0pt}0.958 & \hspace{0pt}2/\allowbreak{}0\\
+\hspace{0pt}without statistic: p10 & \hspace{0pt}XGBoost & \hspace{0pt}30 & \hspace{0pt}0.996 & \hspace{0pt}0.997 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}only statistic: p90 & \hspace{0pt}Logistic regression & \hspace{0pt}10 & \hspace{0pt}0.984 & \hspace{0pt}0.989 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}only statistic: p90 & \hspace{0pt}XGBoost & \hspace{0pt}10 & \hspace{0pt}0.989 & \hspace{0pt}0.992 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}without statistic: p90 & \hspace{0pt}Logistic regression & \hspace{0pt}30 & \hspace{0pt}0.991 & \hspace{0pt}0.993 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}without statistic: p90 & \hspace{0pt}XGBoost & \hspace{0pt}30 & \hspace{0pt}1.000 & \hspace{0pt}1.000 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}only: spectral\_\allowbreak{}shape & \hspace{0pt}Logistic regression & \hspace{0pt}12 & \hspace{0pt}0.985 & \hspace{0pt}0.990 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}only: spectral\_\allowbreak{}shape & \hspace{0pt}XGBoost & \hspace{0pt}12 & \hspace{0pt}0.998 & \hspace{0pt}0.998 & \hspace{0pt}0.958 & \hspace{0pt}2/\allowbreak{}0\\
+\hspace{0pt}only: band\_\allowbreak{}energies & \hspace{0pt}Logistic regression & \hspace{0pt}20 & \hspace{0pt}0.993 & \hspace{0pt}0.994 & \hspace{0pt}0.923 & \hspace{0pt}1/\allowbreak{}3\\
+\hspace{0pt}only: band\_\allowbreak{}energies & \hspace{0pt}XGBoost & \hspace{0pt}20 & \hspace{0pt}0.993 & \hspace{0pt}0.994 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}only: zcr\_\allowbreak{}and\_\allowbreak{}shape & \hspace{0pt}Logistic regression & \hspace{0pt}16 & \hspace{0pt}0.991 & \hspace{0pt}0.993 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\hspace{0pt}only: zcr\_\allowbreak{}and\_\allowbreak{}shape & \hspace{0pt}XGBoost & \hspace{0pt}16 & \hspace{0pt}0.996 & \hspace{0pt}0.997 & \hspace{0pt}0.980 & \hspace{0pt}1/\allowbreak{}0\\
+\end{longtable}\end{center}
+\section{Integrity and audit checks}\label{sec:app-audit}
+\begin{center}\scriptsize\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{>{\raggedleft\arraybackslash}p{1.55cm}>{\raggedright\arraybackslash}p{12.14cm}>{\raggedright\arraybackslash}p{1.55cm}}
+\caption{Out-of-fold leakage and integrity checks run after the experiments.}\\
+\toprule
+\textbf{\hspace{0pt}\#} & \textbf{\hspace{0pt}Check} & \textbf{\hspace{0pt}Result}\\\midrule\endfirsthead
+\toprule
+\textbf{\hspace{0pt}\#} & \textbf{\hspace{0pt}Check} & \textbf{\hspace{0pt}Result}\\\midrule\endhead
+\bottomrule\endfoot
+\hspace{0pt}1 & \hspace{0pt}Every speaker belongs to exactly one outer fold (all records of a speaker share the fold) & \hspace{0pt}PASS\\
+\hspace{0pt}2 & \hspace{0pt}Speaker overlap between training and test in every completed outer-fold run is zero (recomputed from the frozen split manifest) & \hspace{0pt}PASS\\
+\hspace{0pt}3 & \hspace{0pt}Each test sample has exactly one prediction in its run; ids equal the split manifest & \hspace{0pt}PASS\\
+\hspace{0pt}4 & \hspace{0pt}True labels in prediction files equal the audited sample manifest & \hspace{0pt}PASS\\
+\hspace{0pt}5 & \hspace{0pt}Probabilities are finite and in [0,1] & \hspace{0pt}PASS\\
+\hspace{0pt}6 & \hspace{0pt}Folds in prediction files equal the frozen split manifest & \hspace{0pt}PASS\\
+\hspace{0pt}7 & \hspace{0pt}Protocol hash and split-manifest hash in every run equal the frozen values & \hspace{0pt}PASS\\
+\hspace{0pt}8 & \hspace{0pt}Threshold policy: predicted class equals probability $\geq$ 0.5 fixed in advance; no calibration or threshold search exists in the code & \hspace{0pt}PASS\\
+\hspace{0pt}9 & \hspace{0pt}Run configurations on disk equal the configuration hashes stored in predictions and metrics & \hspace{0pt}PASS\\
+\hspace{0pt}10 & \hspace{0pt}No byte-identical source audio appears in two outer folds; sample ids unique & \hspace{0pt}PASS\\
+\hspace{0pt}11 & \hspace{0pt}No duplicated decoded audio among included recordings & \hspace{0pt}PASS\\
+\hspace{0pt}12 & \hspace{0pt}Features and embeddings are joined by stable sample\_\allowbreak{}id; shapes, finiteness, checkpoint revision and source-audio hash verified & \hspace{0pt}PASS\\
+\hspace{0pt}13 & \hspace{0pt}Modelling code is unchanged since the freeze (hashes); only execution harness files were added after the freeze & \hspace{0pt}PASS\\
+\hspace{0pt}14 & \hspace{0pt}Preprocessing, tuning and feature-selection fit boundaries verified by the instrumented Stage C tests (T06, T07, T07b-d) and the null/\allowbreak{}positive controls (T09, T09b) & \hspace{0pt}PASS\\
+\hspace{0pt}15 & \hspace{0pt}Inner tuning logs exist for every run, train+\allowbreak{}test speakers equal 47, and selected hyperparameters belong to the frozen grid & \hspace{0pt}PASS\\
+\hspace{0pt}16 & \hspace{0pt}Feature-selection runs record exactly 10 selected acoustic features per fold & \hspace{0pt}PASS\\
+\hspace{0pt}17 & \hspace{0pt}Every completed condition has exactly one OOF prediction for each of the 785 recordings (47 speakers) & \hspace{0pt}PASS\\
+\hspace{0pt}18 & \hspace{0pt}Pooled speaker-level AUROC and AUPRC of every completed condition were recomputed with independent code and agree to 1e-9 & \hspace{0pt}PASS\\
+\hspace{0pt}19 & \hspace{0pt}Failed or quarantined runs & \hspace{0pt}PASS\\
+\hspace{0pt}20 & \hspace{0pt}Registry statuses are consistent with the metric files & \hspace{0pt}PASS\\
+\end{longtable}\end{center}
+The independent audit additionally re-derived all labels and speakers from the raw folders, re-extracted embeddings in a fresh process (largest difference 3.1e-06), re-implemented the acoustic features and the nested cross-validation, recomputed all 336 reported metric values (no disagreement) and re-ran all logistic-regression runs. It found no bug that changes a prediction or a metric; it corrected documentation (for example, the two-digit number in file names is the year of birth) and tightened one automatic check.
+
+\section{Where to find everything}\label{sec:app-files}
+\begin{center}\small\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{>{\raggedright\arraybackslash}p{3.57cm}>{\raggedright\arraybackslash}p{12.09cm}}
+\caption{Files in the workspace Project4a\_FINAL\_V1\_ISOLATED.}\\
+\toprule
+\textbf{\hspace{0pt}What} & \textbf{\hspace{0pt}Where}\\\midrule\endfirsthead
+\toprule
+\textbf{\hspace{0pt}What} & \textbf{\hspace{0pt}Where}\\\midrule\endhead
+\bottomrule\endfoot
+\hspace{0pt}Protocol and its hash & \hspace{0pt}FINAL\_\allowbreak{}V1\_\allowbreak{}PROTOCOL.md, configs/\allowbreak{}FINAL\_\allowbreak{}V1/\allowbreak{}protocol.json, FREEZE\_\allowbreak{}RECORD.json, PROTOCOL\_\allowbreak{}ERRATA.md\\
+\hspace{0pt}Data and splits & \hspace{0pt}DATA\_\allowbreak{}INVENTORY.csv, DATA\_\allowbreak{}AUDIT.md, manifests/\allowbreak{}SAMPLE\_\allowbreak{}MANIFEST.csv, SPLIT\_\allowbreak{}MANIFEST.csv\\
+\hspace{0pt}Features & \hspace{0pt}features/\allowbreak{}acoustic\_\allowbreak{}features.csv, features/\allowbreak{}*\_\allowbreak{}embeddings.npy, features/\allowbreak{}manifests/\allowbreak{}\\
+\hspace{0pt}Predictions and metrics & \hspace{0pt}predictions/\allowbreak{}FINAL\_\allowbreak{}V1/\allowbreak{} (280 files), metrics/\allowbreak{}FINAL\_\allowbreak{}V1/\allowbreak{} (run files, condition\_\allowbreak{}metrics.csv, paired\_\allowbreak{}comparisons.csv)\\
+\hspace{0pt}Registry and logs & \hspace{0pt}EXPERIMENT\_\allowbreak{}REGISTRY.csv, FAILURE\_\allowbreak{}LOG.csv, DECISION\_\allowbreak{}LOG.md, logs/\allowbreak{}FINAL\_\allowbreak{}V1/\allowbreak{}\\
+\hspace{0pt}Audit & \hspace{0pt}OOF\_\allowbreak{}LEAKAGE\_\allowbreak{}AUDIT.md, audit\_\allowbreak{}opus/\allowbreak{}OPUS\_\allowbreak{}AUDIT.md, tests/\allowbreak{}test\_\allowbreak{}pipeline.py\\
+\hspace{0pt}Exploratory analyses & \hspace{0pt}supplementary/\allowbreak{}SUPPLEMENTARY\_\allowbreak{}REGISTRY.csv, supplementary/\allowbreak{}results/\allowbreak{}, supplementary/\allowbreak{}code/\allowbreak{}\\
+\hspace{0pt}Code & \hspace{0pt}src/\allowbreak{}final\_\allowbreak{}v1/\allowbreak{} (pipeline.py, protocol\_\allowbreak{}defs.py, splits.py, acoustic.py, extract\_\allowbreak{}embeddings.py, runner.py, ...)\\
+\end{longtable}\end{center}
+\section{Glossary}\label{sec:app-glossary}
+\begin{center}\small\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{>{\raggedright\arraybackslash}p{3.57cm}>{\raggedright\arraybackslash}p{12.09cm}}
+\caption{Terms used in this report.}\\
+\toprule
+\textbf{\hspace{0pt}Term} & \textbf{\hspace{0pt}Meaning}\\\midrule\endfirsthead
+\toprule
+\textbf{\hspace{0pt}Term} & \textbf{\hspace{0pt}Meaning}\\\midrule\endhead
+\bottomrule\endfoot
+\hspace{0pt}AUROC & \hspace{0pt}Probability that a random patient scores higher than a random control; 0.5 = guessing, 1 = perfect.\\
+\hspace{0pt}AUPRC & \hspace{0pt}Area under the precision-recall curve; guessing level = share of patients (0.53 here).\\
+\hspace{0pt}Speaker-disjoint & \hspace{0pt}No person has recordings in both the training and the test data of a fold.\\
+\hspace{0pt}Nested cross-validation & \hspace{0pt}Hyperparameters are chosen with an inner cross-validation inside the training part of each outer fold.\\
+\hspace{0pt}Embedding & \hspace{0pt}A fixed-length vector of numbers that a neural network uses to describe an input.\\
+\hspace{0pt}Frozen model & \hspace{0pt}A pretrained network whose weights are not changed; it is only used to compute embeddings.\\
+\hspace{0pt}Self-supervised learning & \hspace{0pt}Training on unlabelled data by solving an artificial task, such as predicting masked parts of speech.\\
+\hspace{0pt}Bootstrap interval & \hspace{0pt}Uncertainty interval obtained by resampling the people with replacement many times.\\
+\hspace{0pt}Clopper-Pearson interval & \hspace{0pt}Exact confidence interval for a proportion such as sensitivity.\\
+\hspace{0pt}Confounding & \hspace{0pt}When a third factor (here the recording session) is linked to both the input and the label.\\
+\hspace{0pt}Permutation importance & \hspace{0pt}How much a model's predictions get worse when one feature is randomly shuffled.\\
+\hspace{0pt}10th percentile (p10) & \hspace{0pt}The value below which the quietest tenth of a recording's frames lie; mostly pauses and background.\\
+\end{longtable}\end{center}
+\begin{thebibliography}{99}\setlength{\itemsep}{1pt}\small
+\bibitem{r1} Global, regional, national epidemiology and trends of Parkinson's disease from 1990 to 2021: findings from the Global Burden of Disease Study 2021; Frontiers in Aging Neuroscience, 2025. https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11757241/
+\bibitem{r2} M. Trail et al., Speech treatment for Parkinson's disease, NeuroRehabilitation 20(3), 2005. https://content.iospress.com/articles/neurorehabilitation/nre00283
+\bibitem{r3} A. Raty et al., Stability and accuracy of a diagnosis of Parkinson disease over 10 years, Neurology, 2025. https://research.utu.fi/converis/portal/detail/Publication/491935225
+\bibitem{r4} C. Quan, K. Ren, Z. Luo, Z. Chen, Y. Ling, End-to-end deep learning approach for Parkinson's disease detection from speech signals, Biocybernetics and Biomedical Engineering 42(2):556-574, 2022. doi:10.1016/j.bbe.2022.04.002
+\bibitem{r5} A. Iyer, A. Kemp et al., A machine learning method to process voice samples for identification of Parkinson's disease, Scientific Reports 13:20615, 2023. doi:10.1038/s41598-023-47568-w
+\bibitem{r6} Q. Wang, Y. Fu, B. Shao, L. Chang, K. Ren, Z. Chen, Y. Ling, Early detection of Parkinson's disease from multiple signal speech: based on Mandarin language dataset, Frontiers in Aging Neuroscience 14:1036588, 2022. doi:10.3389/fnagi.2022.1036588
+\bibitem{r7} B. Egbo, Z. Nigmetolla, N. A. Khan, P. K. Jamwal, Explainable machine learning for early detection of Parkinson's disease in aging populations using vocal biomarkers, Frontiers in Aging Neuroscience 17:1672971, 2025. doi:10.3389/fnagi.2025.1672971
+\bibitem{r8} A. Baevski, H. Zhou, A. Mohamed, M. Auli, wav2vec 2.0: a framework for self-supervised learning of speech representations, NeurIPS 2020.
+\bibitem{r9} A. Babu et al., XLS-R: self-supervised cross-lingual speech representation learning at scale, Interspeech 2022. arXiv:2111.09296
+\bibitem{r10} S. Chen et al., WavLM: large-scale self-supervised pre-training for full stack speech processing, IEEE Journal of Selected Topics in Signal Processing 16(6):1505-1518, 2022. doi:10.1109/JSTSP.2022.3188113
+\bibitem{r11} O. Klempir, R. Krupicka, Analyzing wav2vec 1.0 embeddings for cross-database Parkinson's disease detection and speech features extraction, Sensors 24(17):5520, 2024. doi:10.3390/s24175520
+\bibitem{r12} J. L. Crawford, Linguistic changes in spontaneous speech for detecting Parkinson's disease using large language models, PLOS Digital Health 4(2):e0000757, 2025. doi:10.1371/journal.pdig.0000757
+\bibitem{r13} E. Vaiciukynas, A. Verikas, A. Gelzinis, M. Bacauskiene, Detecting Parkinson's disease from sustained phonation and speech signals, PLoS ONE 12(10):e0185613, 2017. doi:10.1371/journal.pone.0185613
+\bibitem{r14} G. Dimauro, F. Girardi, Italian Parkinson's Voice and Speech, IEEE DataPort, 2019. doi:10.21227/aw6b-tg17
+\bibitem{r15} G. Dimauro, V. Di Nicola, V. Bevilacqua, D. Caivano, F. Girardi, Assessment of speech intelligibility in Parkinson's disease using a speech-to-text system, IEEE Access 5:22199-22208, 2017. doi:10.1109/ACCESS.2017.2762475
+\bibitem{r16} R.-E. Fan, K.-W. Chang, C.-J. Hsieh, X.-R. Wang, C.-J. Lin, LIBLINEAR: a library for large linear classification, Journal of Machine Learning Research 9:1871-1874, 2008.
+\bibitem{r17} C.-C. Chang, C.-J. Lin, LIBSVM: a library for support vector machines, ACM Transactions on Intelligent Systems and Technology 2(3):27, 2011.
+\bibitem{r18} T. Chen, C. Guestrin, XGBoost: a scalable tree boosting system, KDD 2016. doi:10.1145/2939672.2939785
+\bibitem{r19} L. Mendes-Laureano et al., NeuroVoz: a Castillian Spanish corpus of parkinsonian speech, Scientific Data 11:1367, 2024. https://zenodo.org/records/10777657
+\bibitem{r20} F. Pedregosa et al., Scikit-learn: machine learning in Python, Journal of Machine Learning Research 12:2825-2830, 2011.
+\end{thebibliography}
+\end{document}

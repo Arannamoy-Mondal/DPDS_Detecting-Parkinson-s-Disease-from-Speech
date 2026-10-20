@@ -1,0 +1,35 @@
+{
+ "W2V": {
+  "file_sha256": {
+   "config.json": "89e251162bc1f1dc66cb1d68f5ce3782b3d4bf2e10709bd867122bca47102b9b",
+   "preprocessor_config.json": "c403ce09975b90dff0dd8302c42d422e9de1f166cd7772df23490069893cb0cf",
+   "pytorch_model.bin": "1d095321ee151b9cbeeb2f325d104bf1813b795c9bbbee58efcde34f701d0386",
+   "special_tokens_map.json": "bb7068de1150661a10b55f9e4b12a0e77af8bf91f5e45e1b58afaf1d0e17f675",
+   "tokenizer_config.json": "dc790594f5bc351a4311c6624f40acd95850d4aaf2a5cb3c656c9b610720b608",
+   "vocab.json": "19727f8944fe6459fc3f240ae2c198395b740f6a029bd23e06656266b83bcf64"
+  },
+  "model_id": "facebook/wav2vec2-large-lv60",
+  "revision": "0cde644b64dac88d8416bec1c92a4099b850ba0b",
+  "snapshot": "/root/Projects/Project4a_FINAL_V1_ISOLATED/cache/hf/models--facebook--wav2vec2-large-lv60/snapshots/0cde644b64dac88d8416bec1c92a4099b850ba0b"
+ },
+ "WLM": {
+  "file_sha256": {
+   "config.json": "a3d8fe831aaf63d725b54a8ac36f3549cd4365c5086774b2c89cabbc6f9e129d",
+   "preprocessor_config.json": "60ca5a31e13f69ee2fbf147504c8676db5f6398fd7a6b12294341dff838edfcf",
+   "pytorch_model.bin": "fdee460e529396ddb2f8c8e8ce0ad74cfb747b726bc6f612e666c7c1e1963c9d"
+  },
+  "model_id": "microsoft/wavlm-large",
+  "revision": "c1423ed94bb01d80a3f5ce5bc39f6026a0f4828c",
+  "snapshot": "/root/Projects/Project4a_FINAL_V1_ISOLATED/cache/hf/models--microsoft--wavlm-large/snapshots/c1423ed94bb01d80a3f5ce5bc39f6026a0f4828c"
+ },
+ "XLSR": {
+  "file_sha256": {
+   "config.json": "0bffa0d0e98153e883b828d86491f3c6062cb563dc9d7a9cfd1790da30c286ac",
+   "preprocessor_config.json": "a2254a5b58f72cd4de3632f8eee64f3f098b7c1402128d2f419e7d00ae13e335",
+   "pytorch_model.bin": "d5e490574712ad0a6736923b9ed11d4cd51c78609c36205f704fc4e87b11d2e0"
+  },
+  "model_id": "facebook/wav2vec2-xls-r-300m",
+  "revision": "1a640f32ac3e39899438a2931f9924c02f080a54",
+  "snapshot": "/root/Projects/Project4a_FINAL_V1_ISOLATED/cache/hf/models--facebook--wav2vec2-xls-r-300m/snapshots/1a640f32ac3e39899438a2931f9924c02f080a54"
+ }
+}

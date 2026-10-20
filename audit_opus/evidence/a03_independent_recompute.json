@@ -1,0 +1,68 @@
+{
+ "acoustic_independent_max_relative_difference": 9.572856750965585e-06,
+ "independent_nested_cv_WLM_LR": {
+  "max_abs_probability_difference": 1.2823075934420558e-14,
+  "folds_with_same_selected_config": 5
+ },
+ "independent_nested_cv_XLSR_LR": {
+  "max_abs_probability_difference": 0.0003949724151286471,
+  "folds_with_same_selected_config": 5
+ },
+ "threshold_metric_disagreements": [],
+ "bootstrap_recomputation": [
+  [
+   "FV1-H1-ALL-LR",
+   "FV1-WLM-ALL-LR",
+   "AUROC",
+   "True"
+  ],
+  [
+   "FV1-H1-ALL-LR",
+   "FV1-WLM-ALL-LR",
+   "AUPRC",
+   "True"
+  ],
+  [
+   "FV1-H1-ALL-LR",
+   "own CI",
+   "AUROC",
+   "True"
+  ],
+  [
+   "FV1-H1-ALL-LR",
+   "own CI",
+   "AUPRC",
+   "True"
+  ],
+  [
+   "FV1-WLM-ALL-RSVM",
+   "FV1-WLM-ALL-LR",
+   "AUROC",
+   "True"
+  ],
+  [
+   "FV1-WLM-ALL-RSVM",
+   "FV1-WLM-ALL-LR",
+   "AUPRC",
+   "True"
+  ],
+  [
+   "FV1-WLM-ALL-RSVM",
+   "own CI",
+   "AUROC",
+   "True"
+  ],
+  [
+   "FV1-WLM-ALL-RSVM",
+   "own CI",
+   "AUPRC",
+   "True"
+  ]
+ ],
+ "feature_selection_differs_across_models_count": 0,
+ "final_LR_fit_convergence": {
+  "fits": 70,
+  "convergence_warnings": 0,
+  "examples": []
+ }
+}

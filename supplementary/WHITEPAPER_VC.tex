@@ -1,0 +1,890 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[margin=1.9cm]{geometry}
+\usepackage{booktabs,longtable,float,graphicx,amsmath,array,enumitem,helvet,xcolor,tcolorbox}
+\renewcommand{\familydefault}{\sfdefault}
+\usepackage[colorlinks=true,linkcolor=blue!50!black,urlcolor=blue!50!black]{hyperref}
+\setlist{itemsep=1pt,topsep=2pt}\setlength{\parskip}{3.5pt}\setlength{\parindent}{0pt}
+\usepackage{titlesec}\titleformat{\section}{\large\bfseries}{\thesection.}{.5em}{}
+\usepackage{fancyhdr}\pagestyle{fancy}\fancyhf{}\fancyfoot[C]{\small\thepage}\fancyhead[L]{\small Speech biomarkers for Parkinson's screening - venture whitepaper (research stage)}\fancyhead[R]{\small Confidential draft}\renewcommand{\headrulewidth}{.3pt}
+\begin{document}
+\begin{center}{\LARGE\bfseries Speech Biomarkers for Parkinson's Disease Screening\par}\vspace{4pt}{\large Technology assessment and venture whitepaper (research stage)\par}\vspace{4pt}
+{\small Md.~Osman Goni \textperiodcentered{} Md.~Mohibur Rahman \textperiodcentered{} Arannamoy Mondal\par}\vspace{2pt}{\small Evidence base: frozen protocol FINAL\_V1 (audited) \textperiodcentered{} 2026-10-20\par}\end{center}\vspace{2pt}\hrule\vspace{4pt}
+\tableofcontents\newpage
+\begin{tcolorbox}[colback=blue!3,colframe=blue!45!black,boxrule=0.5pt,arc=2pt,left=5pt,right=5pt,top=3pt,bottom=3pt,title={\small\bfseries Status and reading guide}]\small Research-stage technology assessment prepared for investor due diligence. The product described is \textbf{not a medical device} and has \textbf{not} been clinically validated. All performance numbers come from one frozen, audited internal study (protocol FINAL\_V1, 47 speakers, one Italian corpus). Market and regulatory statements are cited to public sources (reference list at the end) and must be re-verified before any filing or investment decision.\end{tcolorbox}
+\section{Executive summary}\label{sec:exec}
+\textbf{The opportunity.} About 11.8 million people lived with Parkinson's disease (PD) worldwide in 2021 [1], nearly one million in the United States with about 90,000 new US diagnoses per year [2], and the US economic burden was estimated at about \$52 billion per year [3]. Clinical diagnosis is wrong in a meaningful minority of cases, especially early and outside specialist centres (pooled clinicopathologic accuracy about 74-80\%) [4]. Speech is affected in about 89\% of people with PD [5], it is cheap to record on any phone, and it can be repeated at home. A validated speech screen could triage referrals, support earlier diagnosis and provide digital endpoints for clinical trials.
+\textbf{What was built.} A speaker-independent pipeline that turns a short multi-task speech recording (about 5.4 minutes of median task durations) into a PD probability: 40 hand-crafted acoustic features and three frozen self-supervised speech encoders (WavLM-large, wav2vec2-large-lv60, XLS-R 300M; about 315 million parameters each), four classifier families, feature selection and eight hybrid representations - 56 configurations, each evaluated with nested, speaker-disjoint five-fold cross-validation under a frozen, hash-locked protocol and an independent audit.
+\textbf{What the data show.} On 47 speakers (25 PD, 22 age-comparable controls; 785 recordings) the median pooled speaker-level AUROC over the 56 configurations is 0.995 (range 0.867 to 1.000); 40 of 56 make at most one speaker error. The reference model (WavLM-large + logistic regression, 1025 trainable parameters) reaches AUROC 0.995 [95\% CI 0.977-1.000], sensitivity 0.96 (exact 95\% CI 0.80-1.00) and specificity 1.00 (exact CI 0.85-1.00).
+\begin{tcolorbox}[colback=blue!3,colframe=blue!45!black,boxrule=0.5pt,arc=2pt,left=5pt,right=5pt,top=3pt,bottom=3pt,title={\small\bfseries The critical caveat (read before the numbers)}]\small In this corpus every recording session contains only one class (patients and controls were recorded on different days; part of the patient audio was recorded at a different sampling rate). Four simple statistics of the zero-crossing rate already give AUROC 0.989, the most important features are statistics of the \textbf{quietest 10\% of frames} (background), and the same representations can tell recording sessions apart \textbf{inside one class} for unseen speakers (controls early versus late March: AUROC up to 0.93). The near-perfect separation is therefore \textbf{not evidence of disease detection}; it is at least partly a recording-condition effect. This is the single largest technical risk and the first thing a funded programme must remove.\end{tcolorbox}
+\textbf{Investment thesis.} The asset today is a rigorously engineered and audited evaluation pipeline, a feature-level understanding of where the signal comes from, and a concrete plan to obtain confound-free evidence. It is \textbf{pre-validation (proof of concept on a confounded dataset)}. A staged programme (section \ref{sec:roadmap}) converts it into an investable clinical asset only if a recording-matched, multi-site cohort reproduces the separation with an AUROC lower confidence bound above 0.80 while a background-only model stays at chance. Milestones are designed so that each tranche buys a decisive answer.
+\begin{center}\small\begin{tabular}{p{7.4cm}p{7.4cm}}\toprule\textbf{What we can claim} & \textbf{What we cannot claim}\\\midrule A leakage-controlled, reproducible pipeline (280 runs, 20 audit checks, independent re-implementation). & That the models detect Parkinson's disease. \\ Near-perfect speaker-independent separation on this corpus with simple and with large models. & Any clinical accuracy, sensitivity or specificity for a real screening population. \\ Which features, tasks and models carry the separation, and how fragile tuning is. & Generalisation to other languages, devices, rooms or disease stages. \\ Low compute cost per test (CPU seconds). & Regulatory readiness, reimbursement or clinical utility. \\\bottomrule\end{tabular}\end{center}
+\section{Problem and market}\label{sec:market}
+\begin{itemize}\item Prevalence: about 11.77 million people with PD worldwide in 2021, age-standardised prevalence 138.6 per 100,000, rising (GBD 2021 based analysis) [1].
+\item United States: nearly 1 million people living with PD (earlier estimates about 650,000) and about 90,000 new diagnoses per year [2]; total economic burden about \$52 billion per year (about \$25.4 billion direct medical, \$26.5 billion non-medical) [3].
+\item Diagnostic gap: pooled clinicopathologic accuracy of the clinical diagnosis about 74-80\%, lower in early disease and with non-specialists; in a 10-year cohort 10.6\% of diagnoses were revised [4].
+\item Speech: about 89\% of people with PD have a speech or voice disorder, but only 3-4\% receive speech treatment [5]; voice is therefore both a candidate biomarker and an under-served symptom.
+\item Where a speech screen could create value: (1) triage of referrals to movement-disorder clinics; (2) case finding in primary care or tele-medicine; (3) remote monitoring and digital endpoints in clinical trials; (4) speech-therapy follow-up.
+\end{itemize}
+\textbf{Why now.} (1) Self-supervised speech foundation models (wav2vec 2.0, WavLM, XLS-R) give strong frozen representations without disease labels [11]; (2) smartphones make repeated, remote recordings cheap; (3) regulators have begun to process speech-based software devices (section \ref{sec:regulatory}); (4) public corpora such as NeuroVoz [8] allow frozen external tests.
+\begin{center}\scriptsize\renewcommand{\arraystretch}{1.12}
+\begin{longtable}{rrrr}
+\caption{Illustrative, assumption-driven sizing of one segment only (remote monitoring of people already diagnosed in the US; base of about 1 million people [2]). Adoption and annual price per patient are assumptions to be tested, not forecasts.}\\
+\toprule
+\textbf{Assumed adoption} & \textbf{Assumed annual price} & \textbf{Patients} & \textbf{Annual revenue}\\\midrule\endfirsthead
+\toprule
+\textbf{Assumed adoption} & \textbf{Assumed annual price} & \textbf{Patients} & \textbf{Annual revenue}\\\midrule\endhead
+\bottomrule\endfoot
+1\% & \$100 & 10,000 & \$1.0 M\\
+1\% & \$300 & 10,000 & \$3.0 M\\
+5\% & \$100 & 50,000 & \$5.0 M\\
+5\% & \$300 & 50,000 & \$15.0 M\\
+10\% & \$100 & 100,000 & \$10.0 M\\
+10\% & \$300 & 100,000 & \$30.0 M\\
+\end{longtable}\end{center}
+\textbf{Why predictive value matters commercially.} A screen is used where prevalence is low. With sensitivity 0.96, a positive result means PD in only about 5\% of cases at 1\% prevalence if specificity is 0.80, 16\% at specificity 0.95 and 49\% at specificity 0.99 (figure below). Any go-to-market therefore needs either very high specificity or an enriched population (for example people already referred for motor symptoms).
+\begin{figure}[H]\centering\includegraphics[width=0.6\linewidth]{wp_ppv.pdf}\caption{Positive predictive value as a function of prevalence for sensitivity 0.96 and four specificities (formula, no study data).}\end{figure}
+\section{Product concept}\label{sec:product}
+A guided recording session on a smartphone or web browser (sustained vowels, /pa/ and /ta/ repetitions, a reading passage, a word list and a phrase; median durations in this corpus give about 5.4 minutes of speech), automatic recording-quality checks, server-side or on-device scoring and a clinician report with a risk score and confidence. The recording-quality and \textbf{background-consistency gate} is part of the core product, not an add-on: section \ref{sec:confound} shows that background differences can dominate the score.
+\begin{center}\scriptsize\renewcommand{\arraystretch}{1.12}
+\begin{longtable}{lrr}
+\caption{Recording protocol in the corpus (16 task codes; median seconds per recording).}\\
+\toprule
+\textbf{Task code} & \textbf{Recordings} & \textbf{Median s}\\\midrule\endfirsthead
+\toprule
+\textbf{Task code} & \textbf{Recordings} & \textbf{Median s}\\\midrule\endhead
+\bottomrule\endfoot
+B1 & 49 & 69.7\\
+B2 & 44 & 61.9\\
+D1 & 50 & 6.5\\
+D2 & 50 & 6.2\\
+FB1 & 47 & 30.3\\
+PR1 & 50 & 55.8\\
+VA1 & 50 & 12.3\\
+VA2 & 49 & 6.0\\
+VE1 & 50 & 12.4\\
+VE2 & 49 & 6.1\\
+VI1 & 50 & 13.7\\
+VI2 & 49 & 6.2\\
+VO1 & 50 & 13.2\\
+VO2 & 49 & 6.2\\
+VU1 & 50 & 12.9\\
+VU2 & 49 & 6.4\\
+\end{longtable}\end{center}
+\section{Technology}\label{sec:tech}
+\begin{figure}[H]\centering\includegraphics[width=0.95\linewidth]{pipeline.pdf}\caption{Pipeline: frozen feature extraction (no labels) and the only fitted stages (standardisation and classifier), fitted on training speakers only.}\end{figure}
+\textbf{Representations.} (i) 40 acoustic features: 10 frame features (log energy, zero-crossing rate, spectral centroid, roll-off at 85\%\%, spectral flatness, log energy in 0-0.5, 0.5-1, 1-2, 2-4 and 4-8 kHz) x 4 statistics over 25-ms frames (mean, SD, 10th and 90th percentile); (ii) frozen encoders: each 10-s window gives a 499 x 1,024 output map, averaged over time and windows to 1,024 values; (iii) hybrids: concatenations up to 3,112 values. \textbf{Models.} Logistic regression (20 configurations), linear SVM (10), RBF SVM (24), XGBoost (24 of a 256-point grid), class weighting inside every grid. \textbf{Decision.} Speaker score = mean recording probability, fixed threshold 0.5.
+\begin{center}\scriptsize\renewcommand{\arraystretch}{1.12}
+\begin{longtable}{llrrll}
+\caption{Frozen encoders: size, CPU cost per 10-s window (1 / 4 / 8 threads, desktop CPU) and licence (model hub metadata).}\\
+\toprule
+\textbf{Key} & \textbf{Checkpoint} & \textbf{Parameters} & \textbf{Weights MB} & \textbf{s per window} & \textbf{Licence}\\\midrule\endfirsthead
+\toprule
+\textbf{Key} & \textbf{Checkpoint} & \textbf{Parameters} & \textbf{Weights MB} & \textbf{s per window} & \textbf{Licence}\\\midrule\endhead
+\bottomrule\endfoot
+WLM & microsoft/wavlm-large & 315453120 & 1262 & 4.96 / 1.63 / 1.52 & not declared on model card\\
+W2V & facebook/wav2vec2-large-lv60 & 315438720 & 1270 & 4.39 / 2.21 / 1.42 & Apache-2.0\\
+XLSR & facebook/wav2vec2-xls-r-300m & 315438720 & 1270 & 4.67 / 2.39 / 1.40 & Apache-2.0\\
+\end{longtable}\end{center}
+\textbf{Cost per test.} The corpus averages 45.9 encoder windows per speaker; at 1.52 s per window with 8 threads the WavLM pass costs about 70 s of wall time (about 0.15 core-hours) per test. The 40 acoustic features take 0.08 s per minute of audio on one thread. At an assumed cloud price of p dollars per vCPU-hour the encoder cost per test is about 0.15 x p dollars (for example about \$0.008 at an assumed p = \$0.05), i.e. compute is not a cost driver; clinical validation, regulatory work and data acquisition are.
+\begin{figure}[H]\centering\includegraphics[width=0.55\linewidth]{wp_compute.pdf}\caption{Measured CPU inference cost of the three encoders.}\end{figure}
+\section{Data asset and its limits}\label{sec:data}
+Italian Parkinson's Voice and Speech [6] (IEEE DataPort, listed as Creative Commons Attribution [7]): after exclusions \textbf{785 recordings, 47 speakers (25 PD, 22 elderly controls), 4.98 audio hours, 16 task codes}. Spreadsheet demographics: PD 66.8 +/- 9.1 years (40-80), 16 men / 9 women; controls 67.1 +/- 5.2 years (60-77), 10 men / 12 women. Exclusions: 15 young controls (age confound) and one byte-identical duplicate recording; three people recorded in two sessions were merged into one speaker each. Four controls are flagged in the corpus spreadsheet for poor recording quality or reading difficulty.
+\begin{figure}[H]\centering\includegraphics[width=0.85\linewidth]{wp_confound_timeline.pdf}\caption{The structural confound: recording dates, class and sampling rate. No date contains both classes; all 44.1-kHz audio is PD.}\end{figure}
+\begin{itemize}\item No disease severity, duration or medication data; no clinical scale (for example MDS-UPDRS) to relate scores to disease stage.
+\item Single site, single language, small sample: one speaker changes a speaker-level metric by about two percentage points.
+\item Sex balance differs between groups (PD 64\% men, controls 45\% men); age distributions overlap (60-80 for most).
+\item The dataset licence permits attribution-based reuse, but clinical-grade development requires new, consented, protocol-controlled data (section \ref{sec:roadmap}).
+\end{itemize}
+\section{Evaluation design and integrity}\label{sec:eval}
+\begin{itemize}\item Frozen protocol (SHA-256 5535d1a440a57005...) written before any model saw the data; 56 conditions x 5 outer folds = 280 runs; FWL adjustment blocked because it was not defined in advance.
+\item Stratified, speaker-disjoint 5-fold outer CV; nested speaker-disjoint 3-fold inner CV for tuning and feature selection; every learned step fitted on training speakers only; fixed threshold 0.5.
+\item Integrity gates on every run (speaker overlap, coverage, probability validity, labels, folds, hashes) and an out-of-fold audit: 20 of 20 checks passed, 0 failed runs.
+\item Independent audit (this document's appendix): independent re-parse of the raw data, re-extraction of embeddings (max difference 3.1e-06), independent nested CV (same selected configurations), recomputation of all metrics (0 disagreements), bit-identical re-execution of all 70 logistic-regression runs under single-threaded BLAS. No result-changing bug; documentation errata recorded.
+\item Primary metrics: pooled speaker-level AUPRC and AUROC (prevalence 53.2\% PD); supporting: F1, sensitivity, specificity, balanced accuracy, bootstrap and exact intervals.
+\end{itemize}
+\section{Results: metrics by feature combination and model}\label{sec:results}
+\begin{figure}[H]\centering\includegraphics[width=0.55\linewidth]{heatmap_auroc.pdf}\caption{Pooled speaker-level AUROC for every representation and model (56 configurations).}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=0.98\linewidth]{wp_forest_auroc.pdf}\caption{AUROC with 95\% speaker-bootstrap intervals for logistic regression and XGBoost. Intervals collapse to a point when AUROC = 1 (percentile bootstrap at the boundary).}\end{figure}
+\begin{center}\tiny\renewcommand{\arraystretch}{1.12}
+\begin{longtable}{p{3.0cm}p{2.0cm}rlllrrl}
+\caption{All 56 configurations: pooled out-of-fold speaker-level metrics (47 speakers). Sensitivity and specificity with exact Clopper-Pearson 95\% intervals; FN/FP = missed patients / false alarms at threshold 0.5.}\\
+\toprule
+\textbf{Representation} & \textbf{Model} & \textbf{AUPRC} & \textbf{AUROC [bootstrap CI]} & \textbf{Sensitivity (exact CI)} & \textbf{Specificity (exact CI)} & \textbf{F1} & \textbf{Bal. acc.} & \textbf{FN/FP}\\\midrule\endfirsthead
+\toprule
+\textbf{Representation} & \textbf{Model} & \textbf{AUPRC} & \textbf{AUROC [bootstrap CI]} & \textbf{Sensitivity (exact CI)} & \textbf{Specificity (exact CI)} & \textbf{F1} & \textbf{Bal. acc.} & \textbf{FN/FP}\\\midrule\endhead
+\bottomrule\endfoot
+Acoustic (40) & Logistic regression & 1.000 & 1.000 [1.000, 1.000] & 0.96 (0.80-1.00) & 1.00 (0.85-1.00) & 0.980 & 0.980 & 1/0\\
+Acoustic (40) & Linear SVM & 0.998 & 0.998 [0.989, 1.000] & 0.96 (0.80-1.00) & 1.00 (0.85-1.00) & 0.980 & 0.980 & 1/0\\
+Acoustic (40) & RBF SVM & 0.991 & 0.989 [0.964, 1.000] & 0.96 (0.80-1.00) & 0.86 (0.65-0.97) & 0.923 & 0.912 & 1/3\\
+Acoustic (40) & XGBoost & 1.000 & 1.000 [1.000, 1.000] & 0.96 (0.80-1.00) & 1.00 (0.85-1.00) & 0.980 & 0.980 & 1/0\\
+Acoustic (40) / forward & Logistic regression & 0.997 & 0.996 [0.983, 1.000] & 0.96 (0.80-1.00) & 1.00 (0.85-1.00) & 0.980 & 0.980 & 1/0\\
+Acoustic (40) / forward & Linear SVM & 0.997 & 0.996 [0.983, 1.000] & 0.96 (0.80-1.00) & 1.00 (0.85-1.00) & 0.980 & 0.980 & 1/0\\
+Acoustic (40) / forward & RBF SVM & 0.997 & 0.996 [0.984, 1.000] & 0.96 (0.80-1.00) & 0.95 (0.77-1.00) & 0.960 & 0.957 & 1/1\\
+Acoustic (40) / forward & XGBoost & 0.997 & 0.996 [0.983, 1.000] & 0.96 (0.80-1.00) & 1.00 (0.85-1.00) & 0.980 & 0.980 & 1/0\\
+Acoustic (40) / backward & Logistic regression & 0.990 & 0.987 [0.957, 1.000] & 0.96 (0.80-1.00) & 0.91 (0.71-0.99) & 0.941 & 0.935 & 1/2\\
+Acoustic (40) / backward & Linear SVM & 0.994 & 0.993 [0.971, 1.000] & 0.96 (0.80-1.00) & 1.00 (0.85-1.00) & 0.980 & 0.980 & 1/0\\
+Acoustic (40) / backward & RBF SVM & 0.990 & 0.985 [0.947, 1.000] & 0.96 (0.80-1.00) & 0.86 (0.65-0.97) & 0.923 & 0.912 & 1/3\\
+Acoustic (40) / backward & XGBoost & 0.996 & 0.995 [0.978, 1.000] & 0.96 (0.80-1.00) & 1.00 (0.85-1.00) & 0.980 & 0.980 & 1/0\\
+WavLM-large & Logistic regression & 0.996 & 0.995 [0.977, 1.000] & 0.96 (0.80-1.00) & 1.00 (0.85-1.00) & 0.980 & 0.980 & 1/0\\
+WavLM-large & Linear SVM & 0.996 & 0.995 [0.977, 1.000] & 0.96 (0.80-1.00) & 1.00 (0.85-1.00) & 0.980 & 0.980 & 1/0\\
+WavLM-large & RBF SVM & 0.887 & 0.873 [0.752, 0.966] & 0.96 (0.80-1.00) & 0.77 (0.55-0.92) & 0.889 & 0.866 & 1/5\\
+WavLM-large & XGBoost & 0.998 & 0.998 [0.989, 1.000] & 0.96 (0.80-1.00) & 0.95 (0.77-1.00) & 0.960 & 0.957 & 1/1\\
+wav2vec2-large-lv60 & Logistic regression & 0.992 & 0.989 [0.960, 1.000] & 0.96 (0.80-1.00) & 1.00 (0.85-1.00) & 0.980 & 0.980 & 1/0\\
+wav2vec2-large-lv60 & Linear SVM & 0.986 & 0.975 [0.913, 1.000] & 0.96 (0.80-1.00) & 1.00 (0.85-1.00) & 0.980 & 0.980 & 1/0\\
+wav2vec2-large-lv60 & RBF SVM & 0.997 & 0.996 [0.984, 1.000] & 1.00 (0.86-1.00) & 0.91 (0.71-0.99) & 0.962 & 0.955 & 0/2\\
+wav2vec2-large-lv60 & XGBoost & 0.989 & 0.982 [0.935, 1.000] & 0.96 (0.80-1.00) & 1.00 (0.85-1.00) & 0.980 & 0.980 & 1/0\\
+XLS-R 300M & Logistic regression & 1.000 & 1.000 [1.000, 1.000] & 0.96 (0.80-1.00) & 1.00 (0.85-1.00) & 0.980 & 0.980 & 1/0\\
+XLS-R 300M & Linear SVM & 0.997 & 0.996 [0.984, 1.000] & 0.96 (0.80-1.00) & 1.00 (0.85-1.00) & 0.980 & 0.980 & 1/0\\
+XLS-R 300M & RBF SVM & 0.986 & 0.976 [0.919, 1.000] & 0.96 (0.80-1.00) & 0.91 (0.71-0.99) & 0.941 & 0.935 & 1/2\\
+XLS-R 300M & XGBoost & 0.997 & 0.996 [0.983, 1.000] & 0.96 (0.80-1.00) & 1.00 (0.85-1.00) & 0.980 & 0.980 & 1/0\\
+WavLM + acoustic & Logistic regression & 0.998 & 0.998 [0.989, 1.000] & 0.96 (0.80-1.00) & 1.00 (0.85-1.00) & 0.980 & 0.980 & 1/0\\
+WavLM + acoustic & Linear SVM & 0.991 & 0.987 [0.955, 1.000] & 0.96 (0.80-1.00) & 1.00 (0.85-1.00) & 0.980 & 0.980 & 1/0\\
+WavLM + acoustic & RBF SVM & 0.901 & 0.867 [0.749, 0.954] & 0.96 (0.80-1.00) & 0.59 (0.36-0.79) & 0.828 & 0.775 & 1/9\\
+WavLM + acoustic & XGBoost & 0.998 & 0.998 [0.989, 1.000] & 0.96 (0.80-1.00) & 1.00 (0.85-1.00) & 0.980 & 0.980 & 1/0\\
+wav2vec2 + acoustic & Logistic regression & 0.997 & 0.996 [0.984, 1.000] & 0.96 (0.80-1.00) & 1.00 (0.85-1.00) & 0.980 & 0.980 & 1/0\\
+wav2vec2 + acoustic & Linear SVM & 0.989 & 0.982 [0.935, 1.000] & 0.96 (0.80-1.00) & 1.00 (0.85-1.00) & 0.980 & 0.980 & 1/0\\
+wav2vec2 + acoustic & RBF SVM & 0.956 & 0.962 [0.891, 1.000] & 1.00 (0.86-1.00) & 0.73 (0.50-0.89) & 0.893 & 0.864 & 0/6\\
+wav2vec2 + acoustic & XGBoost & 0.998 & 0.998 [0.989, 1.000] & 0.96 (0.80-1.00) & 1.00 (0.85-1.00) & 0.980 & 0.980 & 1/0\\
+XLS-R + acoustic & Logistic regression & 1.000 & 1.000 [1.000, 1.000] & 0.96 (0.80-1.00) & 1.00 (0.85-1.00) & 0.980 & 0.980 & 1/0\\
+XLS-R + acoustic & Linear SVM & 1.000 & 1.000 [1.000, 1.000] & 0.96 (0.80-1.00) & 1.00 (0.85-1.00) & 0.980 & 0.980 & 1/0\\
+XLS-R + acoustic & RBF SVM & 0.985 & 0.973 [0.905, 1.000] & 0.96 (0.80-1.00) & 0.91 (0.71-0.99) & 0.941 & 0.935 & 1/2\\
+XLS-R + acoustic & XGBoost & 0.998 & 0.998 [0.989, 1.000] & 0.96 (0.80-1.00) & 1.00 (0.85-1.00) & 0.980 & 0.980 & 1/0\\
+WavLM + wav2vec2 & Logistic regression & 0.996 & 0.995 [0.977, 1.000] & 0.96 (0.80-1.00) & 1.00 (0.85-1.00) & 0.980 & 0.980 & 1/0\\
+WavLM + wav2vec2 & Linear SVM & 0.992 & 0.989 [0.960, 1.000] & 0.96 (0.80-1.00) & 1.00 (0.85-1.00) & 0.980 & 0.980 & 1/0\\
+WavLM + wav2vec2 & RBF SVM & 0.986 & 0.975 [0.912, 1.000] & 0.96 (0.80-1.00) & 0.95 (0.77-1.00) & 0.960 & 0.957 & 1/1\\
+WavLM + wav2vec2 & XGBoost & 0.994 & 0.993 [0.971, 1.000] & 0.96 (0.80-1.00) & 1.00 (0.85-1.00) & 0.980 & 0.980 & 1/0\\
+WavLM + XLS-R & Logistic regression & 0.997 & 0.996 [0.983, 1.000] & 0.96 (0.80-1.00) & 1.00 (0.85-1.00) & 0.980 & 0.980 & 1/0\\
+WavLM + XLS-R & Linear SVM & 0.998 & 0.998 [0.989, 1.000] & 0.96 (0.80-1.00) & 1.00 (0.85-1.00) & 0.980 & 0.980 & 1/0\\
+WavLM + XLS-R & RBF SVM & 0.986 & 0.975 [0.912, 1.000] & 0.96 (0.80-1.00) & 0.91 (0.71-0.99) & 0.941 & 0.935 & 1/2\\
+WavLM + XLS-R & XGBoost & 0.993 & 0.991 [0.964, 1.000] & 0.96 (0.80-1.00) & 1.00 (0.85-1.00) & 0.980 & 0.980 & 1/0\\
+wav2vec2 + XLS-R & Logistic regression & 1.000 & 1.000 [1.000, 1.000] & 0.96 (0.80-1.00) & 1.00 (0.85-1.00) & 0.980 & 0.980 & 1/0\\
+wav2vec2 + XLS-R & Linear SVM & 0.992 & 0.989 [0.961, 1.000] & 0.96 (0.80-1.00) & 1.00 (0.85-1.00) & 0.980 & 0.980 & 1/0\\
+wav2vec2 + XLS-R & RBF SVM & 0.986 & 0.975 [0.912, 1.000] & 0.96 (0.80-1.00) & 0.95 (0.77-1.00) & 0.960 & 0.957 & 1/1\\
+wav2vec2 + XLS-R & XGBoost & 0.998 & 0.998 [0.989, 1.000] & 0.96 (0.80-1.00) & 1.00 (0.85-1.00) & 0.980 & 0.980 & 1/0\\
+three encoders & Logistic regression & 0.997 & 0.996 [0.983, 1.000] & 0.96 (0.80-1.00) & 1.00 (0.85-1.00) & 0.980 & 0.980 & 1/0\\
+three encoders & Linear SVM & 0.997 & 0.996 [0.984, 1.000] & 0.96 (0.80-1.00) & 1.00 (0.85-1.00) & 0.980 & 0.980 & 1/0\\
+three encoders & RBF SVM & 0.984 & 0.971 [0.901, 1.000] & 0.96 (0.80-1.00) & 0.91 (0.71-0.99) & 0.941 & 0.935 & 1/2\\
+three encoders & XGBoost & 0.993 & 0.991 [0.964, 1.000] & 0.96 (0.80-1.00) & 1.00 (0.85-1.00) & 0.980 & 0.980 & 1/0\\
+three encoders + acoustic & Logistic regression & 0.997 & 0.996 [0.984, 1.000] & 0.96 (0.80-1.00) & 1.00 (0.85-1.00) & 0.980 & 0.980 & 1/0\\
+three encoders + acoustic & Linear SVM & 0.998 & 0.998 [0.989, 1.000] & 0.96 (0.80-1.00) & 1.00 (0.85-1.00) & 0.980 & 0.980 & 1/0\\
+three encoders + acoustic & RBF SVM & 0.986 & 0.975 [0.912, 1.000] & 0.96 (0.80-1.00) & 0.91 (0.71-0.99) & 0.941 & 0.935 & 1/2\\
+three encoders + acoustic & XGBoost & 0.998 & 0.998 [0.989, 1.000] & 0.96 (0.80-1.00) & 1.00 (0.85-1.00) & 0.980 & 0.980 & 1/0\\
+\end{longtable}\end{center}
+\begin{center}\scriptsize\renewcommand{\arraystretch}{1.12}
+\begin{longtable}{lrrrrrrr}
+\caption{Feature-combination leaderboard (median over the four models).}\\
+\toprule
+\textbf{Combination} & \textbf{Dim.} & \textbf{Median AUROC} & \textbf{Min} & \textbf{Max} & \textbf{Median AUPRC} & \textbf{Fewest errors} & \textbf{Median errors}\\\midrule\endfirsthead
+\toprule
+\textbf{Combination} & \textbf{Dim.} & \textbf{Median AUROC} & \textbf{Min} & \textbf{Max} & \textbf{Median AUPRC} & \textbf{Fewest errors} & \textbf{Median errors}\\\midrule\endhead
+\bottomrule\endfoot
+Acoustic (40) & 40 & 0.999 & 0.989 & 1.000 & 0.999 & 1 & 1\\
+WavLM-large & 1024 & 0.995 & 0.873 & 0.998 & 0.996 & 1 & 1\\
+wav2vec2-large-lv60 & 1024 & 0.985 & 0.975 & 0.996 & 0.990 & 1 & 1\\
+XLS-R 300M & 1024 & 0.996 & 0.976 & 1.000 & 0.997 & 1 & 1\\
+WavLM + acoustic & 1064 & 0.993 & 0.867 & 0.998 & 0.995 & 1 & 1\\
+wav2vec2 + acoustic & 1064 & 0.989 & 0.962 & 0.998 & 0.993 & 1 & 1\\
+XLS-R + acoustic & 1064 & 0.999 & 0.973 & 1.000 & 0.999 & 1 & 1\\
+WavLM + wav2vec2 & 2048 & 0.991 & 0.975 & 0.995 & 0.993 & 1 & 1\\
+WavLM + XLS-R & 2048 & 0.994 & 0.975 & 0.998 & 0.995 & 1 & 1\\
+wav2vec2 + XLS-R & 2048 & 0.994 & 0.975 & 1.000 & 0.995 & 1 & 1\\
+three encoders & 3072 & 0.994 & 0.971 & 0.996 & 0.995 & 1 & 1\\
+three encoders + acoustic & 3112 & 0.997 & 0.975 & 0.998 & 0.998 & 1 & 1\\
+\end{longtable}\end{center}
+\textbf{Do combinations help?} Over 76 paired comparisons of a hybrid with each of its components (same model, same folds) the median AUROC difference is 0.000 (range -0.122 to 0.102); the 95\% interval excludes zero in 5 comparisons (4 up, 1 down). \textbf{Do non-linear models help?} Median AUROC difference against logistic regression: Linear SVM -0.001; RBF SVM -0.023; XGBoost -0.001. \textbf{Does feature selection help?} Ten selected acoustic features minus all 40: median -0.004, interval excluding zero in 0 of 8. In short, at this ceiling no combination, model or selection beats the simplest configurations; the differences are within one or two speakers.
+\begin{figure}[H]\centering\includegraphics[width=0.7\linewidth]{deltas.pdf}\caption{Paired AUROC differences for all pre-specified comparisons (red: interval excludes zero).}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=0.5\linewidth]{wp_roc.pdf}\caption{Pooled speaker-level ROC curves for six configurations.}\end{figure}
+\begin{center}\tiny\renewcommand{\arraystretch}{1.12}
+\begin{longtable}{lrrrrrl}
+\caption{Fold-by-fold held-out results for eight representative configurations (9 or 10 test speakers per fold).}\\
+\toprule
+\textbf{Configuration} & \textbf{Fold} & \textbf{Test speakers} & \textbf{AUPRC} & \textbf{AUROC} & \textbf{F1} & \textbf{FN/FP}\\\midrule\endfirsthead
+\toprule
+\textbf{Configuration} & \textbf{Fold} & \textbf{Test speakers} & \textbf{AUPRC} & \textbf{AUROC} & \textbf{F1} & \textbf{FN/FP}\\\midrule\endhead
+\bottomrule\endfoot
+AC LR & 0 & 10 & 1.000 & 1.000 & 1.000 & 0/0\\
+AC LR & 1 & 10 & 1.000 & 1.000 & 1.000 & 0/0\\
+AC LR & 2 & 9 & 1.000 & 1.000 & 1.000 & 0/0\\
+AC LR & 3 & 9 & 1.000 & 1.000 & 0.889 & 1/0\\
+AC LR & 4 & 9 & 1.000 & 1.000 & 1.000 & 0/0\\
+AC XGB & 0 & 10 & 1.000 & 1.000 & 1.000 & 0/0\\
+AC XGB & 1 & 10 & 1.000 & 1.000 & 1.000 & 0/0\\
+AC XGB & 2 & 9 & 1.000 & 1.000 & 1.000 & 0/0\\
+AC XGB & 3 & 9 & 1.000 & 1.000 & 0.889 & 1/0\\
+AC XGB & 4 & 9 & 1.000 & 1.000 & 1.000 & 0/0\\
+WLM LR & 0 & 10 & 1.000 & 1.000 & 1.000 & 0/0\\
+WLM LR & 1 & 10 & 1.000 & 1.000 & 1.000 & 0/0\\
+WLM LR & 2 & 9 & 1.000 & 1.000 & 1.000 & 0/0\\
+WLM LR & 3 & 9 & 0.967 & 0.950 & 0.889 & 1/0\\
+WLM LR & 4 & 9 & 1.000 & 1.000 & 1.000 & 0/0\\
+WLM XGB & 0 & 10 & 1.000 & 1.000 & 1.000 & 0/0\\
+WLM XGB & 1 & 10 & 1.000 & 1.000 & 0.909 & 0/1\\
+WLM XGB & 2 & 9 & 1.000 & 1.000 & 1.000 & 0/0\\
+WLM XGB & 3 & 9 & 1.000 & 1.000 & 0.889 & 1/0\\
+WLM XGB & 4 & 9 & 1.000 & 1.000 & 1.000 & 0/0\\
+W2V LR & 0 & 10 & 1.000 & 1.000 & 1.000 & 0/0\\
+W2V LR & 1 & 10 & 1.000 & 1.000 & 1.000 & 0/0\\
+W2V LR & 2 & 9 & 1.000 & 1.000 & 1.000 & 0/0\\
+W2V LR & 3 & 9 & 0.911 & 0.800 & 0.889 & 1/0\\
+W2V LR & 4 & 9 & 1.000 & 1.000 & 1.000 & 0/0\\
+XLSR LR & 0 & 10 & 1.000 & 1.000 & 1.000 & 0/0\\
+XLSR LR & 1 & 10 & 1.000 & 1.000 & 1.000 & 0/0\\
+XLSR LR & 2 & 9 & 1.000 & 1.000 & 1.000 & 0/0\\
+XLSR LR & 3 & 9 & 1.000 & 1.000 & 0.889 & 1/0\\
+XLSR LR & 4 & 9 & 1.000 & 1.000 & 1.000 & 0/0\\
+H3 LR & 0 & 10 & 1.000 & 1.000 & 1.000 & 0/0\\
+H3 LR & 1 & 10 & 1.000 & 1.000 & 1.000 & 0/0\\
+H3 LR & 2 & 9 & 1.000 & 1.000 & 1.000 & 0/0\\
+H3 LR & 3 & 9 & 1.000 & 1.000 & 0.889 & 1/0\\
+H3 LR & 4 & 9 & 1.000 & 1.000 & 1.000 & 0/0\\
+H8 XGB & 0 & 10 & 1.000 & 1.000 & 1.000 & 0/0\\
+H8 XGB & 1 & 10 & 1.000 & 1.000 & 1.000 & 0/0\\
+H8 XGB & 2 & 9 & 1.000 & 1.000 & 1.000 & 0/0\\
+H8 XGB & 3 & 9 & 1.000 & 1.000 & 0.889 & 1/0\\
+H8 XGB & 4 & 9 & 1.000 & 1.000 & 1.000 & 0/0\\
+\end{longtable}\end{center}
+\begin{center}\scriptsize\renewcommand{\arraystretch}{1.12}
+\begin{longtable}{llll}
+\caption{Training versus inner-validation versus held-out scores (means over the five outer folds; training scores from a diagnostic refit). Perfect training fit with lower but close validation and held-out scores: no sign that tuning overfitted the held-out folds.}\\
+\toprule
+\textbf{Configuration} & \textbf{Training AUPRC / AUROC} & \textbf{Inner-validation AUPRC} & \textbf{Held-out fold AUPRC}\\\midrule\endfirsthead
+\toprule
+\textbf{Configuration} & \textbf{Training AUPRC / AUROC} & \textbf{Inner-validation AUPRC} & \textbf{Held-out fold AUPRC}\\\midrule\endhead
+\bottomrule\endfoot
+AC LR & 1.000 / 1.000 & 0.998 (SD 0.003) & 1.000 (SD 0.000)\\
+WLM LR & 1.000 / 1.000 & 0.999 (SD 0.001) & 0.993 (SD 0.015)\\
+W2V LR & 1.000 / 1.000 & 0.988 (SD 0.008) & 0.982 (SD 0.040)\\
+XLSR LR & 1.000 / 1.000 & 0.999 (SD 0.001) & 1.000 (SD 0.000)\\
+H3 LR & 1.000 / 1.000 & 0.999 (SD 0.001) & 1.000 (SD 0.000)\\
+WLM XGB & 1.000 / 1.000 & 0.997 (SD 0.003) & 1.000 (SD 0.000)\\
+\end{longtable}\end{center}
+\begin{center}\tiny\renewcommand{\arraystretch}{1.12}
+\begin{longtable}{p{3.6cm}p{2.4cm}rrrr}
+\caption{Recording-level versus speaker-level discrimination: averaging a speaker's recordings raises AUROC in almost every configuration.}\\
+\toprule
+\textbf{Representation} & \textbf{Model} & \textbf{Recording AUROC} & \textbf{Recording AUPRC} & \textbf{Speaker AUROC} & \textbf{Speaker AUPRC}\\\midrule\endfirsthead
+\toprule
+\textbf{Representation} & \textbf{Model} & \textbf{Recording AUROC} & \textbf{Recording AUPRC} & \textbf{Speaker AUROC} & \textbf{Speaker AUPRC}\\\midrule\endhead
+\bottomrule\endfoot
+Acoustic (40) & Logistic regression & 0.969 & 0.973 & 1.000 & 1.000\\
+Acoustic (40) & Linear SVM & 0.964 & 0.970 & 0.998 & 0.998\\
+Acoustic (40) & RBF SVM & 0.977 & 0.983 & 0.989 & 0.991\\
+Acoustic (40) & XGBoost & 0.975 & 0.985 & 1.000 & 1.000\\
+Acoustic (40) / forward & Logistic regression & 0.954 & 0.970 & 0.996 & 0.997\\
+Acoustic (40) / forward & Linear SVM & 0.955 & 0.971 & 0.996 & 0.997\\
+Acoustic (40) / forward & RBF SVM & 0.972 & 0.980 & 0.996 & 0.997\\
+Acoustic (40) / forward & XGBoost & 0.950 & 0.966 & 0.996 & 0.997\\
+Acoustic (40) / backward & Logistic regression & 0.902 & 0.921 & 0.987 & 0.990\\
+Acoustic (40) / backward & Linear SVM & 0.909 & 0.930 & 0.993 & 0.994\\
+Acoustic (40) / backward & RBF SVM & 0.948 & 0.965 & 0.985 & 0.990\\
+Acoustic (40) / backward & XGBoost & 0.961 & 0.972 & 0.995 & 0.996\\
+WavLM-large & Logistic regression & 0.959 & 0.963 & 0.995 & 0.996\\
+WavLM-large & Linear SVM & 0.980 & 0.990 & 0.995 & 0.996\\
+WavLM-large & RBF SVM & 0.869 & 0.888 & 0.873 & 0.887\\
+WavLM-large & XGBoost & 0.974 & 0.979 & 0.998 & 0.998\\
+wav2vec2-large-lv60 & Logistic regression & 0.978 & 0.985 & 0.989 & 0.992\\
+wav2vec2-large-lv60 & Linear SVM & 0.969 & 0.983 & 0.975 & 0.986\\
+wav2vec2-large-lv60 & RBF SVM & 0.973 & 0.979 & 0.996 & 0.997\\
+wav2vec2-large-lv60 & XGBoost & 0.957 & 0.971 & 0.982 & 0.989\\
+XLS-R 300M & Logistic regression & 0.985 & 0.991 & 1.000 & 1.000\\
+XLS-R 300M & Linear SVM & 0.980 & 0.989 & 0.996 & 0.997\\
+XLS-R 300M & RBF SVM & 0.963 & 0.978 & 0.976 & 0.986\\
+XLS-R 300M & XGBoost & 0.978 & 0.983 & 0.996 & 0.997\\
+WavLM + acoustic & Logistic regression & 0.984 & 0.991 & 0.998 & 0.998\\
+WavLM + acoustic & Linear SVM & 0.978 & 0.989 & 0.987 & 0.991\\
+WavLM + acoustic & RBF SVM & 0.849 & 0.886 & 0.867 & 0.901\\
+WavLM + acoustic & XGBoost & 0.976 & 0.987 & 0.998 & 0.998\\
+wav2vec2 + acoustic & Logistic regression & 0.981 & 0.988 & 0.996 & 0.997\\
+wav2vec2 + acoustic & Linear SVM & 0.972 & 0.986 & 0.982 & 0.989\\
+wav2vec2 + acoustic & RBF SVM & 0.929 & 0.936 & 0.962 & 0.956\\
+wav2vec2 + acoustic & XGBoost & 0.977 & 0.986 & 0.998 & 0.998\\
+XLS-R + acoustic & Logistic regression & 0.981 & 0.990 & 1.000 & 1.000\\
+XLS-R + acoustic & Linear SVM & 0.981 & 0.991 & 1.000 & 1.000\\
+XLS-R + acoustic & RBF SVM & 0.963 & 0.978 & 0.973 & 0.985\\
+XLS-R + acoustic & XGBoost & 0.978 & 0.987 & 0.998 & 0.998\\
+WavLM + wav2vec2 & Logistic regression & 0.975 & 0.981 & 0.995 & 0.996\\
+WavLM + wav2vec2 & Linear SVM & 0.978 & 0.989 & 0.989 & 0.992\\
+WavLM + wav2vec2 & RBF SVM & 0.958 & 0.971 & 0.975 & 0.986\\
+WavLM + wav2vec2 & XGBoost & 0.968 & 0.973 & 0.993 & 0.994\\
+WavLM + XLS-R & Logistic regression & 0.979 & 0.983 & 0.996 & 0.997\\
+WavLM + XLS-R & Linear SVM & 0.982 & 0.991 & 0.998 & 0.998\\
+WavLM + XLS-R & RBF SVM & 0.955 & 0.970 & 0.975 & 0.986\\
+WavLM + XLS-R & XGBoost & 0.976 & 0.981 & 0.991 & 0.993\\
+wav2vec2 + XLS-R & Logistic regression & 0.981 & 0.990 & 1.000 & 1.000\\
+wav2vec2 + XLS-R & Linear SVM & 0.979 & 0.990 & 0.989 & 0.992\\
+wav2vec2 + XLS-R & RBF SVM & 0.964 & 0.978 & 0.975 & 0.986\\
+wav2vec2 + XLS-R & XGBoost & 0.981 & 0.986 & 0.998 & 0.998\\
+three encoders & Logistic regression & 0.979 & 0.984 & 0.996 & 0.997\\
+three encoders & Linear SVM & 0.981 & 0.990 & 0.996 & 0.997\\
+three encoders & RBF SVM & 0.956 & 0.973 & 0.971 & 0.984\\
+three encoders & XGBoost & 0.973 & 0.980 & 0.991 & 0.993\\
+three encoders + acoustic & Logistic regression & 0.979 & 0.989 & 0.996 & 0.997\\
+three encoders + acoustic & Linear SVM & 0.980 & 0.990 & 0.998 & 0.998\\
+three encoders + acoustic & RBF SVM & 0.967 & 0.980 & 0.975 & 0.986\\
+three encoders + acoustic & XGBoost & 0.980 & 0.989 & 0.998 & 0.998\\
+\end{longtable}\end{center}
+\section{Every acoustic feature}\label{sec:features}
+Speaker-level univariate analysis of all 40 features (descriptive, whole cohort, not used for any model decision). 12 features separate the groups with direction-free AUROC of at least 0.90 on their own; all of them are spectral-shape features (zero-crossing rate, spectral centroid, roll-off), and \textbf{they are lower in PD}. The effect remains when only 16-kHz recordings are used, so it is not only a resampling artefact. But the share of variance explained by the recording date \textbf{within one class} is large for many features (within-control eta-squared up to 0.95), i.e. the same features also vary strongly between sessions of healthy people.
+\begin{figure}[H]\centering\includegraphics[width=0.78\linewidth]{wp_univariate_features.pdf}\caption{Univariate speaker-level separation of each of the 40 acoustic features (bars) and the same analysis on 16-kHz recordings only (ticks).}\end{figure}
+\begin{center}\tiny\renewcommand{\arraystretch}{1.12}
+\begin{longtable}{lllrrrrrrrr}
+\caption{Feature dictionary and univariate statistics (speaker means; AUROC $>$ 0.5 means higher in PD). eta2: share of variance explained by class, or by recording date within PD / within controls.}\\
+\toprule
+\textbf{Feature} & \textbf{Direction} & \textbf{Mean PD} & \textbf{Mean ctrl} & \textbf{AUROC} & \textbf{AUROC 16 kHz} & \textbf{Cohen d} & \textbf{eta2 class} & \textbf{eta2 date$|$PD} & \textbf{eta2 date$|$ctrl}\\\midrule\endfirsthead
+\toprule
+\textbf{Feature} & \textbf{Direction} & \textbf{Mean PD} & \textbf{Mean ctrl} & \textbf{AUROC} & \textbf{AUROC 16 kHz} & \textbf{Cohen d} & \textbf{eta2 class} & \textbf{eta2 date$|$PD} & \textbf{eta2 date$|$ctrl}\\\midrule\endhead
+\bottomrule\endfoot
+centroid\_hz\_p90 & PD lower & 615.997 & 1197.133 & 0.036 & 0.008 & -2.19 & 0.56 & 0.43 & 0.87\\
+centroid\_hz\_std & PD lower & 265.736 & 506.689 & 0.036 & 0.013 & -1.56 & 0.39 & 0.38 & 0.95\\
+zcr\_p90 & PD lower & 0.117 & 0.199 & 0.044 & 0.053 & -2.51 & 0.62 & 0.37 & 0.32\\
+zcr\_mean & PD lower & 0.066 & 0.111 & 0.044 & 0.025 & -2.74 & 0.66 & 0.34 & 0.37\\
+centroid\_hz\_mean & PD lower & 405.866 & 714.395 & 0.049 & 0.010 & -2.76 & 0.66 & 0.38 & 0.22\\
+zcr\_p10 & PD lower & 0.030 & 0.058 & 0.058 & 0.028 & -2.31 & 0.58 & 0.43 & 0.50\\
+zcr\_std & PD lower & 0.045 & 0.076 & 0.065 & 0.081 & -2.06 & 0.52 & 0.13 & 0.63\\
+rolloff85\_hz\_std & PD lower & 529.889 & 894.172 & 0.067 & 0.038 & -1.44 & 0.35 & 0.33 & 0.91\\
+centroid\_hz\_p10 & PD lower & 225.041 & 421.568 & 0.071 & 0.028 & -2.14 & 0.54 & 0.45 & 0.38\\
+rolloff85\_hz\_mean & PD lower & 637.116 & 1038.761 & 0.075 & 0.058 & -2.08 & 0.53 & 0.40 & 0.31\\
+rolloff85\_hz\_p90 & PD lower & 1132.149 & 2016.296 & 0.080 & 0.081 & -1.75 & 0.44 & 0.51 & 0.77\\
+rolloff85\_hz\_p10 & PD lower & 300.355 & 517.465 & 0.095 & 0.069 & -1.79 & 0.45 & 0.43 & 0.34\\
+band0\_log\_p90 & PD higher & 2.077 & 1.605 & 0.758 & 0.798 & 0.94 & 0.19 & 0.24 & 0.61\\
+band0\_log\_p10 & PD higher & -2.170 & -2.102 & 0.691 & 0.960 & -0.03 & 0.00 & 0.83 & 0.15\\
+band0\_log\_mean & PD higher & 0.426 & -0.058 & 0.687 & 0.902 & 0.65 & 0.10 & 0.64 & 0.61\\
+log\_energy\_db\_p90 & PD higher & -23.201 & -26.289 & 0.680 & 0.699 & 0.62 & 0.09 & 0.12 & 0.53\\
+log\_energy\_db\_p10 & PD higher & -62.285 & -62.708 & 0.678 & 0.937 & 0.02 & 0.00 & 0.81 & 0.08\\
+flatness\_std & PD lower & 0.076 & 0.055 & 0.347 & 0.119 & 0.29 & 0.02 & 0.71 & 0.89\\
+log\_energy\_db\_mean & PD higher & -38.960 & -42.448 & 0.653 & 0.816 & 0.51 & 0.06 & 0.54 & 0.54\\
+band0\_log\_std & PD lower & 2.141 & 1.559 & 0.353 & 0.109 & 0.45 & 0.05 & 0.70 & 0.74\\
+log\_energy\_db\_std & PD lower & 18.972 & 15.062 & 0.362 & 0.124 & 0.40 & 0.04 & 0.69 & 0.64\\
+flatness\_mean & PD lower & 0.032 & 0.028 & 0.362 & 0.154 & 0.14 & 0.00 & 0.76 & 0.77\\
+band1\_log\_p10 & PD higher & -3.384 & -2.652 & 0.627 & 0.859 & -0.32 & 0.03 & 0.81 & 0.13\\
+flatness\_p90 & PD lower & 0.118 & 0.088 & 0.384 & 0.174 & 0.25 & 0.02 & 0.87 & 0.84\\
+band4\_log\_p10 & PD higher & -4.764 & -4.057 & 0.615 & 0.836 & -0.35 & 0.03 & 0.83 & 0.42\\
+flatness\_p10 & PD lower & 0.000 & 0.001 & 0.391 & 0.369 & -0.25 & 0.02 & 0.28 & 0.35\\
+band2\_log\_p10 & PD higher & -4.160 & -3.393 & 0.598 & 0.808 & -0.35 & 0.03 & 0.82 & 0.33\\
+band3\_log\_p10 & PD higher & -4.437 & -3.593 & 0.596 & 0.806 & -0.40 & 0.04 & 0.81 & 0.21\\
+band2\_log\_p90 & PD higher & -0.026 & -0.245 & 0.584 & 0.596 & 0.29 & 0.02 & 0.16 & 0.56\\
+band1\_log\_std & PD lower & 2.199 & 1.547 & 0.416 & 0.192 & 0.57 & 0.08 & 0.68 & 0.67\\
+band4\_log\_std & PD lower & 1.706 & 1.047 & 0.425 & 0.192 & 0.60 & 0.09 & 0.70 & 0.41\\
+band4\_log\_p90 & PD higher & -1.330 & -1.474 & 0.569 & 0.568 & 0.21 & 0.01 & 0.01 & 0.27\\
+band4\_log\_mean & PD higher & -2.764 & -2.838 & 0.551 & 0.694 & 0.10 & 0.00 & 0.50 & 0.45\\
+band2\_log\_std & PD higher & 1.981 & 1.260 & 0.533 & 0.308 & 0.66 & 0.10 & 0.69 & 0.75\\
+band3\_log\_p90 & PD higher & -0.610 & -0.620 & 0.525 & 0.538 & 0.01 & 0.00 & 0.10 & 0.42\\
+band1\_log\_p90 & PD higher & 1.175 & 1.142 & 0.522 & 0.525 & 0.05 & 0.00 & 0.09 & 0.34\\
+band1\_log\_mean & PD lower & -0.778 & -0.636 & 0.480 & 0.614 & -0.17 & 0.01 & 0.52 & 0.33\\
+band2\_log\_mean & PD higher & -1.808 & -1.803 & 0.513 & 0.626 & -0.01 & 0.00 & 0.53 & 0.59\\
+band3\_log\_std & PD lower & 1.867 & 1.180 & 0.493 & 0.301 & 0.64 & 0.10 & 0.70 & 0.61\\
+band3\_log\_mean & PD higher & -2.227 & -2.120 & 0.502 & 0.634 & -0.13 & 0.00 & 0.50 & 0.48\\
+\end{longtable}\end{center}
+\begin{center}\scriptsize\renewcommand{\arraystretch}{1.12}
+\begin{longtable}{lrrrr}
+\caption{Feature families (mean and best direction-free AUROC of their four statistics; mean within-class date effect).}\\
+\toprule
+\textbf{Family} & \textbf{Mean AUROC} & \textbf{Best AUROC} & \textbf{Mean eta2 date$|$PD} & \textbf{Mean eta2 date$|$ctrl}\\\midrule\endfirsthead
+\toprule
+\textbf{Family} & \textbf{Mean AUROC} & \textbf{Best AUROC} & \textbf{Mean eta2 date$|$PD} & \textbf{Mean eta2 date$|$ctrl}\\\midrule\endhead
+\bottomrule\endfoot
+centroid (Hz) & 0.952 & 0.964 & 0.41 & 0.61\\
+zcr & 0.947 & 0.956 & 0.32 & 0.45\\
+rolloff85 (Hz) & 0.921 & 0.933 & 0.42 & 0.58\\
+band0 (log) & 0.696 & 0.758 & 0.60 & 0.53\\
+log\_energy\_db & 0.662 & 0.680 & 0.54 & 0.45\\
+flatness & 0.629 & 0.653 & 0.66 & 0.71\\
+band4 (log) & 0.577 & 0.615 & 0.51 & 0.39\\
+band1 (log) & 0.563 & 0.627 & 0.52 & 0.37\\
+band2 (log) & 0.557 & 0.598 & 0.55 & 0.56\\
+band3 (log) & 0.533 & 0.596 & 0.53 & 0.43\\
+\end{longtable}\end{center}
+Redundancy: 46 feature pairs have an absolute Spearman correlation of at least 0.9 at speaker level (for example the mean and the percentiles of the same frame feature), so single-feature importance is diluted and family-level analysis is more informative.
+\section{Feature families, statistics and feature selection}\label{sec:ablation}
+\begin{figure}[H]\centering\includegraphics[width=0.98\linewidth]{wp_ablation.pdf}\caption{Exploratory ablations with the same nested protocol: one family alone, all but one family, and one statistic of all families.}\end{figure}
+\begin{center}\tiny\renewcommand{\arraystretch}{1.12}
+\begin{longtable}{llrrrrl}
+\caption{Ablation results (66 configurations, exploratory amendment A1, same folds and nested tuning).}\\
+\toprule
+\textbf{Feature subset} & \textbf{Model} & \textbf{Features} & \textbf{AUROC} & \textbf{AUPRC} & \textbf{F1} & \textbf{FN/FP}\\\midrule\endfirsthead
+\toprule
+\textbf{Feature subset} & \textbf{Model} & \textbf{Features} & \textbf{AUROC} & \textbf{AUPRC} & \textbf{F1} & \textbf{FN/FP}\\\midrule\endhead
+\bottomrule\endfoot
+drop: log\_energy\_db & Logistic regression & 36 & 0.996 & 0.997 & 0.980 & 1/0\\
+drop: log\_energy\_db & XGBoost & 36 & 0.998 & 0.998 & 0.980 & 1/0\\
+only: log\_energy\_db & Logistic regression & 4 & 0.725 & 0.727 & 0.741 & 5/9\\
+only: log\_energy\_db & XGBoost & 4 & 0.987 & 0.990 & 0.939 & 2/1\\
+drop: zcr & Logistic regression & 36 & 0.993 & 0.994 & 0.980 & 1/0\\
+drop: zcr & XGBoost & 36 & 1.000 & 1.000 & 0.980 & 1/0\\
+only: zcr & Logistic regression & 4 & 0.989 & 0.992 & 0.980 & 1/0\\
+only: zcr & XGBoost & 4 & 0.998 & 0.998 & 0.980 & 1/0\\
+drop: centroid & Logistic regression & 36 & 0.996 & 0.997 & 0.960 & 1/1\\
+drop: centroid & XGBoost & 36 & 0.998 & 0.998 & 0.980 & 1/0\\
+only: centroid & Logistic regression & 4 & 0.982 & 0.989 & 0.958 & 2/0\\
+only: centroid & XGBoost & 4 & 0.998 & 0.998 & 0.958 & 2/0\\
+drop: rolloff85 & Logistic regression & 36 & 1.000 & 1.000 & 0.980 & 1/0\\
+drop: rolloff85 & XGBoost & 36 & 1.000 & 1.000 & 0.980 & 1/0\\
+only: rolloff85 & Logistic regression & 4 & 0.980 & 0.985 & 0.939 & 2/1\\
+only: rolloff85 & XGBoost & 4 & 0.996 & 0.997 & 0.980 & 1/0\\
+drop: flatness & Logistic regression & 36 & 1.000 & 1.000 & 0.980 & 1/0\\
+drop: flatness & XGBoost & 36 & 1.000 & 1.000 & 0.980 & 1/0\\
+only: flatness & Logistic regression & 4 & 0.549 & 0.654 & 0.400 & 18/3\\
+only: flatness & XGBoost & 4 & 0.935 & 0.959 & 0.898 & 3/2\\
+drop: band0 & Logistic regression & 36 & 0.998 & 0.998 & 0.960 & 1/1\\
+drop: band0 & XGBoost & 36 & 1.000 & 1.000 & 1.000 & 0/0\\
+only: band0 & Logistic regression & 4 & 0.816 & 0.800 & 0.750 & 7/5\\
+only: band0 & XGBoost & 4 & 0.969 & 0.980 & 0.939 & 2/1\\
+drop: band1 & Logistic regression & 36 & 1.000 & 1.000 & 0.980 & 1/0\\
+drop: band1 & XGBoost & 36 & 1.000 & 1.000 & 0.980 & 1/0\\
+only: band1 & Logistic regression & 4 & 0.587 & 0.704 & 0.545 & 13/7\\
+only: band1 & XGBoost & 4 & 1.000 & 1.000 & 0.980 & 1/0\\
+drop: band2 & Logistic regression & 36 & 1.000 & 1.000 & 0.980 & 1/0\\
+drop: band2 & XGBoost & 36 & 1.000 & 1.000 & 0.980 & 1/0\\
+only: band2 & Logistic regression & 4 & 0.698 & 0.742 & 0.591 & 12/6\\
+only: band2 & XGBoost & 4 & 0.995 & 0.996 & 0.980 & 1/0\\
+drop: band3 & Logistic regression & 36 & 1.000 & 1.000 & 0.980 & 1/0\\
+drop: band3 & XGBoost & 36 & 1.000 & 1.000 & 0.980 & 1/0\\
+only: band3 & Logistic regression & 4 & 0.655 & 0.730 & 0.524 & 14/6\\
+only: band3 & XGBoost & 4 & 0.995 & 0.996 & 0.960 & 1/1\\
+drop: band4 & Logistic regression & 36 & 1.000 & 1.000 & 1.000 & 0/0\\
+drop: band4 & XGBoost & 36 & 1.000 & 1.000 & 0.980 & 1/0\\
+only: band4 & Logistic regression & 4 & 0.751 & 0.762 & 0.591 & 12/6\\
+only: band4 & XGBoost & 4 & 0.996 & 0.997 & 0.980 & 1/0\\
+only statistic: mean & Logistic regression & 10 & 0.980 & 0.986 & 0.917 & 3/1\\
+only statistic: mean & XGBoost & 10 & 0.998 & 0.998 & 0.958 & 2/0\\
+drop statistic: mean & Logistic regression & 30 & 1.000 & 1.000 & 1.000 & 0/0\\
+drop statistic: mean & XGBoost & 30 & 0.998 & 0.998 & 0.980 & 1/0\\
+only statistic: std & Logistic regression & 10 & 0.971 & 0.969 & 0.941 & 1/2\\
+only statistic: std & XGBoost & 10 & 0.993 & 0.994 & 0.980 & 1/0\\
+drop statistic: std & Logistic regression & 30 & 0.989 & 0.991 & 0.960 & 1/1\\
+drop statistic: std & XGBoost & 30 & 0.996 & 0.997 & 0.958 & 2/0\\
+only statistic: p10 & Logistic regression & 10 & 0.967 & 0.969 & 0.920 & 2/2\\
+only statistic: p10 & XGBoost & 10 & 0.996 & 0.997 & 0.960 & 1/1\\
+drop statistic: p10 & Logistic regression & 30 & 0.993 & 0.994 & 0.958 & 2/0\\
+drop statistic: p10 & XGBoost & 30 & 0.996 & 0.997 & 0.980 & 1/0\\
+only statistic: p90 & Logistic regression & 10 & 0.984 & 0.989 & 0.980 & 1/0\\
+only statistic: p90 & XGBoost & 10 & 0.989 & 0.992 & 0.980 & 1/0\\
+drop statistic: p90 & Logistic regression & 30 & 0.991 & 0.993 & 0.980 & 1/0\\
+drop statistic: p90 & XGBoost & 30 & 1.000 & 1.000 & 0.980 & 1/0\\
+only: spectral\_shape & Logistic regression & 12 & 0.985 & 0.990 & 0.980 & 1/0\\
+only: spectral\_shape & XGBoost & 12 & 0.998 & 0.998 & 0.958 & 2/0\\
+only: band\_energies & Logistic regression & 20 & 0.993 & 0.994 & 0.923 & 1/3\\
+only: band\_energies & XGBoost & 20 & 0.993 & 0.994 & 0.980 & 1/0\\
+only: zcr\_and\_shape & Logistic regression & 16 & 0.991 & 0.993 & 0.980 & 1/0\\
+only: zcr\_and\_shape & XGBoost & 16 & 0.996 & 0.997 & 0.980 & 1/0\\
+\end{longtable}\end{center}
+Reading: no family is necessary (dropping any single family leaves AUROC $\geq$ 0.993), and several are sufficient on their own with XGBoost (for example the 500-1000 Hz band: AUROC 1.000). With logistic regression, the four zero-crossing statistics alone reach 0.989 and energy alone only 0.725, so the linear signal is mostly spectral shape. Any single statistic over all families (10 values) reaches at least 0.967.
+\textbf{Sequential selection (frozen FINAL\_V1 conditions).} Forward and backward selection of exactly 10 of the 40 features, repeated inside every training partition with a logistic-regression selector (selection is identical for the four final models). Forward: AUROC 0.996-0.996 across models; backward: 0.985-0.995; all 40: 0.989-1.000. Stability is moderate: the table lists how often each feature was selected over the five outer folds.
+\begin{center}\tiny\renewcommand{\arraystretch}{1.12}
+\begin{longtable}{lll}
+\caption{Selected features and selection frequency over the five outer folds.}\\
+\toprule
+\textbf{Method} & \textbf{Feature} & \textbf{Selected}\\\midrule\endfirsthead
+\toprule
+\textbf{Method} & \textbf{Feature} & \textbf{Selected}\\\midrule\endhead
+\bottomrule\endfoot
+forward & log\_energy\_db\_mean & 4/5\\
+forward & log\_energy\_db\_p10 & 4/5\\
+forward & zcr\_mean & 4/5\\
+forward & zcr\_p10 & 4/5\\
+forward & centroid\_hz\_std & 4/5\\
+forward & band2\_log\_p90 & 4/5\\
+forward & log\_energy\_db\_p90 & 4/5\\
+forward & centroid\_hz\_p90 & 4/5\\
+forward & log\_energy\_db\_std & 3/5\\
+forward & zcr\_p90 & 3/5\\
+forward & zcr\_std & 3/5\\
+forward & centroid\_hz\_p10 & 2/5\\
+forward & rolloff85\_hz\_mean & 2/5\\
+forward & band1\_log\_std & 1/5\\
+forward & flatness\_p10 & 1/5\\
+forward & band1\_log\_p90 & 1/5\\
+forward & band4\_log\_mean & 1/5\\
+forward & centroid\_hz\_mean & 1/5\\
+backward & band4\_log\_mean & 5/5\\
+backward & band4\_log\_p10 & 5/5\\
+backward & band4\_log\_p90 & 5/5\\
+backward & band3\_log\_p10 & 4/5\\
+backward & band4\_log\_std & 4/5\\
+backward & rolloff85\_hz\_std & 3/5\\
+backward & rolloff85\_hz\_p90 & 3/5\\
+backward & band3\_log\_std & 3/5\\
+backward & band3\_log\_p90 & 3/5\\
+backward & band2\_log\_p90 & 3/5\\
+backward & centroid\_hz\_p10 & 2/5\\
+backward & centroid\_hz\_p90 & 2/5\\
+backward & rolloff85\_hz\_mean & 2/5\\
+backward & zcr\_p10 & 2/5\\
+backward & log\_energy\_db\_p90 & 1/5\\
+backward & band0\_log\_p90 & 1/5\\
+backward & centroid\_hz\_std & 1/5\\
+backward & band1\_log\_mean & 1/5\\
+\end{longtable}\end{center}
+\section{Feature importance}\label{sec:importance}
+\begin{figure}[H]\centering\includegraphics[width=0.98\linewidth]{wp_importance_acoustic.pdf}\caption{Acoustic models: permutation importance (increase in recording-level log-loss when a family or a statistic is shuffled within the outer-test folds) and XGBoost gain shares.}\end{figure}
+\textbf{Logistic regression} relies on many correlated features (top by permutation: band3\_log\_std, log\_energy\_db\_std, log\_energy\_db\_mean, zcr\_p10, centroid\_hz\_std); its coefficients change sign across folds for some energy features, a sign of collinearity. \textbf{XGBoost} concentrates on \textbf{10th-percentile statistics}: centroid\_hz\_p10, log\_energy\_db\_p10, band0\_log\_p10 alone carry 72\% of the total gain, and shuffling the p10 statistic of all families costs more than any family. The 10th percentile of a frame feature describes the quietest frames, i.e. pauses and background, not the voice.
+\begin{center}\tiny\renewcommand{\arraystretch}{1.12}
+\begin{longtable}{lrrrl}
+\caption{Logistic regression on acoustic features: top 15 features by permutation importance (mean of 20 shuffles) and the mean standardised coefficient over the five outer folds.}\\
+\toprule
+\textbf{Feature} & \textbf{Log-loss increase} & \textbf{AUROC drop} & \textbf{Mean coefficient} & \textbf{Sign stable}\\\midrule\endfirsthead
+\toprule
+\textbf{Feature} & \textbf{Log-loss increase} & \textbf{AUROC drop} & \textbf{Mean coefficient} & \textbf{Sign stable}\\\midrule\endhead
+\bottomrule\endfoot
+band3\_log\_std & 2.258 & 0.095 & 18.66 & yes\\
+log\_energy\_db\_std & 2.044 & 0.057 & -22.58 & no\\
+log\_energy\_db\_mean & 1.779 & 0.046 & 12.63 & no\\
+zcr\_p10 & 1.679 & 0.056 & -9.01 & yes\\
+centroid\_hz\_std & 1.536 & 0.053 & -7.54 & yes\\
+band1\_log\_mean & 1.395 & 0.017 & -8.85 & yes\\
+band3\_log\_p90 & 1.296 & 0.037 & -8.85 & yes\\
+band1\_log\_std & 1.280 & 0.021 & 10.89 & yes\\
+band0\_log\_mean & 1.077 & 0.013 & -9.22 & yes\\
+log\_energy\_db\_p90 & 0.995 & 0.022 & 7.56 & yes\\
+centroid\_hz\_mean & 0.851 & 0.007 & -5.88 & no\\
+flatness\_std & 0.811 & 0.019 & -9.40 & no\\
+band3\_log\_mean & 0.767 & 0.004 & 7.64 & yes\\
+band4\_log\_std & 0.716 & 0.005 & 8.09 & no\\
+band0\_log\_p90 & 0.568 & 0.008 & -5.92 & yes\\
+\end{longtable}\end{center}
+\begin{figure}[H]\centering\includegraphics[width=0.8\linewidth]{wp_block_importance.pdf}\caption{Hybrid models: which representation block carries the weight.}\end{figure}
+\textbf{In hybrids the two model families disagree about what matters.} Logistic regression puts 86\%-92\% of its coefficient mass on the encoder block, whereas XGBoost puts 74\%-90\% of its gain on the 40 acoustic features. When all three encoders are combined, logistic regression weights WavLM most (50\%), then XLS-R (35\%), then wav2vec2 (15\%). Shuffling the wav2vec2 block in the three-encoder models changes nothing, i.e. it is redundant given the other two.
+\begin{center}\tiny\renewcommand{\arraystretch}{1.12}
+\begin{longtable}{llrrr}
+\caption{Block permutation importance and weight share in hybrids (LR: coefficient mass; XGBoost: gain).}\\
+\toprule
+\textbf{Model} & \textbf{Block} & \textbf{AUROC drop} & \textbf{Log-loss increase} & \textbf{Weight share}\\\midrule\endfirsthead
+\toprule
+\textbf{Model} & \textbf{Block} & \textbf{AUROC drop} & \textbf{Log-loss increase} & \textbf{Weight share}\\\midrule\endhead
+\bottomrule\endfoot
+H1 LR & WLM & 0.186 & 1.329 & 87\%\\
+H1 LR & AC & 0.011 & 0.186 & 13\%\\
+H1 XGB & WLM & 0.002 & 0.124 & 26\%\\
+H1 XGB & AC & 0.127 & 0.577 & 74\%\\
+H2 LR & W2V & 0.055 & 1.144 & 86\%\\
+H2 LR & AC & 0.032 & 0.732 & 14\%\\
+H2 XGB & W2V & -0.000 & 0.035 & 10\%\\
+H2 XGB & AC & 0.385 & 1.073 & 90\%\\
+H3 LR & XLSR & 0.211 & 1.085 & 92\%\\
+H3 LR & AC & 0.005 & 0.142 & 8\%\\
+H3 XGB & XLSR & 0.000 & 0.054 & 13\%\\
+H3 XGB & AC & 0.286 & 0.705 & 87\%\\
+H7 LR & WLM & 0.081 & 0.472 & 50\%\\
+H7 LR & W2V & -0.000 & 0.015 & 15\%\\
+H7 LR & XLSR & 0.002 & 0.226 & 35\%\\
+H7 XGB & WLM & 0.102 & 0.539 & 73\%\\
+H7 XGB & W2V & -0.000 & 0.017 & 6\%\\
+H7 XGB & XLSR & 0.003 & 0.101 & 21\%\\
+H8 LR & WLM & 0.020 & 0.433 & 45\%\\
+H8 LR & W2V & -0.002 & -0.001 & 16\%\\
+H8 LR & XLSR & 0.018 & 0.245 & 34\%\\
+H8 LR & AC & 0.000 & 0.041 & 4\%\\
+H8 XGB & WLM & 0.001 & 0.111 & 25\%\\
+H8 XGB & W2V & -0.000 & 0.001 & 1\%\\
+H8 XGB & XLSR & -0.000 & 0.020 & 3\%\\
+H8 XGB & AC & 0.100 & 0.583 & 71\%\\
+\end{longtable}\end{center}
+\section{Hyperparameter tuning}\label{sec:tuning}
+\begin{center}\scriptsize\renewcommand{\arraystretch}{1.12}
+\begin{longtable}{lrp{11.5cm}}
+\caption{Frozen search spaces (inner objective: pooled speaker-level AUPRC over three speaker-disjoint inner folds; ties to the first configuration).}\\
+\toprule
+\textbf{Model} & \textbf{Configs} & \textbf{Grid}\\\midrule\endfirsthead
+\toprule
+\textbf{Model} & \textbf{Configs} & \textbf{Grid}\\\midrule\endhead
+\bottomrule\endfoot
+Logistic regression & 20 & C \{0.01,0.1,1,10,100\} x penalty \{L1,L2\} x class weight \{none, balanced\}\\
+Linear SVM & 10 & C \{0.01,0.1,1,10,100\} x class weight\\
+RBF SVM & 24 & C \{0.1,1,10,100\} x gamma = m/d, m \{0.1,1,10\} x class weight\\
+XGBoost & 24 & 24 fixed of 256: learning rate \{0.03,0.1\}, depth \{2,4\}, trees \{100,300\}, min child weight \{1,5\}, subsample \{0.7,1\}, colsample \{0.3,1\}, lambda \{1,10\}, pos. weight \{1, balanced\}\\
+\end{longtable}\end{center}
+\textbf{Finding 1 - the inner objective saturates.} In most runs several configurations tie at the best inner score (Logistic regression 64 of 70 runs (median 12 tied); Linear SVM 63 of 70 runs (median 10 tied); RBF SVM 65 of 70 runs (median 6 tied); XGBoost 59 of 70 runs (median 9.5 tied)). Selection then falls back to the order of the grid, so 'tuning' is largely tie-breaking: logistic regression most often ends at C = 0.1 or 0.01 with L2, the linear SVM at C = 0.01, the RBF SVM at C = 1 with a narrow kernel (m = 10), XGBoost at the first configuration of its list.
+\begin{center}\tiny\renewcommand{\arraystretch}{1.12}
+\begin{longtable}{lp{11.5cm}r}
+\caption{Most frequently selected configurations over the 70 runs of each model family.}\\
+\toprule
+\textbf{Model} & \textbf{Configuration} & \textbf{Runs}\\\midrule\endfirsthead
+\toprule
+\textbf{Model} & \textbf{Configuration} & \textbf{Runs}\\\midrule\endhead
+\bottomrule\endfoot
+Logistic regression & C=0.1, class\_weight=None, penalty=l2 & 15 of 70\\
+Logistic regression & C=0.01, class\_weight=None, penalty=l2 & 14 of 70\\
+Logistic regression & C=0.01, class\_weight=None, penalty=l1 & 8 of 70\\
+Logistic regression & C=1, class\_weight=None, penalty=l1 & 6 of 70\\
+Logistic regression & C=10, class\_weight=None, penalty=l2 & 5 of 70\\
+Linear SVM & C=0.01, class\_weight=None & 38 of 70\\
+Linear SVM & C=0.1, class\_weight=None & 15 of 70\\
+Linear SVM & C=1, class\_weight=None & 6 of 70\\
+Linear SVM & C=10, class\_weight=None & 3 of 70\\
+Linear SVM & C=0.01, class\_weight=balanced & 3 of 70\\
+RBF SVM & C=1, class\_weight=None, gamma\_mult=10 & 26 of 70\\
+RBF SVM & C=1, class\_weight=None, gamma\_mult=1 & 9 of 70\\
+RBF SVM & C=0.1, class\_weight=None, gamma\_mult=10 & 7 of 70\\
+RBF SVM & C=10, class\_weight=None, gamma\_mult=10 & 6 of 70\\
+RBF SVM & C=0.1, class\_weight=None, gamma\_mult=1 & 5 of 70\\
+XGBoost & colsample\_bytree=1.0, learning\_rate=0.03, max\_depth=2, min\_child\_weight=1, n\_estimators=100, reg\_lambda=10, scale\_pos\_weight=1, subsample=0.7 & 28 of 70\\
+XGBoost & colsample\_bytree=1.0, learning\_rate=0.03, max\_depth=4, min\_child\_weight=1, n\_estimators=100, reg\_lambda=1, scale\_pos\_weight=1, subsample=0.7 & 8 of 70\\
+XGBoost & colsample\_bytree=0.3, learning\_rate=0.03, max\_depth=4, min\_child\_weight=1, n\_estimators=300, reg\_lambda=1, scale\_pos\_weight=1, subsample=0.7 & 6 of 70\\
+XGBoost & colsample\_bytree=1.0, learning\_rate=0.1, max\_depth=2, min\_child\_weight=1, n\_estimators=300, reg\_lambda=10, scale\_pos\_weight=balanced, subsample=0.7 & 5 of 70\\
+XGBoost & colsample\_bytree=0.3, learning\_rate=0.1, max\_depth=2, min\_child\_weight=1, n\_estimators=100, reg\_lambda=1, scale\_pos\_weight=1, subsample=1.0 & 4 of 70\\
+\end{longtable}\end{center}
+\textbf{Finding 2 - when tuning goes wrong it is the RBF SVM.} Refitting every configuration on the outer folds (post hoc, descriptive) shows that most configurations of the linear models perform alike, while the RBF SVM spans a wide range (for wav2vec2 from 0.562 to 0.996). The largest loss from the nested choice is WavLM-large with RBF SVM: nested choice 0.873 against a grid median of 0.996. The RBF SVM's poor scores are therefore a tuning artefact of a saturated objective (plus an uncalibrated score at the fixed threshold), not evidence against the model family.
+\begin{figure}[H]\centering\includegraphics[width=0.98\linewidth]{wp_tuning.pdf}\caption{Left: number of configurations tied at the best inner score per run. Right: outer-fold AUROC of every grid configuration (range, median) and the nested choice.}\end{figure}
+\begin{center}\tiny\renewcommand{\arraystretch}{1.12}
+\begin{longtable}{llrrrr}
+\caption{Tuning landscape: pooled AUROC of every configuration refitted on the outer folds (descriptive) versus the nested selection.}\\
+\toprule
+\textbf{Representation} & \textbf{Model} & \textbf{Worst config} & \textbf{Median config} & \textbf{Best config} & \textbf{Nested choice}\\\midrule\endfirsthead
+\toprule
+\textbf{Representation} & \textbf{Model} & \textbf{Worst config} & \textbf{Median config} & \textbf{Best config} & \textbf{Nested choice}\\\midrule\endhead
+\bottomrule\endfoot
+Acoustic (40) & Logistic regression & 0.953 & 0.996 & 1.000 & 1.000\\
+Acoustic (40) & Linear SVM & 0.987 & 0.996 & 1.000 & 0.998\\
+Acoustic (40) & RBF SVM & 0.969 & 1.000 & 1.000 & 0.989\\
+Acoustic (40) & XGBoost & 0.996 & 1.000 & 1.000 & 1.000\\
+XLS-R + acoustic & Logistic regression & 0.962 & 1.000 & 1.000 & 1.000\\
+XLS-R + acoustic & Linear SVM & 1.000 & 1.000 & 1.000 & 1.000\\
+XLS-R + acoustic & RBF SVM & 0.938 & 0.995 & 1.000 & 0.973\\
+XLS-R + acoustic & XGBoost & 0.996 & 1.000 & 1.000 & 0.998\\
+wav2vec2-large-lv60 & Logistic regression & 0.845 & 0.992 & 0.998 & 0.989\\
+wav2vec2-large-lv60 & Linear SVM & 0.967 & 0.984 & 0.987 & 0.975\\
+wav2vec2-large-lv60 & RBF SVM & 0.562 & 0.981 & 0.996 & 0.996\\
+wav2vec2-large-lv60 & XGBoost & 0.969 & 0.984 & 0.987 & 0.982\\
+WavLM-large & Logistic regression & 0.991 & 0.998 & 0.998 & 0.995\\
+WavLM-large & Linear SVM & 0.995 & 0.995 & 0.995 & 0.995\\
+WavLM-large & RBF SVM & 0.935 & 0.996 & 1.000 & 0.873\\
+WavLM-large & XGBoost & 0.989 & 0.993 & 0.998 & 0.998\\
+XLS-R 300M & Logistic regression & 0.958 & 1.000 & 1.000 & 1.000\\
+XLS-R 300M & Linear SVM & 0.995 & 0.996 & 0.996 & 0.996\\
+XLS-R 300M & RBF SVM & 0.905 & 0.995 & 1.000 & 0.976\\
+XLS-R 300M & XGBoost & 0.989 & 0.995 & 0.995 & 0.996\\
+\end{longtable}\end{center}
+\textbf{Implication for product development.} With few speakers per fold, classical grid search cannot discriminate between configurations. A product model should use simple, strongly regularised defaults, report sensitivity to them, and spend data on external validation rather than on tuning.
+\section{Which speech tasks carry the signal}\label{sec:tasks}
+\begin{figure}[H]\centering\includegraphics[width=0.9\linewidth]{wp_tasks.pdf}\caption{Speaker-level AUROC when each speaker's score is computed from one task family only (no retraining).}\end{figure}
+\begin{center}\tiny\renewcommand{\arraystretch}{1.12}
+\begin{longtable}{llrrrrr}
+\caption{Task-family analysis.}\\
+\toprule
+\textbf{Model} & \textbf{Task family} & \textbf{Recordings} & \textbf{Median s} & \textbf{Speaker AUROC} & \textbf{Errors} & \textbf{Recording AUROC}\\\midrule\endfirsthead
+\toprule
+\textbf{Model} & \textbf{Task family} & \textbf{Recordings} & \textbf{Median s} & \textbf{Speaker AUROC} & \textbf{Errors} & \textbf{Recording AUROC}\\\midrule\endhead
+\bottomrule\endfoot
+AC LR & passages & 93 & 65.7 & 1.000 & 1 & 0.976\\
+AC LR & phrase & 47 & 30.3 & 0.961 & 4 & 0.962\\
+AC LR & syllables & 100 & 6.3 & 1.000 & 1 & 0.991\\
+AC LR & vowels & 495 & 8.4 & 0.996 & 2 & 0.962\\
+AC LR & word list & 50 & 55.8 & 0.995 & 2 & 0.989\\
+AC LR & all tasks & 785 & 10.6 & 1.000 & 1 & 0.969\\
+WLM LR & passages & 93 & 65.7 & 0.962 & 3 & 0.961\\
+WLM LR & phrase & 47 & 30.3 & 1.000 & 2 & 1.000\\
+WLM LR & syllables & 100 & 6.3 & 0.976 & 3 & 0.972\\
+WLM LR & vowels & 495 & 8.4 & 0.978 & 3 & 0.950\\
+WLM LR & word list & 50 & 55.8 & 0.980 & 2 & 0.981\\
+WLM LR & all tasks & 785 & 10.6 & 0.995 & 1 & 0.959\\
+W2V LR & passages & 93 & 65.7 & 0.996 & 1 & 0.996\\
+W2V LR & phrase & 47 & 30.3 & 1.000 & 1 & 1.000\\
+W2V LR & syllables & 100 & 6.3 & 0.998 & 2 & 0.998\\
+W2V LR & vowels & 495 & 8.4 & 0.980 & 1 & 0.965\\
+W2V LR & word list & 50 & 55.8 & 1.000 & 0 & 1.000\\
+W2V LR & all tasks & 785 & 10.6 & 0.989 & 1 & 0.978\\
+XLSR LR & passages & 93 & 65.7 & 0.998 & 1 & 0.998\\
+XLSR LR & phrase & 47 & 30.3 & 1.000 & 0 & 1.000\\
+XLSR LR & syllables & 100 & 6.3 & 0.995 & 1 & 0.994\\
+XLSR LR & vowels & 495 & 8.4 & 0.996 & 1 & 0.981\\
+XLSR LR & word list & 50 & 55.8 & 1.000 & 0 & 1.000\\
+XLSR LR & all tasks & 785 & 10.6 & 1.000 & 1 & 0.985\\
+H3 LR & passages & 93 & 65.7 & 1.000 & 2 & 0.999\\
+H3 LR & phrase & 47 & 30.3 & 1.000 & 0 & 1.000\\
+H3 LR & syllables & 100 & 6.3 & 0.991 & 2 & 0.992\\
+H3 LR & vowels & 495 & 8.4 & 0.995 & 1 & 0.973\\
+H3 LR & word list & 50 & 55.8 & 1.000 & 0 & 1.000\\
+H3 LR & all tasks & 785 & 10.6 & 1.000 & 1 & 0.981\\
+H8 XGB & passages & 93 & 65.7 & 1.000 & 0 & 1.000\\
+H8 XGB & phrase & 47 & 30.3 & 1.000 & 0 & 1.000\\
+H8 XGB & syllables & 100 & 6.3 & 0.967 & 1 & 0.971\\
+H8 XGB & vowels & 495 & 8.4 & 0.993 & 2 & 0.969\\
+H8 XGB & word list & 50 & 55.8 & 1.000 & 2 & 1.000\\
+H8 XGB & all tasks & 785 & 10.6 & 0.998 & 1 & 0.980\\
+\end{longtable}\end{center}
+Every task family alone separates the groups well (speaker AUROC 0.961 or higher in every cell of the table); the 30-s phrase and the 56-s word list reach 1.000 with wav2vec2 and XLS-R, and sustained vowels have the lowest (or tied lowest) recording-level AUROC in every model. For a product this suggests a protocol of about two minutes (word list + phrase + a few vowels) - but the same caveat applies: a short recording also carries the session background.
+\section{The confounding problem - evidence and implications}\label{sec:confound}
+Pre-specified diagnostic (amendment A1): train the same pipeline to recognise the \textbf{recording session inside one class}, for unseen speakers. If sessions are recognisable within a class, a PD-versus-control classifier can succeed simply by recognising sessions, because sessions and class coincide in this corpus.
+\begin{figure}[H]\centering\includegraphics[width=0.9\linewidth]{wp_session.pdf}\caption{Session predictability within one class (unit = speaker x session; nested, speaker-disjoint).}\end{figure}
+\begin{itemize}\item Controls, early versus late March 2017 (same class, same sampling rate): AUROC 0.839 to 0.929 across representations - sessions are clearly recognisable.
+\item PD, 2016 (44.1 kHz) versus 2017 (16 kHz): AUROC 0.950 to 1.000 - recognisable (session and resampling).
+\item PD, 24 January versus 10 February 2017 (same rate): AUROC 0.500 to 0.764 - near chance for three of four representations; not every session pair differs.
+\item Feature importance (section \ref{sec:importance}) points at background statistics (10th percentiles), and the four flagged controls (poor recording quality, reading difficulty) produce 29 of 44 false alarms.
+\end{itemize}
+\begin{tcolorbox}[colback=blue!3,colframe=blue!45!black,boxrule=0.5pt,arc=2pt,left=5pt,right=5pt,top=3pt,bottom=3pt,title={\small\bfseries Interpretation for investors}]\small The current numbers cannot separate 'detects Parkinson's speech' from 'detects which session a recording came from'. Part of the signal may be genuine (spectral-shape features stay discriminative in 16-kHz-only data, and literature documents real PD speech changes [5]), but the size of the genuine effect is \textbf{unknown}. The programme in section \ref{sec:roadmap} is designed to measure it.\end{tcolorbox}
+\section{Error analysis}\label{sec:errors}
+All missed patients are one person: PD\_005 is missed in 54 of 56 configurations; her recording probabilities sit just below the threshold in every task (WavLM-LR 0.19-0.59), so the models are uncertain about her as a whole. False alarms concentrate in a few controls; the four controls flagged in the corpus spreadsheet produce 29 of 44 false-alarm events. Sustained vowels have the highest recording-level error rate. In a product, recording-quality flags should abstain rather than score.
+\begin{figure}[H]\centering\includegraphics[width=0.95\linewidth]{error_tasks.pdf}\caption{Recording probabilities (WavLM-LR) of the three most frequently misclassified speakers.}\end{figure}
+\section{De-risking programme and validation plan}\label{sec:roadmap}
+\begin{center}\scriptsize\renewcommand{\arraystretch}{1.12}
+\begin{longtable}{p{2.6cm}p{6.2cm}p{5.0cm}p{2.0cm}}
+\caption{Staged programme with decision gates (no budget figures are given; each stage is sized by the founders).}\\
+\toprule
+\textbf{Stage} & \textbf{Work} & \textbf{Evidence produced} & \textbf{Gate}\\\midrule\endfirsthead
+\toprule
+\textbf{Stage} & \textbf{Work} & \textbf{Evidence produced} & \textbf{Gate}\\\midrule\endhead
+\bottomrule\endfoot
+0 (done) & Frozen-protocol internal study and independent audit & Pipeline, 56 configurations, audit, this whitepaper & Completed\\
+1: confound control on existing data & Background-consistency features and gate; re-analysis with background removed or matched; acquisition of a second public corpus (e.g. NeuroVoz, Castilian Spanish, 108-112 speakers [8]) for frozen external testing & A background-only model at chance on matched data; frozen model AUROC on an external corpus with pre-set success criterion (lower 95\% bound $>$ 0.80) & Go/no-go 1\\
+2: prospective recording-matched cohort & Multi-site study: PD and age/sex-matched controls recorded in the same sessions, rooms and devices, interleaved; clinical scales (MDS-UPDRS), medication state, disease duration & Sample size from the tables in section \ref{sec:roadmap}; pre-registered endpoints; independent statistician & Go/no-go 2\\
+3: clinical validation & Intended-use population (for example referrals with suspected parkinsonism), differential diagnoses (essential tremor, atypical parkinsonism), multiple languages/devices & Regulatory-grade performance study; quality-management system & Regulatory submission\\
+4: product & App, clinician report, monitoring, integration, post-market surveillance & Real-world performance monitoring & Commercial launch\\
+\end{longtable}\end{center}
+\begin{center}\scriptsize\renewcommand{\arraystretch}{1.12}
+\begin{longtable}{rrr}
+\caption{Approximate number of people needed in one class so that the exact 95\% lower bound of sensitivity (or specificity) reaches a target, if the observed proportion equals the assumed true value.}\\
+\toprule
+\textbf{Assumed true value} & \textbf{Required lower bound} & \textbf{People in that class}\\\midrule\endfirsthead
+\toprule
+\textbf{Assumed true value} & \textbf{Required lower bound} & \textbf{People in that class}\\\midrule\endhead
+\bottomrule\endfoot
+0.85 & 0.75 & 70\\
+0.85 & 0.80 & 242\\
+0.90 & 0.75 & 33\\
+0.90 & 0.80 & 55\\
+0.90 & 0.85 & 193\\
+0.95 & 0.75 & 20\\
+0.95 & 0.80 & 26\\
+0.95 & 0.85 & 46\\
+0.95 & 0.90 & 127\\
+\end{longtable}\end{center}
+\begin{center}\scriptsize\renewcommand{\arraystretch}{1.12}
+\begin{longtable}{rrr}
+\caption{Approximate 95\% half-width of an AUROC estimate (Hanley-McNeil) for equal group sizes.}\\
+\toprule
+\textbf{True AUROC} & \textbf{People per class} & \textbf{Half-width}\\\midrule\endfirsthead
+\toprule
+\textbf{True AUROC} & \textbf{People per class} & \textbf{Half-width}\\\midrule\endhead
+\bottomrule\endfoot
+0.80 & 50 & +/- 0.087\\
+0.80 & 100 & +/- 0.061\\
+0.80 & 200 & +/- 0.043\\
+0.80 & 300 & +/- 0.035\\
+0.80 & 500 & +/- 0.027\\
+0.85 & 50 & +/- 0.077\\
+0.85 & 100 & +/- 0.054\\
+0.85 & 200 & +/- 0.038\\
+0.85 & 300 & +/- 0.031\\
+0.85 & 500 & +/- 0.024\\
+0.90 & 50 & +/- 0.063\\
+0.90 & 100 & +/- 0.044\\
+0.90 & 200 & +/- 0.031\\
+0.90 & 300 & +/- 0.026\\
+0.90 & 500 & +/- 0.020\\
+\end{longtable}\end{center}
+\section{Regulatory pathway (to be confirmed with regulatory counsel)}\label{sec:regulatory}
+\begin{itemize}\item The intended product is software as a medical device (SaMD) for decision support; in the US the likely routes are 510(k) if a predicate exists or De Novo otherwise; in the EU, MDR rule 11 typically places diagnostic decision-support software in class IIa or higher.
+\item Precedents in speech: Aural Analytics' Speech Vitals (speech analysis, ALS) received FDA breakthrough designation, and reports describe registration of its product as a class II software device; Kintsugi has described a De Novo submission for a voice model for depression and anxiety [9]. Status changes quickly and must be checked in FDA databases.
+\item Required before any submission: quality-management system (ISO 13485), software life cycle (IEC 62304), risk management (ISO 14971), clinical evaluation, cybersecurity, data protection (voice is personal and health data; GDPR special-category processing).
+\end{itemize}
+\section{Intellectual property and freedom to operate}\label{sec:ip}
+\begin{itemize}\item Own assets today: the evaluation pipeline, protocol, audit chain and the feature-level findings (copyright/know-how); no patent has been filed.
+\item Patent landscape: patents on speech-based diagnosis of neurological disorders exist (for example EP 4 346 558 A1, 'software-based, speech-operated and objective diagnostic tool for use in diagnosing a chronic neurological disorder' [12]); a freedom-to-operate analysis is required before product development.
+\item Model licences: wav2vec2-large-lv60 and XLS-R 300M are Apache-2.0; the WavLM-large model card declares no licence (to be clarified with the publisher or replaced); the Italian corpus is listed as Creative Commons Attribution [7].
+\item Defensibility is expected to come from proprietary, protocol-controlled clinical data and validation evidence rather than from model architecture.
+\end{itemize}
+\section{Competitive landscape}\label{sec:competition}
+\begin{center}\scriptsize\renewcommand{\arraystretch}{1.12}
+\begin{longtable}{p{3.6cm}p{10.2cm}l}
+\caption{Selected companies working on voice biomarkers (public sources; to be verified).}\\
+\toprule
+\textbf{Company} & \textbf{Focus} & \textbf{Source}\\\midrule\endfirsthead
+\toprule
+\textbf{Company} & \textbf{Focus} & \textbf{Source}\\\midrule\endhead
+\bottomrule\endfoot
+Canary Speech (US) & Voice platform for neurological and mental-health conditions; Parkinson's listed among targets; about \$22M raised (CB Insights) & [10]\\
+Winterlight Labs (CA) & Speech-based cognitive assessment (dementia, Alzheimer's) & [10]\\
+Sonde Health (US) & Voice-based mental, cognitive and respiratory health monitoring & [10]\\
+Aural Analytics (US) & Speech Vitals (ALS, cognition); FDA breakthrough designation & [9]\\
+Kintsugi (US) & Voice model for depression/anxiety; De Novo submission described & [9]\\
+Novoic, Vocalis Health & Speech/voice AI (claims about Parkinson's for Vocalis rest on a single aggregator) & [9][10]\\
+\end{longtable}\end{center}
+\textbf{Defensible differentiation} must come from evidence, not from the model: confound-controlled, protocol-matched clinical data; a published, auditable validation chain (frozen protocols, hash-locked artefacts, independent audits such as the one in the appendix); multi-task recording with quality gating; and low-cost CPU inference.
+\section{Business model hypotheses (to be tested)}\label{sec:business}
+\begin{itemize}\item Clinical-trial services (pharma, CROs): speech as a remote, frequent digital endpoint - shortest path to revenue, lower regulatory burden if used as exploratory endpoint.
+\item Referral triage / tele-neurology decision support: per-test or per-site subscription; requires regulatory clearance.
+\item Primary-care or population screening: largest volume but lowest prevalence, hence the hardest predictive-value problem (section \ref{sec:market}).
+\item Licensing of a validated scoring engine to device or platform partners.
+\item Unit cost of compute is negligible (section \ref{sec:tech}); value and cost sit in clinical evidence, regulatory status, integration and reimbursement.
+\end{itemize}
+\section{Risk register}\label{sec:risks}
+\begin{center}\scriptsize\renewcommand{\arraystretch}{1.12}
+\begin{longtable}{p{3.4cm}p{1.4cm}p{4.4cm}p{6.6cm}}
+\caption{Main risks and mitigations.}\\
+\toprule
+\textbf{Risk} & \textbf{Severity} & \textbf{Consequence} & \textbf{Mitigation}\\\midrule\endfirsthead
+\toprule
+\textbf{Risk} & \textbf{Severity} & \textbf{Consequence} & \textbf{Mitigation}\\\midrule\endhead
+\bottomrule\endfoot
+Recording-condition confound & Critical & Scores may reflect sessions, not disease & Recording-matched data; background gate; background-only model must be at chance; external frozen test\\
+Generalisation (language, device, room) & High & Performance drop outside the corpus & Multi-site, multi-device, multilingual cohorts; domain-shift monitoring\\
+Small and narrow data & High & Wide uncertainty; no severity data & Prospective cohorts sized as in section \ref{sec:roadmap}; clinical scales\\
+Label quality & Medium & Clinical PD diagnosis is 74-80\% accurate [4] & Specialist-confirmed diagnoses, follow-up, differential diagnoses\\
+Tuning instability & Medium & Saturated objectives choose arbitrary configurations & Fixed regularised defaults; external validation instead of tuning\\
+Low prevalence in screening & High & Low positive predictive value & Enriched intended-use population; high-specificity operating point\\
+Regulatory / reimbursement & High & Time and cost to clearance; payment unclear & Early regulatory consultation; trial-services revenue first\\
+Privacy and consent & Medium & Voice is biometric and health data & Consent design, on-device features, data minimisation\\
+Model and data licences & Medium & WavLM-large licence not declared on the model card; dataset CC BY & Licence clearance or replacement by Apache-2.0 encoders (wav2vec2, XLS-R perform comparably here)\\
+\end{longtable}\end{center}
+\section{Team and use of funds}\label{sec:team}
+Project team (CSE 431, topic 4a): Md. Osman Goni, Md. Mohibur Rahman, Arannamoy Mondal. The FINAL\_V1 execution, audit and this document were produced with an AI assistant under the team's direction. Roles that a funded programme must add: a clinical lead (movement-disorder neurologist), a speech-language pathologist, regulatory and quality lead, data engineering, and clinical-study operations. Use of funds should follow the stages in section \ref{sec:roadmap}, each tranche tied to its gate; the largest cost items are expected to be prospective data collection, clinical study management and regulatory work, not computing.
+\section{Conclusion}\label{sec:conclusion}
+The technology pipeline is sound, reproducible and cheap to run, and on the available data even simple acoustic statistics separate patients from controls almost perfectly. That is exactly why the result cannot yet be trusted: in this corpus the recording session coincides with the diagnosis, the decisive features describe the background, and sessions are recognisable within a class. The investable proposition is a disciplined de-risking programme whose first milestone - a frozen model that still separates patients from controls on recording-matched or external data while a background-only model fails - is cheap to test and decisive either way.
+\appendix\section{Audit summary}
+An independent audit (Opus 5.5, max effort) re-derived the data from raw files, re-extracted embeddings, re-implemented the acoustic features and the nested cross-validation, recomputed all metrics and bootstrap intervals, and re-executed all 70 logistic-regression runs. Verdict: no critical bug and no change to any reported prediction or metric; two major documentation errors (the file-name number is the birth year, not the age; spreadsheet quality flags were not reported) and eight minor glitches were fixed and recorded as errata. Details: \texttt{audit\_opus/OPUS\_AUDIT.md}.
+\begin{center}\tiny\renewcommand{\arraystretch}{1.12}
+\begin{longtable}{llrrr}
+\caption{Re-execution of all logistic-regression runs with single-threaded BLAS.}\\
+\toprule
+\textbf{Condition} & \textbf{Same config} & \textbf{Max $|$dp$|$} & \textbf{AUROC official} & \textbf{AUROC re-run}\\\midrule\endfirsthead
+\toprule
+\textbf{Condition} & \textbf{Same config} & \textbf{Max $|$dp$|$} & \textbf{AUROC official} & \textbf{AUROC re-run}\\\midrule\endhead
+\bottomrule\endfoot
+AC-ALL-LR & 5/5 & 0.0e+00 & 1.000 & 1.000\\
+AC-BACKWARD-LR & 5/5 & 0.0e+00 & 0.987 & 0.987\\
+AC-FORWARD-LR & 5/5 & 0.0e+00 & 0.996 & 0.996\\
+H1-ALL-LR & 5/5 & 0.0e+00 & 0.998 & 0.998\\
+H2-ALL-LR & 5/5 & 0.0e+00 & 0.996 & 0.996\\
+H3-ALL-LR & 5/5 & 0.0e+00 & 1.000 & 1.000\\
+H4-ALL-LR & 5/5 & 0.0e+00 & 0.995 & 0.995\\
+H5-ALL-LR & 5/5 & 0.0e+00 & 0.996 & 0.996\\
+H6-ALL-LR & 5/5 & 0.0e+00 & 1.000 & 1.000\\
+H7-ALL-LR & 5/5 & 4.4e-16 & 0.996 & 0.996\\
+H8-ALL-LR & 5/5 & 3.3e-16 & 0.996 & 0.996\\
+W2V-ALL-LR & 5/5 & 0.0e+00 & 0.989 & 0.989\\
+WLM-ALL-LR & 5/5 & 0.0e+00 & 0.995 & 0.995\\
+XLSR-ALL-LR & 5/5 & 0.0e+00 & 1.000 & 1.000\\
+\end{longtable}\end{center}
+\section{Glossary}
+\begin{center}\scriptsize\renewcommand{\arraystretch}{1.12}
+\begin{longtable}{p{3.2cm}p{12.8cm}}
+\caption{Glossary.}\\
+\toprule
+\textbf{Term} & \textbf{Meaning}\\\midrule\endfirsthead
+\toprule
+\textbf{Term} & \textbf{Meaning}\\\midrule\endhead
+\bottomrule\endfoot
+AUROC & Probability that a random patient scores higher than a random control (0.5 chance, 1 perfect)\\
+AUPRC & Area under the precision-recall curve; chance level equals the share of patients (0.53 here)\\
+Speaker-disjoint & No person appears in both training and test data of a fold\\
+Nested CV & Tuning happens inside the training data of each outer fold\\
+Confound & A variable related to both the input and the label (here: recording session)\\
+p10 statistic & 10th percentile of a frame feature over a recording - the quietest frames\\
+Clopper-Pearson & Exact binomial confidence interval for a proportion\\
+SaMD & Software as a medical device\\
+\end{longtable}\end{center}
+\begin{thebibliography}{99}\setlength{\itemsep}{1pt}\scriptsize
+\bibitem{w1} Global, regional, national epidemiology and trends of Parkinson's disease from 1990 to 2021: findings from the Global Burden of Disease Study 2021 (secondary analysis), Frontiers in Aging Neuroscience 2025; https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11757241/ and https://www.frontiersin.org/journals/aging-neuroscience/articles/10.3389/fnagi.2024.1498756/full
+\bibitem{w2} Parkinson's Foundation: incidence and prevalence (npj Parkinson's Disease 2022 study, coverage); https://thedailyherald.sx/us/us-parkinson-s-disease-incidence-far-higher-than-earlier-estimates
+\bibitem{w3} Parkinson's Foundation: Economic burden of Parkinson's disease is \$52 billion; https://parkinson.org/blog/research/economic-burden ; https://www.parkinson.org/about-us/news/economic-burden-of-parkinsons-disease-study
+\bibitem{w4} Raty et al., Stability and accuracy of a diagnosis of Parkinson disease over 10 years, Neurology 2025; https://research.utu.fi/converis/portal/detail/Publication/491935225 ; Rizzo et al. review, https://pmc.ncbi.nlm.nih.gov/articles/PMC5877503
+\bibitem{w5} Trail M. et al., Speech treatment for Parkinson's disease, NeuroRehabilitation 2005 (89\% speech/voice disorder; 3-4\% treated); https://content.iospress.com/articles/neurorehabilitation/nre00283
+\bibitem{w6} G. Dimauro, F. Girardi, Italian Parkinson's Voice and Speech, IEEE DataPort 2019, doi:10.21227/aw6b-tg17; G. Dimauro et al., IEEE Access 5:22199-22208, 2017, doi:10.1109/ACCESS.2017.2762475
+\bibitem{w7} IEEE DataPort dataset page (licence listed as Creative Commons Attribution); https://ieee-dataport.org/node/1482
+\bibitem{w8} Mendes-Laureano et al., NeuroVoz: a Castillian Spanish corpus of parkinsonian speech, Scientific Data 11:1367, 2024; https://zenodo.org/records/10777657 ; https://arxiv.org/abs/2403.02371v3
+\bibitem{w9} Voice-biomarker regulatory news: https://pharmaphorum.com/news/speech-analysis-tech-als-gets-fda-breakthrough-tag ; https://www.speechtechmag.com/Articles/News/Speech-Technology-News/Aural-Analytics-Gets-FDA-Approval-155602.aspx ; https://healthy-innovations.beehiiv.com/p/voice-biomarkers
+\bibitem{w10} Company profiles: https://www.cbinsights.com/company/winterlight-labs ; https://www.cbinsights.com/company/sonde-health ; https://www.thesilab.com/vendor-directory/canary-speech ; https://www.statnews.com/2023/11/07/voice-biomarkers-detecting-disease-ai-privacy-concerns/
+\bibitem{w11} S. Chen et al., WavLM, IEEE JSTSP 16(6):1505-1518, 2022; A. Baevski et al., wav2vec 2.0, NeurIPS 2020; A. Babu et al., XLS-R, Interspeech 2022 (arXiv:2111.09296); T. Chen, C. Guestrin, XGBoost, KDD 2016.
+\bibitem{w12} European patent application EP4346558A1 (patent listing); https://data.epo.org/gpi/EP4346558A1
+\end{thebibliography}
+\end{document}

@@ -1,0 +1,25 @@
+{
+ "checkpoint_file_sha256": {
+  "config.json": "89e251162bc1f1dc66cb1d68f5ce3782b3d4bf2e10709bd867122bca47102b9b",
+  "preprocessor_config.json": "c403ce09975b90dff0dd8302c42d422e9de1f166cd7772df23490069893cb0cf",
+  "pytorch_model.bin": "1d095321ee151b9cbeeb2f325d104bf1813b795c9bbbee58efcde34f701d0386",
+  "special_tokens_map.json": "bb7068de1150661a10b55f9e4b12a0e77af8bf91f5e45e1b58afaf1d0e17f675",
+  "tokenizer_config.json": "dc790594f5bc351a4311c6624f40acd95850d4aaf2a5cb3c656c9b610720b608",
+  "vocab.json": "19727f8944fe6459fc3f240ae2c198395b740f6a029bd23e06656266b83bcf64"
+ },
+ "code_sha256": "93baf85f2ff9aae7019daa02710f237ceb4bb655430f2e20c74e69df14471d15",
+ "created_utc": "2026-10-20T10:33:31Z",
+ "dtype": "float32",
+ "file_sha256": "7f255e7b029d47dbc462e6e023f825ddd43d018034c2cc80aedc094183f802a5",
+ "key": "W2V",
+ "model_id": "facebook/wav2vec2-large-lv60",
+ "pooling": "mean over time of last_hidden_state, then mean over 10-s windows",
+ "revision": "0cde644b64dac88d8416bec1c92a4099b850ba0b",
+ "shape": [
+  785,
+  1024
+ ],
+ "total_windows": 2158,
+ "validation": "all 785 samples present, finite, hashes verified",
+ "window_seconds": 10.0
+}

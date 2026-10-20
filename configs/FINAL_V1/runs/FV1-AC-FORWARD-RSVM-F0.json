@@ -1,0 +1,135 @@
+{
+ "condition_id": "FV1-AC-FORWARD-RSVM",
+ "feature_count": 10,
+ "feature_selection": "FORWARD",
+ "grid": [
+  {
+   "C": 0.1,
+   "class_weight": null,
+   "gamma_mult": 0.1
+  },
+  {
+   "C": 0.1,
+   "class_weight": "balanced",
+   "gamma_mult": 0.1
+  },
+  {
+   "C": 0.1,
+   "class_weight": null,
+   "gamma_mult": 1
+  },
+  {
+   "C": 0.1,
+   "class_weight": "balanced",
+   "gamma_mult": 1
+  },
+  {
+   "C": 0.1,
+   "class_weight": null,
+   "gamma_mult": 10
+  },
+  {
+   "C": 0.1,
+   "class_weight": "balanced",
+   "gamma_mult": 10
+  },
+  {
+   "C": 1,
+   "class_weight": null,
+   "gamma_mult": 0.1
+  },
+  {
+   "C": 1,
+   "class_weight": "balanced",
+   "gamma_mult": 0.1
+  },
+  {
+   "C": 1,
+   "class_weight": null,
+   "gamma_mult": 1
+  },
+  {
+   "C": 1,
+   "class_weight": "balanced",
+   "gamma_mult": 1
+  },
+  {
+   "C": 1,
+   "class_weight": null,
+   "gamma_mult": 10
+  },
+  {
+   "C": 1,
+   "class_weight": "balanced",
+   "gamma_mult": 10
+  },
+  {
+   "C": 10,
+   "class_weight": null,
+   "gamma_mult": 0.1
+  },
+  {
+   "C": 10,
+   "class_weight": "balanced",
+   "gamma_mult": 0.1
+  },
+  {
+   "C": 10,
+   "class_weight": null,
+   "gamma_mult": 1
+  },
+  {
+   "C": 10,
+   "class_weight": "balanced",
+   "gamma_mult": 1
+  },
+  {
+   "C": 10,
+   "class_weight": null,
+   "gamma_mult": 10
+  },
+  {
+   "C": 10,
+   "class_weight": "balanced",
+   "gamma_mult": 10
+  },
+  {
+   "C": 100,
+   "class_weight": null,
+   "gamma_mult": 0.1
+  },
+  {
+   "C": 100,
+   "class_weight": "balanced",
+   "gamma_mult": 0.1
+  },
+  {
+   "C": 100,
+   "class_weight": null,
+   "gamma_mult": 1
+  },
+  {
+   "C": 100,
+   "class_weight": "balanced",
+   "gamma_mult": 1
+  },
+  {
+   "C": 100,
+   "class_weight": null,
+   "gamma_mult": 10
+  },
+  {
+   "C": 100,
+   "class_weight": "balanced",
+   "gamma_mult": 10
+  }
+ ],
+ "inner_seed": 142,
+ "model": "RSVM",
+ "outer_fold": 0,
+ "protocol_hash": "5535d1a440a57005fa05d474f5e2d1016df36712b5696f2d1f667569582287c0",
+ "representation": "AC",
+ "run_id": "FV1-AC-FORWARD-RSVM-F0",
+ "seed": 42,
+ "selection_seed": 242
+}

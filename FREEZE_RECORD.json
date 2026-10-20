@@ -1,0 +1,48 @@
+{
+ "code_sha256": {
+  "acoustic.py": "699844bda4a4b4b6f366fdaade1990d532920cfe4eed00b4e61262adb256d572",
+  "common.py": "f90d428e5f1c541fb5634ffb40f1d1d54895f83799a1fc2aba78c05060f73c86",
+  "download_models.py": "d8b17b1d0cde2572d098a17de2b26b5da3a97debc3804b26f1cc24b30ea5a0f7",
+  "extract_embeddings.py": "93baf85f2ff9aae7019daa02710f237ceb4bb655430f2e20c74e69df14471d15",
+  "freeze_protocol.py": "5a0ae9d6364d782c2606708f8d6b838808266e4fd76d2f312da1265618fa78c9",
+  "isolation_check.py": "ff55bdba4e7c837330a74c1393603e963b2f9c6172ec3dacb49be4800d622fcc",
+  "make_pdf.py": "2976fa9a729026ed7cd3645ce023b8f908e383af95c699f3a780e58dbbcb3c50",
+  "pipeline.py": "e3845d895354473e098ca042d822a9cc5f7100c9beda17cb91f04bce182a5836",
+  "protocol_defs.py": "96c42bb73d0491dc536fa3ffbb075c594b87a63c4e12347905fb6e9de023b0c5",
+  "splits.py": "02098301cffdc30d6c63e432a480ffd9317fae942400a4a961122101a0bbbed4",
+  "stage_a_build.py": "bafc57c69496f527b6129ee6e04e8e7210732567a12cb6be39fcf757c7416740",
+  "stage_a_docs.py": "5259df2474f1926432c5a70b8f3f09526c52ef75ec0c8fb498a27c6ecbb39e1a",
+  "stage_a_inventory.py": "e255930b9425e9f9673bdb67061b51ece15708f2cf437f26a3d60649d9845de0",
+  "write_mgmt.py": "e7d6cf3a5bdfe1d798a0e3e1b2b1335e4dc72e98aa8ffffdd0154c3a013ffcac"
+ },
+ "compliance": {
+  "56_conditions_x_5_folds_equals_280_runs": true,
+  "all_hybrid_components_available": true,
+  "encoder_revisions_recorded": true,
+  "grid_sizes_20_10_24_24": true,
+  "implementation_details_open": [],
+  "no_FWL_run_planned": true,
+  "protocol_json_hash_recorded": true,
+  "split_manifest_has_47_speakers_5_folds": true,
+  "unresolved_methodological_decisions": [
+   "FWL (BLOCKED, PROTOCOL_DECISION_REQUIRED)"
+  ]
+ },
+ "data_inventory_sha256": "4b729c64834706b2a9ef15573d8df8c9a7ddbe52006f9d412425465dfe4966ac",
+ "environment_file": "ENVIRONMENT.md",
+ "execution_order_file": "configs/FINAL_V1/planned_run_order.json",
+ "freeze_time_utc": "2026-10-20T09:37:38Z",
+ "protocol_json_sha256": "5535d1a440a57005fa05d474f5e2d1016df36712b5696f2d1f667569582287c0",
+ "protocol_md_sha256": "b84b9ed94443a1646527e7a4e39db70c5e2843f8e4b39a89ca5bf96006737099",
+ "protocol_version": "FINAL_V1",
+ "sample_manifest_sha256": "214a540e6bdd69fc179dbaec7fd5da5dc43cfb181222e89367f3970b420e0d35",
+ "seeds": {
+  "bootstrap": 42,
+  "inner": "142+fold",
+  "outer": 42,
+  "selection": "242+fold",
+  "xgb_grid_subset": 42
+ },
+ "split_manifest_sha256": "31c40ed902165aff483dd8e3ab246e028c985bed029074f4588804c7c8def837",
+ "status": "FROZEN"
+}

@@ -1,0 +1,28 @@
+Loading weights:   0%|          | 0/422 [00:00<?, ?it/s]Loading weights: 100%|██████████| 422/422 [00:00<00:00, 30736.04it/s]
+[transformers] [1mWav2Vec2Model LOAD REPORT[0m from: /root/Projects/Project4a_FINAL_V1_ISOLATED/cache/hf/models--facebook--wav2vec2-xls-r-300m/snapshots/1a640f32ac3e39899438a2931f9924c02f080a54
+Key                          | Status     |  | 
+-----------------------------+------------+--+-
+project_q.weight             | UNEXPECTED |  | 
+project_hid.bias             | UNEXPECTED |  | 
+quantizer.codevectors        | UNEXPECTED |  | 
+quantizer.weight_proj.weight | UNEXPECTED |  | 
+project_hid.weight           | UNEXPECTED |  | 
+project_q.bias               | UNEXPECTED |  | 
+quantizer.weight_proj.bias   | UNEXPECTED |  | 
+
+Notes:
+- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+XLSR part 0 done 20 of 262
+XLSR part 0 done 40 of 262
+XLSR part 0 done 60 of 262
+XLSR part 0 done 80 of 262
+XLSR part 0 done 100 of 262
+XLSR part 0 done 120 of 262
+XLSR part 0 done 140 of 262
+XLSR part 0 done 160 of 262
+XLSR part 0 done 180 of 262
+XLSR part 0 done 200 of 262
+XLSR part 0 done 220 of 262
+XLSR part 0 done 240 of 262
+XLSR part 0 done 260 of 262
+XLSR part 0 finished 262

@@ -1,0 +1,400 @@
+{
+ "run_id": "FV1-XLSR-ALL-XGB-F0",
+ "condition_id": "FV1-XLSR-ALL-XGB",
+ "outer_fold": 0,
+ "status": "COMPLETED",
+ "started_utc": "2026-10-20T10:33:53Z",
+ "configuration_hash": "40cc21bca9f95a4faa071a78d80dcb852bf30bec5e23293fede4065e6f60f269",
+ "protocol_hash": "5535d1a440a57005fa05d474f5e2d1016df36712b5696f2d1f667569582287c0",
+ "split_manifest_hash": "31c40ed902165aff483dd8e3ab246e028c985bed029074f4588804c7c8def837",
+ "gates": {
+  "no_speaker_overlap_train_test": true,
+  "every_test_sample_predicted_exactly_once": true,
+  "probabilities_finite_in_0_1": true,
+  "labels_match_manifest": true,
+  "folds_match_split_manifest": true,
+  "protocol_and_split_hashes_match_freeze": true
+ },
+ "selected_hyperparameters": {
+  "learning_rate": 0.03,
+  "max_depth": 4,
+  "n_estimators": 300,
+  "min_child_weight": 1,
+  "subsample": 0.7,
+  "colsample_bytree": 0.3,
+  "reg_lambda": 1,
+  "scale_pos_weight": 1
+ },
+ "selected_features": [],
+ "n_features_used": 1024,
+ "inner_table": [
+  {
+   "config_index": 0,
+   "params": {
+    "learning_rate": 0.03,
+    "max_depth": 2,
+    "n_estimators": 100,
+    "min_child_weight": 1,
+    "subsample": 0.7,
+    "colsample_bytree": 1.0,
+    "reg_lambda": 10,
+    "scale_pos_weight": 1
+   },
+   "inner_speaker_auprc": 0.962310588090387
+  },
+  {
+   "config_index": 1,
+   "params": {
+    "learning_rate": 0.03,
+    "max_depth": 2,
+    "n_estimators": 100,
+    "min_child_weight": 1,
+    "subsample": 1.0,
+    "colsample_bytree": 0.3,
+    "reg_lambda": 1,
+    "scale_pos_weight": "balanced"
+   },
+   "inner_speaker_auprc": 0.9707280965078955
+  },
+  {
+   "config_index": 2,
+   "params": {
+    "learning_rate": 0.03,
+    "max_depth": 2,
+    "n_estimators": 100,
+    "min_child_weight": 1,
+    "subsample": 1.0,
+    "colsample_bytree": 1.0,
+    "reg_lambda": 10,
+    "scale_pos_weight": "balanced"
+   },
+   "inner_speaker_auprc": 0.9669402177200166
+  },
+  {
+   "config_index": 3,
+   "params": {
+    "learning_rate": 0.03,
+    "max_depth": 2,
+    "n_estimators": 100,
+    "min_child_weight": 5,
+    "subsample": 0.7,
+    "colsample_bytree": 0.3,
+    "reg_lambda": 10,
+    "scale_pos_weight": "balanced"
+   },
+   "inner_speaker_auprc": 0.9795027276738308
+  },
+  {
+   "config_index": 4,
+   "params": {
+    "learning_rate": 0.03,
+    "max_depth": 2,
+    "n_estimators": 100,
+    "min_child_weight": 5,
+    "subsample": 1.0,
+    "colsample_bytree": 0.3,
+    "reg_lambda": 1,
+    "scale_pos_weight": 1
+   },
+   "inner_speaker_auprc": 0.9795027276738308
+  },
+  {
+   "config_index": 5,
+   "params": {
+    "learning_rate": 0.03,
+    "max_depth": 2,
+    "n_estimators": 100,
+    "min_child_weight": 5,
+    "subsample": 1.0,
+    "colsample_bytree": 1.0,
+    "reg_lambda": 10,
+    "scale_pos_weight": 1
+   },
+   "inner_speaker_auprc": 0.9609878367676357
+  },
+  {
+   "config_index": 6,
+   "params": {
+    "learning_rate": 0.03,
+    "max_depth": 4,
+    "n_estimators": 100,
+    "min_child_weight": 1,
+    "subsample": 0.7,
+    "colsample_bytree": 1.0,
+    "reg_lambda": 1,
+    "scale_pos_weight": 1
+   },
+   "inner_speaker_auprc": 0.9846040122588111
+  },
+  {
+   "config_index": 7,
+   "params": {
+    "learning_rate": 0.03,
+    "max_depth": 4,
+    "n_estimators": 100,
+    "min_child_weight": 1,
+    "subsample": 1.0,
+    "colsample_bytree": 1.0,
+    "reg_lambda": 10,
+    "scale_pos_weight": "balanced"
+   },
+   "inner_speaker_auprc": 0.9687518119229153
+  },
+  {
+   "config_index": 8,
+   "params": {
+    "learning_rate": 0.03,
+    "max_depth": 4,
+    "n_estimators": 300,
+    "min_child_weight": 1,
+    "subsample": 0.7,
+    "colsample_bytree": 0.3,
+    "reg_lambda": 1,
+    "scale_pos_weight": 1
+   },
+   "inner_speaker_auprc": 0.9954545454545456
+  },
+  {
+   "config_index": 9,
+   "params": {
+    "learning_rate": 0.03,
+    "max_depth": 4,
+    "n_estimators": 300,
+    "min_child_weight": 5,
+    "subsample": 0.7,
+    "colsample_bytree": 1.0,
+    "reg_lambda": 1,
+    "scale_pos_weight": "balanced"
+   },
+   "inner_speaker_auprc": 0.9846040122588111
+  },
+  {
+   "config_index": 10,
+   "params": {
+    "learning_rate": 0.03,
+    "max_depth": 4,
+    "n_estimators": 300,
+    "min_child_weight": 5,
+    "subsample": 1.0,
+    "colsample_bytree": 0.3,
+    "reg_lambda": 1,
+    "scale_pos_weight": 1
+   },
+   "inner_speaker_auprc": 0.9846040122588111
+  },
+  {
+   "config_index": 11,
+   "params": {
+    "learning_rate": 0.1,
+    "max_depth": 2,
+    "n_estimators": 100,
+    "min_child_weight": 1,
+    "subsample": 1.0,
+    "colsample_bytree": 0.3,
+    "reg_lambda": 1,
+    "scale_pos_weight": 1
+   },
+   "inner_speaker_auprc": 0.9903229665071771
+  },
+  {
+   "config_index": 12,
+   "params": {
+    "learning_rate": 0.1,
+    "max_depth": 2,
+    "n_estimators": 100,
+    "min_child_weight": 5,
+    "subsample": 1.0,
+    "colsample_bytree": 0.3,
+    "reg_lambda": 1,
+    "scale_pos_weight": 1
+   },
+   "inner_speaker_auprc": 0.9814790122588113
+  },
+  {
+   "config_index": 13,
+   "params": {
+    "learning_rate": 0.1,
+    "max_depth": 2,
+    "n_estimators": 300,
+    "min_child_weight": 1,
+    "subsample": 0.7,
+    "colsample_bytree": 1.0,
+    "reg_lambda": 10,
+    "scale_pos_weight": "balanced"
+   },
+   "inner_speaker_auprc": 0.9846040122588111
+  },
+  {
+   "config_index": 14,
+   "params": {
+    "learning_rate": 0.1,
+    "max_depth": 2,
+    "n_estimators": 300,
+    "min_child_weight": 5,
+    "subsample": 0.7,
+    "colsample_bytree": 1.0,
+    "reg_lambda": 1,
+    "scale_pos_weight": 1
+   },
+   "inner_speaker_auprc": 0.9846040122588111
+  },
+  {
+   "config_index": 15,
+   "params": {
+    "learning_rate": 0.1,
+    "max_depth": 2,
+    "n_estimators": 300,
+    "min_child_weight": 5,
+    "subsample": 1.0,
+    "colsample_bytree": 0.3,
+    "reg_lambda": 1,
+    "scale_pos_weight": "balanced"
+   },
+   "inner_speaker_auprc": 0.9814790122588113
+  },
+  {
+   "config_index": 16,
+   "params": {
+    "learning_rate": 0.1,
+    "max_depth": 4,
+    "n_estimators": 100,
+    "min_child_weight": 1,
+    "subsample": 0.7,
+    "colsample_bytree": 1.0,
+    "reg_lambda": 10,
+    "scale_pos_weight": "balanced"
+   },
+   "inner_speaker_auprc": 0.9707280965078955
+  },
+  {
+   "config_index": 17,
+   "params": {
+    "learning_rate": 0.1,
+    "max_depth": 4,
+    "n_estimators": 100,
+    "min_child_weight": 1,
+    "subsample": 1.0,
+    "colsample_bytree": 1.0,
+    "reg_lambda": 10,
+    "scale_pos_weight": 1
+   },
+   "inner_speaker_auprc": 0.9903229665071771
+  },
+  {
+   "config_index": 18,
+   "params": {
+    "learning_rate": 0.1,
+    "max_depth": 4,
+    "n_estimators": 100,
+    "min_child_weight": 5,
+    "subsample": 1.0,
+    "colsample_bytree": 0.3,
+    "reg_lambda": 1,
+    "scale_pos_weight": "balanced"
+   },
+   "inner_speaker_auprc": 0.9814790122588113
+  },
+  {
+   "config_index": 19,
+   "params": {
+    "learning_rate": 0.1,
+    "max_depth": 4,
+    "n_estimators": 100,
+    "min_child_weight": 5,
+    "subsample": 1.0,
+    "colsample_bytree": 1.0,
+    "reg_lambda": 10,
+    "scale_pos_weight": 1
+   },
+   "inner_speaker_auprc": 0.9903229665071771
+  },
+  {
+   "config_index": 20,
+   "params": {
+    "learning_rate": 0.1,
+    "max_depth": 4,
+    "n_estimators": 300,
+    "min_child_weight": 1,
+    "subsample": 0.7,
+    "colsample_bytree": 1.0,
+    "reg_lambda": 1,
+    "scale_pos_weight": 1
+   },
+   "inner_speaker_auprc": 0.9814790122588113
+  },
+  {
+   "config_index": 21,
+   "params": {
+    "learning_rate": 0.1,
+    "max_depth": 4,
+    "n_estimators": 300,
+    "min_child_weight": 1,
+    "subsample": 0.7,
+    "colsample_bytree": 1.0,
+    "reg_lambda": 10,
+    "scale_pos_weight": 1
+   },
+   "inner_speaker_auprc": 0.9875451887293993
+  },
+  {
+   "config_index": 22,
+   "params": {
+    "learning_rate": 0.1,
+    "max_depth": 4,
+    "n_estimators": 300,
+    "min_child_weight": 1,
+    "subsample": 1.0,
+    "colsample_bytree": 0.3,
+    "reg_lambda": 10,
+    "scale_pos_weight": "balanced"
+   },
+   "inner_speaker_auprc": 0.9875451887293993
+  },
+  {
+   "config_index": 23,
+   "params": {
+    "learning_rate": 0.1,
+    "max_depth": 4,
+    "n_estimators": 300,
+    "min_child_weight": 5,
+    "subsample": 0.7,
+    "colsample_bytree": 0.3,
+    "reg_lambda": 10,
+    "scale_pos_weight": 1
+   },
+   "inner_speaker_auprc": 0.9875451887293993
+  }
+ ],
+ "runtime_seconds": 405.2402501106262,
+ "finished_utc": "2026-10-20T10:40:39Z",
+ "n_train_speakers": 37,
+ "n_test_speakers": 10,
+ "speaker_level": {
+  "tp": 5,
+  "fn": 0,
+  "tn": 5,
+  "fp": 0,
+  "sensitivity": 1.0,
+  "specificity": 1.0,
+  "precision": 1.0,
+  "f1": 1.0,
+  "accuracy": 1.0,
+  "balanced_accuracy": 1.0,
+  "auroc": 1.0,
+  "auprc": 1.0
+ },
+ "sample_level": {
+  "tp": 83,
+  "fn": 6,
+  "tn": 73,
+  "fp": 4,
+  "sensitivity": 0.9325842696629213,
+  "specificity": 0.948051948051948,
+  "precision": 0.9540229885057471,
+  "f1": 0.9431818181818182,
+  "accuracy": 0.9397590361445783,
+  "balanced_accuracy": 0.9403181088574346,
+  "auroc": 0.9922661608054866,
+  "auprc": 0.9928041672556037
+ }
+}

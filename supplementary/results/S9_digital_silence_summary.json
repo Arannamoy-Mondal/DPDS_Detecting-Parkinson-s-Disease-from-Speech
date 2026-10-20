@@ -1,0 +1,114 @@
+{
+ "recordings_with_trailing_zeros_ge_0.5s": {
+  "0": 0,
+  "1": 112
+ },
+ "recordings_with_leading_zero_block_ge_5ms": {
+  "0": 272,
+  "1": 0
+ },
+ "recordings_per_label": {
+  "0": 349,
+  "1": 436
+ },
+ "recordings_with_ge_10pct_near_silent_frames": {
+  "0": 0,
+  "1": 40
+ },
+ "speaker_AUROC_trailing_zero_seconds": 0.760909090909091,
+ "speaker_AUROC_leading_zero_ms": 0.025454545454545466,
+ "speaker_AUROC_near_silent_fraction": 0.64,
+ "spearman_silent_fraction_vs_energy_p10": -0.3276660182005539,
+ "by_date": [
+  {
+   "label": 0,
+   "date": "2017-03-17",
+   "sample_rate": 16000,
+   "recordings": 32,
+   "median_leading_ms": 0.125,
+   "median_trailing_s": 0.0,
+   "share_trailing_ge_0p5": 0.0,
+   "median_silent_frames": 0.0
+  },
+  {
+   "label": 0,
+   "date": "2017-03-21",
+   "sample_rate": 16000,
+   "recordings": 93,
+   "median_leading_ms": 5.8125,
+   "median_trailing_s": 0.0,
+   "share_trailing_ge_0p5": 0.0,
+   "median_silent_frames": 0.0
+  },
+  {
+   "label": 0,
+   "date": "2017-03-23",
+   "sample_rate": 16000,
+   "recordings": 144,
+   "median_leading_ms": 5.8125,
+   "median_trailing_s": 0.0,
+   "share_trailing_ge_0p5": 0.0,
+   "median_silent_frames": 0.0
+  },
+  {
+   "label": 0,
+   "date": "2017-03-30",
+   "sample_rate": 16000,
+   "recordings": 48,
+   "median_leading_ms": 5.8125,
+   "median_trailing_s": 0.0,
+   "share_trailing_ge_0p5": 0.0,
+   "median_silent_frames": 0.0
+  },
+  {
+   "label": 0,
+   "date": "2017-04-02",
+   "sample_rate": 16000,
+   "recordings": 32,
+   "median_leading_ms": 5.8125,
+   "median_trailing_s": 0.0,
+   "share_trailing_ge_0p5": 0.0,
+   "median_silent_frames": 0.0
+  },
+  {
+   "label": 1,
+   "date": "2016-05-26",
+   "sample_rate": 44100,
+   "recordings": 80,
+   "median_leading_ms": 0.0,
+   "median_trailing_s": 0.0005668934240362812,
+   "share_trailing_ge_0p5": 0.4,
+   "median_silent_frames": 0.0
+  },
+  {
+   "label": 1,
+   "date": "2016-06-16",
+   "sample_rate": 44100,
+   "recordings": 80,
+   "median_leading_ms": 0.5215419501133787,
+   "median_trailing_s": 1.0003174603174603,
+   "share_trailing_ge_0p5": 1.0,
+   "median_silent_frames": 0.08521764905149051
+  },
+  {
+   "label": 1,
+   "date": "2017-01-24",
+   "sample_rate": 16000,
+   "recordings": 96,
+   "median_leading_ms": 0.0,
+   "median_trailing_s": 0.0,
+   "share_trailing_ge_0p5": 0.0,
+   "median_silent_frames": 0.0
+  },
+  {
+   "label": 1,
+   "date": "2017-02-10",
+   "sample_rate": 16000,
+   "recordings": 180,
+   "median_leading_ms": 0.0,
+   "median_trailing_s": 0.0,
+   "share_trailing_ge_0p5": 0.0,
+   "median_silent_frames": 0.0
+  }
+ ]
+}

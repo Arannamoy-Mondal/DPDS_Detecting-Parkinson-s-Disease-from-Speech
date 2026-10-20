@@ -1,0 +1,1 @@
+{"best_params": {"learning_rate": 0.03, "max_depth": 2, "n_estimators": 100, "min_child_weight": 5, "subsample": 0.7, "colsample_bytree": 0.3, "reg_lambda": 10, "scale_pos_weight": "balanced"}, "runtime": 8.213322877883911}
