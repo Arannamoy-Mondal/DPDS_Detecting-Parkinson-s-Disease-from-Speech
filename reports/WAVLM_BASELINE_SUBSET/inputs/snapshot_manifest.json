@@ -1,0 +1,271 @@
+{
+  "source_run": "/root/Projects/PatchTST/artifacts/runs/20261014T191654Z_v4.0_eb438e63b942",
+  "files": {
+    "pooled_metrics.csv": {
+      "source": "pooled_metrics.csv",
+      "sha256": "ba0df8b6f302a8fee37a8808f0f9aa3b98778345d9835ad7d84f520b0f08639e"
+    },
+    "fine_tuning_decisions.json": {
+      "source": "fine_tuning_decisions.json",
+      "sha256": "4bebc70e40218281c4deab065e2d611d7ac3417215cc9549f7c1b9da2c8661ef"
+    },
+    "config.yaml": {
+      "source": "config.yaml",
+      "sha256": "8bd1ff7086e1db21bd9cc55f34f40ed1fa80aa02b0b7ed8ba422fc4637c225f4"
+    },
+    "main/logistic_regression/speaker_predictions.csv": {
+      "source": "main/logistic_regression/speaker_predictions.csv",
+      "sha256": "4b546600b700b306bdd437a758e9189b66fd09660dc265090dd83399461cad29"
+    },
+    "main/logistic_regression/fold_0/recording_predictions.csv": {
+      "source": "main/logistic_regression/fold_0/recording_predictions.csv",
+      "sha256": "920722dceef158048d3028e59cf778923277e54d190d75e8e14055fc8b148d1a"
+    },
+    "main/logistic_regression/fold_0/selection.json": {
+      "source": "main/logistic_regression/fold_0/selection.json",
+      "sha256": "baf3ccfd679448e4dad09b19adbaa164d80deccf8ee865f05cb7d2da203778bb"
+    },
+    "main/logistic_regression/fold_1/recording_predictions.csv": {
+      "source": "main/logistic_regression/fold_1/recording_predictions.csv",
+      "sha256": "4c2a7d97d072d1231783a668289358506dd91f8a0239d66eaf070ab8af872563"
+    },
+    "main/logistic_regression/fold_1/selection.json": {
+      "source": "main/logistic_regression/fold_1/selection.json",
+      "sha256": "e8423d7506cd9e694845cbccab13f568ab98b54a59a4498aa92fe941d597aa33"
+    },
+    "main/logistic_regression/fold_2/recording_predictions.csv": {
+      "source": "main/logistic_regression/fold_2/recording_predictions.csv",
+      "sha256": "7bf496b2123682ff0f92b176ba07d56f167f0937adf19b06209a9b1f71c59ed5"
+    },
+    "main/logistic_regression/fold_2/selection.json": {
+      "source": "main/logistic_regression/fold_2/selection.json",
+      "sha256": "acb60ee9d531dea017e37679b1c628072b3096d071828b5b561f63f561f573b1"
+    },
+    "main/logistic_regression/fold_3/recording_predictions.csv": {
+      "source": "main/logistic_regression/fold_3/recording_predictions.csv",
+      "sha256": "649ba5509bdeb529a21cf778819f23b9fdf816e0a2ce5d6f4f8e22e7476b1ec2"
+    },
+    "main/logistic_regression/fold_3/selection.json": {
+      "source": "main/logistic_regression/fold_3/selection.json",
+      "sha256": "ef1de893144eec577ae649de57341cc228c6d2fd3a041aaf9d0289aefbe9bda1"
+    },
+    "main/logistic_regression/fold_4/recording_predictions.csv": {
+      "source": "main/logistic_regression/fold_4/recording_predictions.csv",
+      "sha256": "e43567a49b39a2508e92dfbd5e5a3d4a55757ca38333880978c704cbf34754b4"
+    },
+    "main/logistic_regression/fold_4/selection.json": {
+      "source": "main/logistic_regression/fold_4/selection.json",
+      "sha256": "7d9b1a62a3f5d9ec048291c92e57d5c7b0eca26798943c4f5f8bb31c6ef52bc5"
+    },
+    "main/random_forest/speaker_predictions.csv": {
+      "source": "main/random_forest/speaker_predictions.csv",
+      "sha256": "a7e19fcf6b108892542557ab95f151ccb7dcefa4e770d34ad2dea84e33ae5ad9"
+    },
+    "main/random_forest/fold_0/recording_predictions.csv": {
+      "source": "main/random_forest/fold_0/recording_predictions.csv",
+      "sha256": "3b0a6491175ac5a5d183924b54ae0b56deb61f5592e9cef7d7e4066bba2c9aa8"
+    },
+    "main/random_forest/fold_0/selection.json": {
+      "source": "main/random_forest/fold_0/selection.json",
+      "sha256": "83d9473cfeec7a76574a65cd561eeb9fdaf42fb0825f7e54eb0339f5f0b2a073"
+    },
+    "main/random_forest/fold_1/recording_predictions.csv": {
+      "source": "main/random_forest/fold_1/recording_predictions.csv",
+      "sha256": "97f045dd25bd7dbab9dbe740afe1e8cabb2e7afa1698a856e9808d36d5ef821b"
+    },
+    "main/random_forest/fold_1/selection.json": {
+      "source": "main/random_forest/fold_1/selection.json",
+      "sha256": "efd6ed1de2e92086979c9f3d1a22c60d09f555cf936e1588625f7612185e1e8a"
+    },
+    "main/random_forest/fold_2/recording_predictions.csv": {
+      "source": "main/random_forest/fold_2/recording_predictions.csv",
+      "sha256": "ef75a6b0870dccc2325b78a48fd9201e1a1a3701a519286ad6a3b58703704c6b"
+    },
+    "main/random_forest/fold_2/selection.json": {
+      "source": "main/random_forest/fold_2/selection.json",
+      "sha256": "81d2ddbca547f757df8117373f397d7149f969d6ca4108d9cb4b7ea0d97c991c"
+    },
+    "main/random_forest/fold_3/recording_predictions.csv": {
+      "source": "main/random_forest/fold_3/recording_predictions.csv",
+      "sha256": "32733c8a694691deb4487142446a763b393d29b6eb9723d2aa238571bb497e1e"
+    },
+    "main/random_forest/fold_3/selection.json": {
+      "source": "main/random_forest/fold_3/selection.json",
+      "sha256": "39c364db860beb8e424dbf02ddc2b1ce536c66fc14a465cd6bd5503a20b75bed"
+    },
+    "main/random_forest/fold_4/recording_predictions.csv": {
+      "source": "main/random_forest/fold_4/recording_predictions.csv",
+      "sha256": "836d7b1654fa2e493f2ba6f896da12c9d97eed4d746cfe6418ee49c0d822dd9d"
+    },
+    "main/random_forest/fold_4/selection.json": {
+      "source": "main/random_forest/fold_4/selection.json",
+      "sha256": "ada7b1f185360255b7744b03b1d85e8e275093c6deec8dbe48615cd6717d464c"
+    },
+    "main/xgboost/speaker_predictions.csv": {
+      "source": "main/xgboost/speaker_predictions.csv",
+      "sha256": "8936e02956e8b5e4d387db43b5d6fd73ad537aa450b531463d884b8ea51d777c"
+    },
+    "main/xgboost/fold_0/recording_predictions.csv": {
+      "source": "main/xgboost/fold_0/recording_predictions.csv",
+      "sha256": "e3b84eb50547e5bdf7d110dcc8839bbb6bfbfe0db22b46885e5357c4cb056489"
+    },
+    "main/xgboost/fold_0/selection.json": {
+      "source": "main/xgboost/fold_0/selection.json",
+      "sha256": "e8c7c3fe5eb0b5f90dd12123e09ec235cccf84b8bb06960fff9a124200fa2b39"
+    },
+    "main/xgboost/fold_1/recording_predictions.csv": {
+      "source": "main/xgboost/fold_1/recording_predictions.csv",
+      "sha256": "e4ee9d6dc1b7b36a119437db3fba1b1d92ba47ff282d5eb156ed8de26272ccfa"
+    },
+    "main/xgboost/fold_1/selection.json": {
+      "source": "main/xgboost/fold_1/selection.json",
+      "sha256": "2700a88029d4a7ae338ba0972a5ada7aaafd7ffbf494fc51a8c6e98d8938806b"
+    },
+    "main/xgboost/fold_2/recording_predictions.csv": {
+      "source": "main/xgboost/fold_2/recording_predictions.csv",
+      "sha256": "3cfe85915d8182b25baf22b38e9b61c3c67a57dba3b271c433a254cf17ca6cac"
+    },
+    "main/xgboost/fold_2/selection.json": {
+      "source": "main/xgboost/fold_2/selection.json",
+      "sha256": "b71d6961cb6130617c9940b285b3a9659cef96dc0a92e5ada9076d61d068a65d"
+    },
+    "main/xgboost/fold_3/recording_predictions.csv": {
+      "source": "main/xgboost/fold_3/recording_predictions.csv",
+      "sha256": "e0fcd7c4abbcb2e235769ef7cbb4f1436df482dfdbe755f7693923a75a16a5f1"
+    },
+    "main/xgboost/fold_3/selection.json": {
+      "source": "main/xgboost/fold_3/selection.json",
+      "sha256": "92f79eef661ada052ad67e304ecc6553acf04847bfc24d3dd78e113e9f8d6812"
+    },
+    "main/xgboost/fold_4/recording_predictions.csv": {
+      "source": "main/xgboost/fold_4/recording_predictions.csv",
+      "sha256": "781a3a9057642e397245e96b5a03d6bd72a8fcdc71591ac89b609b38856c091a"
+    },
+    "main/xgboost/fold_4/selection.json": {
+      "source": "main/xgboost/fold_4/selection.json",
+      "sha256": "9413658367449dea6855f587cc1cd65aa70a9977a54221aa01cc128ff7e4669a"
+    },
+    "native16k/logistic_regression/speaker_predictions.csv": {
+      "source": "native16k/logistic_regression/speaker_predictions.csv",
+      "sha256": "e035c405d41157aee019c7410be6b4a842d65bcfc92d3df8f4757ee9e65ec3e0"
+    },
+    "native16k/logistic_regression/fold_0/recording_predictions.csv": {
+      "source": "native16k/logistic_regression/fold_0/recording_predictions.csv",
+      "sha256": "6812e086e67bb9105c3adff3291f85c4fe7d31504afeb73cbca257416a6efb79"
+    },
+    "native16k/logistic_regression/fold_1/recording_predictions.csv": {
+      "source": "native16k/logistic_regression/fold_1/recording_predictions.csv",
+      "sha256": "a5fb76b8e412f8ffb4518f144ec9500ab995b218c00a21d04bb6c2f7c12a2f6d"
+    },
+    "native16k/logistic_regression/fold_2/recording_predictions.csv": {
+      "source": "native16k/logistic_regression/fold_2/recording_predictions.csv",
+      "sha256": "068fca8fbd929cd3674841091435997bc3b4723d2b1200ee215897c45e7158c7"
+    },
+    "native16k/logistic_regression/fold_3/recording_predictions.csv": {
+      "source": "native16k/logistic_regression/fold_3/recording_predictions.csv",
+      "sha256": "4c990a18f94ae4e41b39325979c7746a49aefb436c849dd20a9eab29f8f83f04"
+    },
+    "native16k/logistic_regression/fold_4/recording_predictions.csv": {
+      "source": "native16k/logistic_regression/fold_4/recording_predictions.csv",
+      "sha256": "aa7f8d95588f5fbcada2b4b8a46f417e4b4a8b0968735e137ad26a5db1e289fc"
+    },
+    "native16k/random_forest/speaker_predictions.csv": {
+      "source": "native16k/random_forest/speaker_predictions.csv",
+      "sha256": "6efdc5e7a9d583c557cb7b617ab6772bb10285235102177474336c539b2add5c"
+    },
+    "native16k/random_forest/fold_0/recording_predictions.csv": {
+      "source": "native16k/random_forest/fold_0/recording_predictions.csv",
+      "sha256": "648eb182562e2733dc492487341d1a916009273606c39cfd8b462ac515e5d38f"
+    },
+    "native16k/random_forest/fold_1/recording_predictions.csv": {
+      "source": "native16k/random_forest/fold_1/recording_predictions.csv",
+      "sha256": "5b2bc7b2666273bfbbf68f8f52275d03df0bac738822c7ae0fe5471eec33a1e1"
+    },
+    "native16k/random_forest/fold_2/recording_predictions.csv": {
+      "source": "native16k/random_forest/fold_2/recording_predictions.csv",
+      "sha256": "57472620cf2e4828c0927b53af90e2670d8d70eb1719f4e1f3efc56d1a272a0f"
+    },
+    "native16k/random_forest/fold_3/recording_predictions.csv": {
+      "source": "native16k/random_forest/fold_3/recording_predictions.csv",
+      "sha256": "fd42df4bd4bf364a904038db15cb70d086aa7e0c86545546d42bfee7a92627b2"
+    },
+    "native16k/random_forest/fold_4/recording_predictions.csv": {
+      "source": "native16k/random_forest/fold_4/recording_predictions.csv",
+      "sha256": "7ba69154ce96a3c0b9659a92e10708c48e08e0f2dcb457aaafd3e72fb92c98d9"
+    },
+    "native16k/xgboost/speaker_predictions.csv": {
+      "source": "native16k/xgboost/speaker_predictions.csv",
+      "sha256": "87b0dce8a728ccfd8e41d6142135b0cb0ab8519e1bf42ff1d740b3d7f1b09892"
+    },
+    "native16k/xgboost/fold_0/recording_predictions.csv": {
+      "source": "native16k/xgboost/fold_0/recording_predictions.csv",
+      "sha256": "7c3761033e480722f8cd57dda4c5a71aed83f857a59ad9fd85d4400eb6267799"
+    },
+    "native16k/xgboost/fold_1/recording_predictions.csv": {
+      "source": "native16k/xgboost/fold_1/recording_predictions.csv",
+      "sha256": "e253e114c165a96fdef389ecdbc22119587216e20062da1b4b7669110c48588d"
+    },
+    "native16k/xgboost/fold_2/recording_predictions.csv": {
+      "source": "native16k/xgboost/fold_2/recording_predictions.csv",
+      "sha256": "9a01882219cfdb488f7ef423134881b63dfcdb7199078f48b9b9e0c07fee91ee"
+    },
+    "native16k/xgboost/fold_3/recording_predictions.csv": {
+      "source": "native16k/xgboost/fold_3/recording_predictions.csv",
+      "sha256": "13ecd31cff10ab3a7ad3cf027d474e0cf836179e650ceea661d939e0f6fe042b"
+    },
+    "native16k/xgboost/fold_4/recording_predictions.csv": {
+      "source": "native16k/xgboost/fold_4/recording_predictions.csv",
+      "sha256": "7a19920762cfeb0af07d7835a564995f76a1145604685f837289234e9965c5a1"
+    },
+    "splits/fold_0_outer_train_speakers.csv": {
+      "source": "main/splits/fold_0/outer_train.csv (columns speaker_id, label, unique rows)",
+      "sha256": "d8cd9cdb32c6efde03b644ceba8335c8ce9362bd16676fcb5901ad1829251b27",
+      "source_sha256": "10b64a1c0d49e3718f6a65ebfa04a77a5422f97fb17263e702c573a338809a85"
+    },
+    "splits/fold_0_outer_test_speakers.csv": {
+      "source": "main/splits/fold_0/outer_test.csv (columns speaker_id, label, unique rows)",
+      "sha256": "a9ce8c03e98d4fe0b67980e1daf9027a08a2e46c6c049d34426ff1cdc5f8cb97",
+      "source_sha256": "93ffc3f7ac01dcf52608b27e52a6f770fe22433c96b69c43a05c101f0929ab3e"
+    },
+    "splits/fold_1_outer_train_speakers.csv": {
+      "source": "main/splits/fold_1/outer_train.csv (columns speaker_id, label, unique rows)",
+      "sha256": "8141bb370ed8bc1565c3c6319c81dd6ef2f73484fe6dd6b5cfbab3cda689286d",
+      "source_sha256": "f1dfede9eccbeb0621218d15c868e067984f8ce9c7f94bc52c521b7525e47b05"
+    },
+    "splits/fold_1_outer_test_speakers.csv": {
+      "source": "main/splits/fold_1/outer_test.csv (columns speaker_id, label, unique rows)",
+      "sha256": "6a0c0292c924d5e81e086a34e47466aaa8e5c57b6ef8323ab25b409c7cef7c3f",
+      "source_sha256": "54d40407f3e7557d7810d654dda26808676676993a0f56d109916d0eefa3b2dd"
+    },
+    "splits/fold_2_outer_train_speakers.csv": {
+      "source": "main/splits/fold_2/outer_train.csv (columns speaker_id, label, unique rows)",
+      "sha256": "27557f0662494440d6d48646284578eb688bdb1851243ef8425038e96cd04870",
+      "source_sha256": "f23ea9f9af54a71c3b1dc955ce26ab6d7f946a1d65f0680ca14f904b8c09838a"
+    },
+    "splits/fold_2_outer_test_speakers.csv": {
+      "source": "main/splits/fold_2/outer_test.csv (columns speaker_id, label, unique rows)",
+      "sha256": "7f75a9bc0a7dd980c969cdd56b945b196bdf5b05df15df14f54a7ae2ed1a66ce",
+      "source_sha256": "21eaa81e565f87173cba90a04211fd84283867225461648cf31c9cffa5de9d2c"
+    },
+    "splits/fold_3_outer_train_speakers.csv": {
+      "source": "main/splits/fold_3/outer_train.csv (columns speaker_id, label, unique rows)",
+      "sha256": "3bab4a3892dfd3c8529237b02acf0f9d64f5126939d84f99baed6d0c8a3efdf9",
+      "source_sha256": "07832615f36a7eefae2537f83434c033e0d3e746caec6f21ac23bf8cbabf1962"
+    },
+    "splits/fold_3_outer_test_speakers.csv": {
+      "source": "main/splits/fold_3/outer_test.csv (columns speaker_id, label, unique rows)",
+      "sha256": "8bcf5124afc716707698f5cdb9cf3681e69bb267dbb6bc4d72e0e38f73302ee0",
+      "source_sha256": "c65dfeb0e5b53febcce1059902fdabd6f4c7efc74f6521eae97f2b537abc3a1b"
+    },
+    "splits/fold_4_outer_train_speakers.csv": {
+      "source": "main/splits/fold_4/outer_train.csv (columns speaker_id, label, unique rows)",
+      "sha256": "e6db203786a1721c4ced3c3dd2112a160556172f24b0ce3f0f4da22887a90e0a",
+      "source_sha256": "001257083dc3151a818abca6982a79077bbee26453beec22ebfe2cc63380b011"
+    },
+    "splits/fold_4_outer_test_speakers.csv": {
+      "source": "main/splits/fold_4/outer_test.csv (columns speaker_id, label, unique rows)",
+      "sha256": "9e817d7e4c76526336e9dd21bfba1da237efad0a2f70b1011362312bb1adf77c",
+      "source_sha256": "3553a5cfbcded5a6e07ba6aeda244bb0893570061201f6d0b7ffd384f75d8bab"
+    }
+  }
+}

@@ -1,0 +1,109 @@
+experiment: v4.0
+parent: v2.0
+parent_run: artifacts/runs/20261012T183328Z_f-all_cead14cc32f1
+base_config: config/base.yaml
+proposal: Detecting Parkinson's Disease from Speech PP.pdf
+report_template: docs/patchtst_technical_report_v1_2.pdf
+replaces_official_result: false
+features:
+  model: microsoft/wavlm-large
+  revision: c1423ed94bb01d80a3f5ce5bc39f6026a0f4828c
+  hidden_size: 1024
+  seconds: 10.0
+  minimum_samples: 400
+  normalization: pretrained_mean_variance
+  pooling: last_hidden_state_mean_then_equal_window_mean
+  dtype: float32
+  device: cpu
+  threads: 4
+  workers: 4
+  version: frozen-wavlm-large-v1
+classifiers:
+  logistic_regression:
+    C:
+    - 0.01
+    - 0.1
+    - 1.0
+    - 10.0
+  random_forest:
+    n_estimators:
+    - 300
+    max_depth:
+    - 4
+    - null
+    min_samples_leaf:
+    - 1
+    - 2
+    max_features:
+    - sqrt
+  xgboost:
+    n_estimators:
+    - 200
+    max_depth:
+    - 1
+    - 2
+    - 3
+    learning_rate:
+    - 0.03
+    - 0.1
+    subsample:
+    - 1.0
+    colsample_bytree:
+    - 0.5
+    reg_lambda:
+    - 1.0
+fine_tuning:
+  trigger_auroc: 0.8
+  trigger_source: selected_logistic_mean_inner_speaker_auroc
+  upper_layers:
+  - 2
+  - 4
+  learning_rate:
+  - 1.0e-05
+  - 3.0e-05
+  epochs: 6
+  patience: 2
+  validation_fraction: 0.2
+  max_windows_per_file: 2
+  batch_size: 1
+  weight_decay: 0.0001
+  dropout: 0.1
+outputs:
+  cache_root: data/experiments/v4_0_wavlm
+  run_root: artifacts/runs
+data:
+  root: Italian Parkinson's Voice and speech
+  groups:
+  - Italian Parkinson's Voice and speech/28 People with Parkinson's disease
+  - Italian Parkinson's Voice and speech/22 Elderly Healthy Control
+  target_sr: 16000
+  tasks: all
+  merge_probable_speakers: true
+splits:
+  type: stratified_group_kfold
+  n_splits: 5
+  seed: 42
+  group_by: speaker
+train:
+  threshold: 0.5
+inner_folds: 3
+dependency_versions:
+  numpy: 2.4.6
+  pandas: 3.0.6
+  scikit-learn: 1.9.1
+  librosa: 0.11.0
+  soundfile: 0.14.0
+  torch: 2.14.1+cpu
+  transformers: 5.19.0
+  huggingface-hub: 2.2.0
+  xgboost-cpu: 3.1.1
+pretrained_files:
+  config.json:
+    cache_path: /root/.cache/huggingface/hub/models--microsoft--wavlm-large/snapshots/c1423ed94bb01d80a3f5ce5bc39f6026a0f4828c/config.json
+    sha256: a3d8fe831aaf63d725b54a8ac36f3549cd4365c5086774b2c89cabbc6f9e129d
+  preprocessor_config.json:
+    cache_path: /root/.cache/huggingface/hub/models--microsoft--wavlm-large/snapshots/c1423ed94bb01d80a3f5ce5bc39f6026a0f4828c/preprocessor_config.json
+    sha256: 60ca5a31e13f69ee2fbf147504c8676db5f6398fd7a6b12294341dff838edfcf
+  pytorch_model.bin:
+    cache_path: /root/.cache/huggingface/hub/models--microsoft--wavlm-large/snapshots/c1423ed94bb01d80a3f5ce5bc39f6026a0f4828c/pytorch_model.bin
+    sha256: fdee460e529396ddb2f8c8e8ce0ad74cfb747b726bc6f612e666c7c1e1963c9d

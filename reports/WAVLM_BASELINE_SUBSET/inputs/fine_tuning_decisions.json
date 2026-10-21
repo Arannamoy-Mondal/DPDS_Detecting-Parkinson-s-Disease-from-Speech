@@ -1,0 +1,92 @@
+[
+  {
+    "scenario": "main",
+    "fold": 0,
+    "trigger_source": "selected_logistic_mean_inner_speaker_auroc",
+    "baseline_inner_auroc": 1.0,
+    "trigger_threshold": 0.8,
+    "triggered": false,
+    "test_labels_used_for_trigger": false
+  },
+  {
+    "scenario": "main",
+    "fold": 1,
+    "trigger_source": "selected_logistic_mean_inner_speaker_auroc",
+    "baseline_inner_auroc": 1.0,
+    "trigger_threshold": 0.8,
+    "triggered": false,
+    "test_labels_used_for_trigger": false
+  },
+  {
+    "scenario": "main",
+    "fold": 2,
+    "trigger_source": "selected_logistic_mean_inner_speaker_auroc",
+    "baseline_inner_auroc": 0.9920634920634921,
+    "trigger_threshold": 0.8,
+    "triggered": false,
+    "test_labels_used_for_trigger": false
+  },
+  {
+    "scenario": "main",
+    "fold": 3,
+    "trigger_source": "selected_logistic_mean_inner_speaker_auroc",
+    "baseline_inner_auroc": 1.0,
+    "trigger_threshold": 0.8,
+    "triggered": false,
+    "test_labels_used_for_trigger": false
+  },
+  {
+    "scenario": "main",
+    "fold": 4,
+    "trigger_source": "selected_logistic_mean_inner_speaker_auroc",
+    "baseline_inner_auroc": 1.0,
+    "trigger_threshold": 0.8,
+    "triggered": false,
+    "test_labels_used_for_trigger": false
+  },
+  {
+    "scenario": "native16k",
+    "fold": 0,
+    "trigger_source": "selected_logistic_mean_inner_speaker_auroc",
+    "baseline_inner_auroc": 1.0,
+    "trigger_threshold": 0.8,
+    "triggered": false,
+    "test_labels_used_for_trigger": false
+  },
+  {
+    "scenario": "native16k",
+    "fold": 1,
+    "trigger_source": "selected_logistic_mean_inner_speaker_auroc",
+    "baseline_inner_auroc": 1.0,
+    "trigger_threshold": 0.8,
+    "triggered": false,
+    "test_labels_used_for_trigger": false
+  },
+  {
+    "scenario": "native16k",
+    "fold": 2,
+    "trigger_source": "selected_logistic_mean_inner_speaker_auroc",
+    "baseline_inner_auroc": 1.0,
+    "trigger_threshold": 0.8,
+    "triggered": false,
+    "test_labels_used_for_trigger": false
+  },
+  {
+    "scenario": "native16k",
+    "fold": 3,
+    "trigger_source": "selected_logistic_mean_inner_speaker_auroc",
+    "baseline_inner_auroc": 1.0,
+    "trigger_threshold": 0.8,
+    "triggered": false,
+    "test_labels_used_for_trigger": false
+  },
+  {
+    "scenario": "native16k",
+    "fold": 4,
+    "trigger_source": "selected_logistic_mean_inner_speaker_auroc",
+    "baseline_inner_auroc": 1.0,
+    "trigger_threshold": 0.8,
+    "triggered": false,
+    "test_labels_used_for_trigger": false
+  }
+]

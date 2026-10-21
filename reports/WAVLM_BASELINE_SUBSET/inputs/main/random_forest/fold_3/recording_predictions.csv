@@ -1,0 +1,143 @@
+path,speaker_id,label,task,probability
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/ANGELA G/B1AGNIGNEE54F230320171018.wav,EHC_AGNIGNEE54F,0,B1,0.14000624337544734
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/ANGELA G/B2AGNIGNEE54F230320171019.wav,EHC_AGNIGNEE54F,0,B2,0.14749090971881976
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/ANGELA G/D1AGNIGNEE54F230320171019.wav,EHC_AGNIGNEE54F,0,D1,0.17502400054032427
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/ANGELA G/D2AGNIGNEE54F230320171020.wav,EHC_AGNIGNEE54F,0,D2,0.1445062286443719
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/ANGELA G/FB1AGNIGNEE54F230320171025.wav,EHC_AGNIGNEE54F,0,FB1,0.21655744972760962
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/ANGELA G/PR1AGNIGNEE54F230320171024.wav,EHC_AGNIGNEE54F,0,PR1,0.12637456787575732
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/ANGELA G/VA1AGNIGNEE54F230320171020.wav,EHC_AGNIGNEE54F,0,VA1,0.3233450558471818
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/ANGELA G/VA2AGNIGNEE54F230320171021.wav,EHC_AGNIGNEE54F,0,VA2,0.15151807626875707
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/ANGELA G/VE1AGNIGNEE54F230320171021.wav,EHC_AGNIGNEE54F,0,VE1,0.16860849220323323
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/ANGELA G/VE2AGNIGNEE54F230320171021.wav,EHC_AGNIGNEE54F,0,VE2,0.16478387452775412
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/ANGELA G/VI1AGNIGNEE54F230320171021.wav,EHC_AGNIGNEE54F,0,VI1,0.2271694493743891
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/ANGELA G/VI2AGNIGNEE54F230320171022.wav,EHC_AGNIGNEE54F,0,VI2,0.22665082636159534
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/ANGELA G/VO1AGNIGNEE54F230320171022.wav,EHC_AGNIGNEE54F,0,VO1,0.14961777534122084
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/ANGELA G/VO2AGNIGNEE54F230320171022.wav,EHC_AGNIGNEE54F,0,VO2,0.11701896336087177
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/ANGELA G/VU1AGNIGNEE54F230320171022.wav,EHC_AGNIGNEE54F,0,VU1,0.1656251448566276
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/ANGELA G/VU2AGNIGNEE54F230320171023.wav,EHC_AGNIGNEE54F,0,VU2,0.13209899473703168
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/GIOVANNA G/B1GGIAORVG47F300320171207.wav,EHC_GGIAORVG47F,0,B1,0.3024351344747909
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/GIOVANNA G/B2GGIAORVG47F300320171210.wav,EHC_GGIAORVG47F,0,B2,0.19400535328070143
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/GIOVANNA G/D1GGIAORVG47F300320171212.wav,EHC_GGIAORVG47F,0,D1,0.19776070771248033
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/GIOVANNA G/D2GGIAORVG47F300320171212.wav,EHC_GGIAORVG47F,0,D2,0.15893052578089073
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/GIOVANNA G/FB1GGIAORVG47F300320171218.wav,EHC_GGIAORVG47F,0,FB1,0.22244219225373105
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/GIOVANNA G/PR1GGIAORVG47F300320171217.wav,EHC_GGIAORVG47F,0,PR1,0.2132846334051472
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/GIOVANNA G/VA1GGIAORVG47F300320171212.wav,EHC_GGIAORVG47F,0,VA1,0.3235783668482261
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/GIOVANNA G/VA2GGIAORVG47F300320171213.wav,EHC_GGIAORVG47F,0,VA2,0.3711722052613095
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/GIOVANNA G/VE1GGIAORVG47F300320171213.wav,EHC_GGIAORVG47F,0,VE1,0.2633744062991459
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/GIOVANNA G/VE2GGIAORVG47F300320171214.wav,EHC_GGIAORVG47F,0,VE2,0.41446439954966413
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/GIOVANNA G/VI1GGIAORVG47F300320171214.wav,EHC_GGIAORVG47F,0,VI1,0.17821235524841475
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/GIOVANNA G/VI2GGIAORVG47F300320171214.wav,EHC_GGIAORVG47F,0,VI2,0.26647284904461593
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/GIOVANNA G/VO1GGIAORVG47F300320171214.wav,EHC_GGIAORVG47F,0,VO1,0.2015045848155418
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/GIOVANNA G/VO2GGIAORVG47F300320171215.wav,EHC_GGIAORVG47F,0,VO2,0.2704553141389715
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/GIOVANNA G/VU1GGIAORVG47F300320171215.wav,EHC_GGIAORVG47F,0,VU1,0.31574461393382497
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/GIOVANNA G/VU2GGIAORVG47F300320171215.wav,EHC_GGIAORVG47F,0,VU2,0.11517313289011255
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/GRAZIA G/B1GGRIAUZL45F020420171817.wav,EHC_GGRIAUZL45F,0,B1,0.13237684371492095
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/GRAZIA G/B2GGRIAUZL45F020420171820.wav,EHC_GGRIAUZL45F,0,B2,0.12782066706621156
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/GRAZIA G/D1GGRIAUZL45F020420171820.wav,EHC_GGRIAUZL45F,0,D1,0.1706399921036609
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/GRAZIA G/D2GGRIAUZL45F020420171820.wav,EHC_GGRIAUZL45F,0,D2,0.12341806982412845
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/GRAZIA G/FB1GGRIAUZL45F020420171827.wav,EHC_GGRIAUZL45F,0,FB1,0.18229765888999566
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/GRAZIA G/PR1GGRIAUZL45F020420171826.wav,EHC_GGRIAUZL45F,0,PR1,0.2047556234657515
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/GRAZIA G/VA1GGRIAUZL45F020420171821.wav,EHC_GGRIAUZL45F,0,VA1,0.27918253384167346
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/GRAZIA G/VA2GGRIAUZL45F020420171821.wav,EHC_GGRIAUZL45F,0,VA2,0.2534204710971607
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/GRAZIA G/VE1GGRIAUZL45F020420171822.wav,EHC_GGRIAUZL45F,0,VE1,0.28016655217422154
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/GRAZIA G/VE2GGRIAUZL45F020420171822.wav,EHC_GGRIAUZL45F,0,VE2,0.3012847980174341
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/GRAZIA G/VI1GGRIAUZL45F020420171822.wav,EHC_GGRIAUZL45F,0,VI1,0.16572486245447846
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/GRAZIA G/VI2GGRIAUZL45F020420171823.wav,EHC_GGRIAUZL45F,0,VI2,0.16821142585357066
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/GRAZIA G/VO1GGRIAUZL45F020420171823.wav,EHC_GGRIAUZL45F,0,VO1,0.20298698235611765
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/GRAZIA G/VO2GGRIAUZL45F020420171823.wav,EHC_GGRIAUZL45F,0,VO2,0.18840872269651088
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/GRAZIA G/VU1GGRIAUZL45F020420171824.wav,EHC_GGRIAUZL45F,0,VU1,0.12521602129224355
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/GRAZIA G/VU2GGRIAUZL45F020420171824.wav,EHC_GGRIAUZL45F,0,VU2,0.1417511448060776
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/TERESA M/B1TMEIRAEC54F230320171150.wav,EHC_TMEIRAEC54F,0,B1,0.2392890137611499
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/TERESA M/B2TMEIRAEC54F230320171152.wav,EHC_TMEIRAEC54F,0,B2,0.22433456092104292
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/TERESA M/D1TMEIRAEC54F230320171152.wav,EHC_TMEIRAEC54F,0,D1,0.5179006041318434
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/TERESA M/D2TMEIRAEC54F230320171152.wav,EHC_TMEIRAEC54F,0,D2,0.1987541067079366
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/TERESA M/FB1TMEIRAEC54F230320171158.wav,EHC_TMEIRAEC54F,0,FB1,0.2938598753274488
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/TERESA M/PR1TMEIRAEC54F230320171157.wav,EHC_TMEIRAEC54F,0,PR1,0.224265298697457
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/TERESA M/VA1TMEIRAEC54F230320171153.wav,EHC_TMEIRAEC54F,0,VA1,0.26432500310114865
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/TERESA M/VA2TMEIRAEC54F230320171153.wav,EHC_TMEIRAEC54F,0,VA2,0.30666539135926113
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/TERESA M/VE1TMEIRAEC54F230320171154.wav,EHC_TMEIRAEC54F,0,VE1,0.26202294205545584
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/TERESA M/VE2TMEIRAEC54F230320171154.wav,EHC_TMEIRAEC54F,0,VE2,0.2592579147269067
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/TERESA M/VI1TMEIRAEC54F230320171154.wav,EHC_TMEIRAEC54F,0,VI1,0.25306815299736457
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/TERESA M/VI2TMEIRAEC54F230320171154.wav,EHC_TMEIRAEC54F,0,VI2,0.25652646255757144
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/TERESA M/VO1TMEIRAEC54F230320171155.wav,EHC_TMEIRAEC54F,0,VO1,0.1553499619179767
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/TERESA M/VO2TMEIRAEC54F230320171155.wav,EHC_TMEIRAEC54F,0,VO2,0.2791411572975728
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/TERESA M/VU1TMEIRAEC54F230320171155.wav,EHC_TMEIRAEC54F,0,VU1,0.2418535150072617
+Italian Parkinson's Voice and speech/22 Elderly Healthy Control/TERESA M/VU2TMEIRAEC54F230320171155.wav,EHC_TMEIRAEC54F,0,VU2,0.1334361360934192
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/1-5/Lucia R/B1rlouscsi77F2605161820.wav,PD_RLOUSCSI77F,1,B1,0.7007624521075071
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/1-5/Lucia R/B2rlouscsi77F2605161822.wav,PD_RLOUSCSI77F,1,B2,0.6598492218881936
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/1-5/Lucia R/D1rlouscsi77F2605161822.wav,PD_RLOUSCSI77F,1,D1,0.651723584268749
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/1-5/Lucia R/D2rlouscsi77F2605161823.wav,PD_RLOUSCSI77F,1,D2,0.6779298278725724
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/1-5/Lucia R/FB1rlouscsi77F2605161834.wav,PD_RLOUSCSI77F,1,FB1,0.6727020983299752
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/1-5/Lucia R/PR1rlouscsi77F2605161834.wav,PD_RLOUSCSI77F,1,PR1,0.7729572514117552
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/1-5/Lucia R/VA1rlouscsi77F2605161825.wav,PD_RLOUSCSI77F,1,VA1,0.5691984882256629
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/1-5/Lucia R/VA2rlouscsi77F2605161825.wav,PD_RLOUSCSI77F,1,VA2,0.41944800999390336
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/1-5/Lucia R/VE1rlouscsi77F2605161826.wav,PD_RLOUSCSI77F,1,VE1,0.6315599386332634
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/1-5/Lucia R/VE2rlouscsi77F2605161826.wav,PD_RLOUSCSI77F,1,VE2,0.7068073810062496
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/1-5/Lucia R/VI1rlouscsi77F2605161827.wav,PD_RLOUSCSI77F,1,VI1,0.7384674805063925
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/1-5/Lucia R/VI2rlouscsi77F2605161828.wav,PD_RLOUSCSI77F,1,VI2,0.7691366370330244
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/1-5/Lucia R/VO1rlouscsi77F2605161828.wav,PD_RLOUSCSI77F,1,VO1,0.6753562770357536
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/1-5/Lucia R/VO2rlouscsi77F2605161829.wav,PD_RLOUSCSI77F,1,VO2,0.74511547837509
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/1-5/Lucia R/VU1rlouscsi77F2605161830.wav,PD_RLOUSCSI77F,1,VU1,0.5099863877602479
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/1-5/Lucia R/VU2rlouscsi77F2605161830.wav,PD_RLOUSCSI77F,1,VU2,0.5566833195891686
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/11-16/Anna B/B1ABNINSAC46F240120171753.wav,PD_ABNINSAC46F,1,B1,0.6491126924322334
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/11-16/Anna B/B2ABNINSAC46F240120171755.wav,PD_ABNINSAC46F,1,B2,0.6138640120669223
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/11-16/Anna B/D1ABNINSAC46F240120171756.wav,PD_ABNINSAC46F,1,D1,0.7221585244416224
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/11-16/Anna B/D2ABNINSAC46F240120171756.wav,PD_ABNINSAC46F,1,D2,0.5896132488361123
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/11-16/Anna B/FB1ABNINSAC46F240120171808.wav,PD_ABNINSAC46F,1,FB1,0.6610611179116068
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/11-16/Anna B/PR1ABNINSAC46F240120171807.wav,PD_ABNINSAC46F,1,PR1,0.6325569794664199
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/11-16/Anna B/VA1ABNINSAC46F240120171758.wav,PD_ABNINSAC46F,1,VA1,0.9100296357656348
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/11-16/Anna B/VA2ABNINSAC46F240120171759.wav,PD_ABNINSAC46F,1,VA2,0.8523190128010426
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/11-16/Anna B/VE1ABNINSAC46F240120171800.wav,PD_ABNINSAC46F,1,VE1,0.782006231867935
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/11-16/Anna B/VE2ABNINSAC46F240120171801.wav,PD_ABNINSAC46F,1,VE2,0.8375684969469807
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/11-16/Anna B/VI1ABNINSAC46F240120171801.wav,PD_ABNINSAC46F,1,VI1,0.9158140943802289
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/11-16/Anna B/VI2ABNINSAC46F240120171802.wav,PD_ABNINSAC46F,1,VI2,0.9499120282478866
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/11-16/Anna B/VO1ABNINSAC46F240120171802.wav,PD_ABNINSAC46F,1,VO1,0.8088920136619723
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/11-16/Anna B/VO2ABNINSAC46F240120171803.wav,PD_ABNINSAC46F,1,VO2,0.9361183490092851
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/11-16/Anna B/VU1ABNINSAC46F240120171804.wav,PD_ABNINSAC46F,1,VU1,0.92726188112625
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/11-16/Anna B/VU2ABNINSAC46F240120171804.wav,PD_ABNINSAC46F,1,VU2,0.93045571856281
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/11-16/Michele C/B1MCIICLHL46M240120171825.wav,PD_MCIICLHL46M,1,B1,0.8205950662090796
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/11-16/Michele C/B2MCIICLHL46M240120171827.wav,PD_MCIICLHL46M,1,B2,0.7859052595046468
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/11-16/Michele C/D1MCIICLHL46M240120171828.wav,PD_MCIICLHL46M,1,D1,0.7443997770740833
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/11-16/Michele C/D2MCIICLHL46M240120171828.wav,PD_MCIICLHL46M,1,D2,0.6606394135625435
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/11-16/Michele C/FB1MCIICLHL46M240120171837.wav,PD_MCIICLHL46M,1,FB1,0.828293603717333
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/11-16/Michele C/PR1MCIICLHL46M240120171836.wav,PD_MCIICLHL46M,1,PR1,0.809595948127031
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/11-16/Michele C/VA1MCIICLHL46M240120171830.wav,PD_MCIICLHL46M,1,VA1,0.8423754468211491
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/11-16/Michele C/VA2MCIICLHL46M240120171829.wav,PD_MCIICLHL46M,1,VA2,0.9190514377256598
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/11-16/Michele C/VE1MCIICLHL46M240120171830.wav,PD_MCIICLHL46M,1,VE1,0.9382028068942108
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/11-16/Michele C/VE2MCIICLHL46M240120171831.wav,PD_MCIICLHL46M,1,VE2,0.9076583043930287
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/11-16/Michele C/VI1MCIICLHL46M240120171831.wav,PD_MCIICLHL46M,1,VI1,0.8828416282821316
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/11-16/Michele C/VI2MCIICLHL46M240120171832.wav,PD_MCIICLHL46M,1,VI2,0.9006698328796218
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/11-16/Michele C/VO1MCIICLHL46M240120171833.wav,PD_MCIICLHL46M,1,VO1,0.7314961241887872
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/11-16/Michele C/VO2MCIICLHL46M240120171834.wav,PD_MCIICLHL46M,1,VO2,0.517018632839151
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/11-16/Michele C/VU1MCIICLHL46M240120171834.wav,PD_MCIICLHL46M,1,VU1,0.9069653293191321
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/11-16/Michele C/VU2MCIICLHL46M240120171835.wav,PD_MCIICLHL46M,1,VU2,0.9111931451898824
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/17-28/Nicolò C/B1NCIICAOC52M100220171237.wav,PD_NCIICAOC52M,1,B1,0.8564005990544573
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/17-28/Nicolò C/D1NCIICAOC52M100220171238.wav,PD_NCIICAOC52M,1,D1,0.640129066122462
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/17-28/Nicolò C/D2NCIICAOC52M100220171239.wav,PD_NCIICAOC52M,1,D2,0.6571172737267696
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/17-28/Nicolò C/PR1NCIICAOC52M100220171249.wav,PD_NCIICAOC52M,1,PR1,0.6788850727000755
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/17-28/Nicolò C/VA1NCIICAOC52M100220171239.wav,PD_NCIICAOC52M,1,VA1,0.5585050093684545
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/17-28/Nicolò C/VA2NCIICAOC52M100220171240.wav,PD_NCIICAOC52M,1,VA2,0.33236652057882526
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/17-28/Nicolò C/VE1NCIICAOC52M100220171240.wav,PD_NCIICAOC52M,1,VE1,0.662969004310122
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/17-28/Nicolò C/VE2NCIICAOC52M100220171240.wav,PD_NCIICAOC52M,1,VE2,0.8275214097101118
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/17-28/Nicolò C/VI1NCIICAOC52M100220171241.wav,PD_NCIICAOC52M,1,VI1,0.6631191548006925
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/17-28/Nicolò C/VI2NCIICAOC52M100220171241.wav,PD_NCIICAOC52M,1,VI2,0.8883432659915224
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/17-28/Nicolò C/VO1NCIICAOC52M100220171242.wav,PD_NCIICAOC52M,1,VO1,0.332099447968975
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/17-28/Nicolò C/VO2NCIICAOC52M100220171243.wav,PD_NCIICAOC52M,1,VO2,0.8204573620103255
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/17-28/Nicolò C/VU1NCIICAOC52M100220171243.wav,PD_NCIICAOC52M,1,VU1,0.6125765685126635
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/17-28/Nicolò C/VU2NCIICAOC52M100220171244.wav,PD_NCIICAOC52M,1,VU2,0.8710212772074184
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/6-10/Ugo B/B1ubguot_t40M1606161755.wav,PD_UBGUOT_T40M,1,B1,0.7379483057512963
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/6-10/Ugo B/B2ubguot_t40M1606161756.wav,PD_UBGUOT_T40M,1,B2,0.721391314531881
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/6-10/Ugo B/D1ubguot_t40M1606161758.wav,PD_UBGUOT_T40M,1,D1,0.7521324530918044
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/6-10/Ugo B/D2ubguot_t40M1606161758.wav,PD_UBGUOT_T40M,1,D2,0.7229712814406002
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/6-10/Ugo B/FB1ubguot_t40M1606161807.wav,PD_UBGUOT_T40M,1,FB1,0.7680387169348893
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/6-10/Ugo B/PR1ubguot_t40M1606161806.wav,PD_UBGUOT_T40M,1,PR1,0.742995389332151
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/6-10/Ugo B/VA1ubguot_t40M1606161759.wav,PD_UBGUOT_T40M,1,VA1,0.43658744729921023
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/6-10/Ugo B/VA2ubguot_t40M1606161759.wav,PD_UBGUOT_T40M,1,VA2,0.3457836892234216
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/6-10/Ugo B/VE1ubguot_t40M1606161800.wav,PD_UBGUOT_T40M,1,VE1,0.49525292104272495
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/6-10/Ugo B/VE2ubguot_t40M1606161801.wav,PD_UBGUOT_T40M,1,VE2,0.5159822683747646
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/6-10/Ugo B/VI1ubguot_t40M1606161801.wav,PD_UBGUOT_T40M,1,VI1,0.4689782302326255
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/6-10/Ugo B/VI2ubguot_t40M1606161802.wav,PD_UBGUOT_T40M,1,VI2,0.4437203990345406
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/6-10/Ugo B/VO1ubguot_t40M1606161802.wav,PD_UBGUOT_T40M,1,VO1,0.41490935720946914
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/6-10/Ugo B/VO2ubguot_t40M1606161803.wav,PD_UBGUOT_T40M,1,VO2,0.556302127528897
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/6-10/Ugo B/VU1ubguot_t40M1606161803.wav,PD_UBGUOT_T40M,1,VU1,0.548092933646945
+Italian Parkinson's Voice and speech/28 People with Parkinson's disease/6-10/Ugo B/VU2ubguot_t40M1606161804.wav,PD_UBGUOT_T40M,1,VU2,0.45603314188908844

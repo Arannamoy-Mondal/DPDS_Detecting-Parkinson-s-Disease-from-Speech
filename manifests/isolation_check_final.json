@@ -3,10 +3,29 @@
  "original": "/root/Projects/PatchTST",
  "original_audio_files_changed": [],
  "original_audio_files_checked": 831,
- "original_project_files_added_or_changed_since_start": [],
- "original_project_files_removed_or_changed_since_start": [],
- "passed": true,
- "time_utc": "2026-10-20T19:01:08Z",
+ "original_project_files_added_or_changed_since_start": [
+  "./.gitattributes\t3752\t1792526318.9022909650",
+  "./.gitignore\t646\t1792526318.9012909220",
+  "./CHANGELOG.md\t20853\t1792609833.3600111080",
+  "./docs/experiment_versions.md\t17628\t1792609833.3598943040",
+  "./docs/wavlm_baseline_subset_report.pdf\t187179\t1792609822.6611782340",
+  "./docs/wavlm_baseline_subset_report/README.md\t1319\t1792609833.3396342830",
+  "./docs/wavlm_baseline_subset_report/build_subset_report.py\t24240\t1792609819.9906705790",
+  "./docs/wavlm_baseline_subset_report/generated/fold_f1.pdf\t16554\t1792609821.9921496620",
+  "./docs/wavlm_baseline_subset_report/generated/speaker_scores.pdf\t20436\t1792609822.1171550000",
+  "./docs/wavlm_baseline_subset_report/generated/subset_fold_metrics.csv\t3659\t1792609821.6281341160",
+  "./docs/wavlm_baseline_subset_report/generated/subset_pooled_metrics.csv\t1351\t1792609821.6296783880",
+  "./docs/wavlm_baseline_subset_report/report_manifest.json\t624\t1792609822.6643323080",
+  "./docs/wavlm_baseline_subset_report/wavlm_baseline_subset_report.tex\t10984\t1792609822.1587300970"
+ ],
+ "original_project_files_removed_or_changed_since_start": [
+  "./.gitattributes\t3650\t1792485410.3026736750",
+  "./.gitignore\t127\t1791826926.6211273270",
+  "./CHANGELOG.md\t20097\t1792471846.7903389990",
+  "./docs/experiment_versions.md\t17149\t1792471846.7902555300"
+ ],
+ "passed": false,
+ "time_utc": "2026-10-21T19:27:44Z",
  "workspace": "/root/Projects/Project4a_FINAL_V1_ISOLATED",
  "workspace_distinct_and_not_inside_original": true
 }

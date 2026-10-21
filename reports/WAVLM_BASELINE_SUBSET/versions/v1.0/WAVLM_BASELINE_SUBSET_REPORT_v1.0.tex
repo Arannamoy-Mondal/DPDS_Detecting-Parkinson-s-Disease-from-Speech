@@ -1,0 +1,253 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.1cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern,microtype}
+\usepackage{booktabs,float,graphicx,amsmath,amssymb,enumitem,xcolor,tcolorbox}
+\usepackage[colorlinks=true,linkcolor=blue!50!black,urlcolor=blue!50!black,citecolor=blue!50!black]{hyperref}
+\setlist{itemsep=2pt,topsep=3pt}\setlength{\parskip}{5pt}\setlength{\parindent}{0pt}\linespread{1.08}
+\usepackage{titlesec}\titleformat{\section}{\Large\bfseries}{\thesection.}{.5em}{}\titleformat{\subsection}{\large\bfseries}{\thesubsection}{.5em}{}
+\usepackage{fancyhdr}\pagestyle{fancy}\fancyhf{}\fancyfoot[C]{\small\thepage}\fancyhead[L]{\small Frozen WavLM baseline subset}\fancyhead[R]{\small Subset of experiment v4.0}\renewcommand{\headrulewidth}{.3pt}
+\begin{document}
+\begin{center}{\LARGE\bfseries Frozen WavLM Baseline Subset\par}\vspace{6pt}{\Large Logistic regression, Random Forest and XGBoost on the same embeddings\par}\vspace{4pt}{\large Subset of the WavLM proposal experiment v4.0 \textperiodcentered{} Version 1.0 \textperiodcentered{} 21 October 2026\par}\vspace{6pt}{\small Arannamoy Mondal (report author). Evidence: v4.0 WavLM proposal experiment (run 20261014T191654Z\_v4.0\_eb438e63b942), saved predictions only, no model retrained.\par}\end{center}
+\vspace{4pt}\hrule\vspace{6pt}
+\tableofcontents
+\newpage
+\section*{Key numbers at a glance}\addcontentsline{toc}{section}{Key numbers at a glance}
+\begin{table}[H]\centering\small\renewcommand{\arraystretch}{1.15}
+\caption{Main cohort (46 people): pooled speaker results at threshold 0.5, percent.}
+\begin{tabular}{lrrrrr}
+\toprule
+\textbf{Classifier} & \textbf{F1} & \textbf{Recall} & \textbf{Specificity} & \textbf{Accuracy} & \textbf{AUROC}\\
+\midrule
+Logistic regression & 97.96 & 96.00 & 100.00 & 97.83 & 99.43\\
+Random Forest & 97.96 & 96.00 & 100.00 & 97.83 & 99.43\\
+XGBoost & 96.00 & 96.00 & 95.24 & 95.65 & 98.48\\
+\bottomrule
+\end{tabular}\end{table}
+Logistic regression (the predeclared baseline) and Random Forest reach the same pooled result. XGBoost is lower. The native 16 kHz cohort is smaller (39 people) and all three classifiers are perfect there, so it does not separately confirm any of them.
+
+\section*{Revision history}\addcontentsline{toc}{section}{Revision history}
+\begin{table}[H]\centering\small\renewcommand{\arraystretch}{1.15}
+\caption{Versions of this report.}
+\begin{tabular}{llp{11cm}}
+\toprule
+\textbf{Version} & \textbf{Date} & \textbf{Changes}\\
+\midrule
+1.0 & 21 October 2026 & First edition. Subset of experiment v4.0: frozen WavLM-large embeddings with logistic regression, Random Forest and XGBoost; conditional fine-tuning excluded because its gate never triggered.\\
+\bottomrule
+\end{tabular}\end{table}
+\section{Summary}\label{sec:summary}
+Each recording is turned into one 1,024-value vector by a frozen WavLM-large speech model. The model is never trained here. Three classifiers are trained on the same vectors, the same speaker folds and the same speech tasks. The question is whether the classifier choice changes the result. On the main 46 people, logistic regression and Random Forest both reach a speaker F1 of 97.96\%, with one missed patient and no false alarms. XGBoost reaches 96.00\%, with the same missed patient and one false alarm. These are differences of one or two people out of 46, so they are descriptive, not evidence that one classifier is better. Nothing here is an external validation.
+
+\section{Scope and what is left out}\label{sec:scope}
+The full v4.0 experiment has three parts: the frozen classifier comparison, a conditional partial fine-tuning branch, and a native-rate check. This report covers the frozen classifier comparison and its native-rate repeat. The fine-tuning branch is not included. Its gate was never triggered: in all five outer folds the training-side inner AUROC was above the 0.80 trigger, so no fine-tuned model exists.
+
+\begin{tcolorbox}[colback=green!3,colframe=green!40!black,boxrule=0.5pt,arc=2pt,left=5pt,right=5pt,top=3pt,bottom=3pt,title={\small\bfseries In plain words}]\small This report is a reading of saved predictions. It adds no new model, no new fold and no new threshold. Every number is recomputed from the saved files and checked against the values the experiment saved (section 'Checks performed').\end{tcolorbox}
+\section{Motivation and question}\label{sec:motivation}
+Parkinson's disease changes how people speak. The aim of the experiment is to tell people with Parkinson's disease apart from elderly healthy controls using speech recordings only. The baseline question is simple: if the speech representation is fixed and frozen, does the choice of classifier change the result? Logistic regression is the baseline chosen before any result was seen. Random Forest and XGBoost are the two alternatives proposed in the same plan.
+
+\section{The input: a frozen WavLM embedding}\label{sec:input}
+WavLM-large is a speech model trained by its authors on large amounts of unlabelled audio. Here it is used only as a fixed feature extractor. Each recording is resampled to 16 kHz and cut into windows of at most ten seconds. The last hidden layer is averaged over time inside each window, and the window vectors are averaged, giving one 1,024-value vector per recording. The model revision is pinned, and its weights are never changed.
+
+\begin{figure}[H]\centering\includegraphics[width=0.95\linewidth]{embedding_pipeline.pdf}\caption{How one recording becomes one 1,024-number embedding. The encoder weights never change; only averaging is applied.}\label{fig:embedding_pipeline}\end{figure}
+\begin{tcolorbox}[colback=green!3,colframe=green!40!black,boxrule=0.5pt,arc=2pt,left=5pt,right=5pt,top=3pt,bottom=3pt,title={\small\bfseries In plain words}]\small Think of the frozen model as a listener that writes down 1,024 numbers for each recording. The classifier only learns which numbers go with Parkinson's disease and which with controls. The listener does not know the diagnosis.\end{tcolorbox}
+\section{Cohort}\label{sec:cohort}
+\begin{table}[H]\centering\small\renewcommand{\arraystretch}{1.15}
+\caption{Who is scored in each scenario. Young controls are excluded from the whole study.}
+\begin{tabular}{lrrrr}
+\toprule
+\textbf{Scenario} & \textbf{People} & \textbf{PD} & \textbf{Elderly controls} & \textbf{Recordings}\\
+\midrule
+Main cohort & 46 & 25 & 21 & 773\\
+Without flagged people & 43 & 25 & 18 & 725\\
+Native 16 kHz only & 39 & 18 & 21 & 613\\
+\bottomrule
+\end{tabular}\end{table}
+Each person is one unit. A person's score is the mean of that person's recording scores. A person is called Parkinson's when the score is at least 0.5. Recordings from one person stay in one fold, so no person is both trained on and tested on. The native 16 kHz scenario keeps only recordings originally sampled at 16 kHz, and all three classifiers are refitted on that set. Vitantonio D has no passage recordings and is outside the shared 46-person cohort.
+
+\section{Classifiers and how their settings were chosen}\label{sec:classifiers}
+\begin{table}[H]\centering\small\renewcommand{\arraystretch}{1.15}
+\caption{Settings searched. Each classifier is trained inside the outer training data only.}
+\begin{tabular}{lp{11.5cm}}
+\toprule
+\textbf{Classifier} & \textbf{Settings searched (frozen grid)}\\
+\midrule
+Logistic regression & C in {0.01, 0.1, 1, 10}; liblinear solver; features standardised using training data only\\
+Random Forest & 300 trees; maximum depth in {4, unlimited}; minimum leaf size in {1, 2}; maximum features = sqrt\\
+XGBoost & 200 trees; maximum depth in {1, 2, 3}; learning rate in {0.03, 0.1}; subsample 1.0; column sample 0.5; lambda 1.0\\
+\bottomrule
+\end{tabular}\end{table}
+For every outer fold, the settings are chosen by a three-fold search that uses only the training people. The score used for choosing is the mean inner speaker AUROC. The chosen settings are then refitted on all training people of that fold. Each training person has equal total weight and each class has equal total weight, so the larger group does not dominate.
+
+\begin{table}[H]\centering\footnotesize\renewcommand{\arraystretch}{1.15}
+\caption{Settings chosen in each outer fold, with the inner-search AUROC that selected them.}
+\begin{tabular}{lp{4.6cm}p{4.6cm}p{4.6cm}}
+\toprule
+\textbf{Fold} & \textbf{Logistic regression} & \textbf{Random Forest} & \textbf{XGBoost}\\
+\midrule
+1 & C = 0.01 (inner 1.000) & depth 4, min leaf 1 (inner 1.000) & depth 1, rate 0.03 (inner 1.000)\\
+2 & C = 10.0 (inner 1.000) & depth 4, min leaf 1 (inner 0.991) & depth 1, rate 0.03 (inner 0.991)\\
+3 & C = 0.01 (inner 0.992) & depth unlimited, min leaf 1 (inner 0.992) & depth 2, rate 0.03 (inner 0.992)\\
+4 & C = 0.01 (inner 1.000) & depth 4, min leaf 1 (inner 1.000) & depth 2, rate 0.03 (inner 1.000)\\
+5 & C = 0.01 (inner 1.000) & depth 4, min leaf 1 (inner 1.000) & depth 1, rate 0.03 (inner 1.000)\\
+\bottomrule
+\end{tabular}\end{table}
+\section{Results}\label{sec:results}
+\subsection{Pooled speaker results}\label{sec:pooled}
+Each row pools the five outer test folds, so every person is scored exactly once. Counts are true positives (TP), false negatives (FN), true negatives (TN) and false positives (FP). All values are percentages except the counts.
+
+\begin{table}[H]\centering\scriptsize\renewcommand{\arraystretch}{1.15}
+\caption{Pooled speaker results at threshold 0.5 (percent; AUPRC is trapezoidal).}
+\begin{tabular}{llrlrrrrrrr}
+\toprule
+\textbf{Scenario} & \textbf{Classifier} & \textbf{People} & \textbf{TP/FN/TN/FP} & \textbf{F1} & \textbf{Recall} & \textbf{Spec.} & \textbf{Prec.} & \textbf{Acc.} & \textbf{AUROC} & \textbf{AUPRC}\\
+\midrule
+Main cohort & Logistic regression & 46 & 24/1/21/0 & 97.96 & 96.00 & 100.00 & 100.00 & 97.83 & 99.43 & 99.56\\
+ & Random Forest & 46 & 24/1/21/0 & 97.96 & 96.00 & 100.00 & 100.00 & 97.83 & 99.43 & 99.56\\
+ & XGBoost & 46 & 24/1/20/1 & 96.00 & 96.00 & 95.24 & 96.00 & 95.65 & 98.48 & 99.02\\
+\midrule
+Without flagged people & Logistic regression & 43 & 24/1/18/0 & 97.96 & 96.00 & 100.00 & 100.00 & 97.67 & 99.78 & 99.84\\
+ & Random Forest & 43 & 24/1/18/0 & 97.96 & 96.00 & 100.00 & 100.00 & 97.67 & 99.56 & 99.70\\
+ & XGBoost & 43 & 24/1/18/0 & 97.96 & 96.00 & 100.00 & 100.00 & 97.67 & 98.67 & 99.21\\
+\midrule
+Native 16 kHz only & Logistic regression & 39 & 18/0/21/0 & 100.00 & 100.00 & 100.00 & 100.00 & 100.00 & 100.00 & 100.00\\
+ & Random Forest & 39 & 18/0/21/0 & 100.00 & 100.00 & 100.00 & 100.00 & 100.00 & 100.00 & 100.00\\
+ & XGBoost & 39 & 18/0/21/0 & 100.00 & 100.00 & 100.00 & 100.00 & 100.00 & 100.00 & 100.00\\
+\bottomrule
+\end{tabular}\end{table}
+\begin{tcolorbox}[colback=orange!5,colframe=orange!70!black,boxrule=0.5pt,arc=2pt,left=5pt,right=5pt,top=3pt,bottom=3pt,title={\small\bfseries Key point}]\small The clinical pair is recall and specificity. Recall says how many patients were found; specificity says how many controls were left alone. Logistic regression and Random Forest have recall 96\% and specificity 100\%. XGBoost has recall 96\% and specificity 95.24\%.\end{tcolorbox}
+\subsection{Mean and spread across the five folds}\label{sec:folds}
+Each fold has 9 or 10 test people and about five patients. One missed patient lowers a fold's recall by about 20 points, so the spread across folds is large. The table gives the mean and sample standard deviation over the five folds of the main cohort.
+
+\begin{table}[H]\centering\footnotesize\renewcommand{\arraystretch}{1.15}
+\caption{Mean \$\textbackslash{}pm\$ sample standard deviation over the five main-cohort folds (percent).}
+\begin{tabular}{lrrrrrr}
+\toprule
+\textbf{Classifier} & \textbf{F1} & \textbf{Recall} & \textbf{Specificity} & \textbf{Precision} & \textbf{Accuracy} & \textbf{AUROC}\\
+\midrule
+Logistic regression & 97.78 \$\textbackslash{}pm\$ 4.97 & 96.00 \$\textbackslash{}pm\$ 8.94 & 100.00 \$\textbackslash{}pm\$ 0.00 & 100.00 \$\textbackslash{}pm\$ 0.00 & 97.78 \$\textbackslash{}pm\$ 4.97 & 99.00 \$\textbackslash{}pm\$ 2.24\\
+Random Forest & 97.78 \$\textbackslash{}pm\$ 4.97 & 96.00 \$\textbackslash{}pm\$ 8.94 & 100.00 \$\textbackslash{}pm\$ 0.00 & 100.00 \$\textbackslash{}pm\$ 0.00 & 97.78 \$\textbackslash{}pm\$ 4.97 & 99.00 \$\textbackslash{}pm\$ 2.24\\
+XGBoost & 96.00 \$\textbackslash{}pm\$ 8.94 & 96.00 \$\textbackslash{}pm\$ 8.94 & 95.00 \$\textbackslash{}pm\$ 11.18 & 96.00 \$\textbackslash{}pm\$ 8.94 & 95.56 \$\textbackslash{}pm\$ 9.94 & 99.00 \$\textbackslash{}pm\$ 2.24\\
+\bottomrule
+\end{tabular}\end{table}
+\begin{figure}[H]\centering\includegraphics[width=0.85\linewidth]{fold_f1.pdf}\caption{Speaker F1 in each of the five outer test folds, main cohort. The line marks the mean.}\label{fig:fold_f1}\end{figure}
+AUROC is 1.00 in folds 1 to 4 for all three classifiers. In fold 5 each classifier ranks one patient below one control, which gives 0.95 (19 of 20 correctly ordered pairs). That is why the AUROC columns match: each classifier makes the same single ranking error.
+
+\subsection{Errors by fold}\label{sec:errors}
+\begin{table}[H]\centering\small\renewcommand{\arraystretch}{1.15}
+\caption{F1 per fold, with missed patients and false alarms in brackets (FN/FP).}
+\begin{tabular}{rrlll}
+\toprule
+\textbf{Fold} & \textbf{People} & \textbf{Logistic regression} & \textbf{Random Forest} & \textbf{XGBoost}\\
+\midrule
+1 & 10 & 100.00 (0/0) & 100.00 (0/0) & 100.00 (0/0)\\
+2 & 9 & 100.00 (0/0) & 100.00 (0/0) & 100.00 (0/0)\\
+3 & 9 & 100.00 (0/0) & 100.00 (0/0) & 100.00 (0/0)\\
+4 & 9 & 100.00 (0/0) & 100.00 (0/0) & 100.00 (0/0)\\
+5 & 9 & 88.89 (1/0) & 88.89 (1/0) & 80.00 (1/1)\\
+\bottomrule
+\end{tabular}\end{table}
+\subsection{Which people were misclassified}\label{sec:misclassified}
+\begin{table}[H]\centering\small\renewcommand{\arraystretch}{1.15}
+\caption{Every misclassified person in the main cohort.}
+\begin{tabular}{llllr}
+\toprule
+\textbf{Classifier} & \textbf{Speaker} & \textbf{Error} & \textbf{Score} & \textbf{Fold}\\
+\midrule
+Logistic regression & PD\_CFAERLEI54F & missed patient & 0.188 & fold 5\\
+Random Forest & PD\_CFAERLEI54F & missed patient & 0.333 & fold 5\\
+XGBoost & EHC\_GCIALSDA52F & false alarm & 0.532 & fold 5\\
+XGBoost & PD\_CFAERLEI54F & missed patient & 0.280 & fold 5\\
+\bottomrule
+\end{tabular}\end{table}
+\begin{figure}[H]\centering\includegraphics[width=0.95\linewidth]{speaker_scores.pdf}\caption{Speaker scores in the main cohort, pooled over the five outer folds. The dashed line is the 0.5 threshold. Labelled points are misclassified people.}\label{fig:speaker_scores}\end{figure}
+The same patient is missed by all three classifiers. One control is a false alarm for XGBoost only.
+
+\section{Answer to the question}\label{sec:answer}
+\begin{itemize}\item Random Forest ties logistic regression on pooled F1, AUROC and AUPRC in the main cohort.
+\item XGBoost scores lower than logistic regression on F1, specificity, precision, accuracy, AUROC and AUPRC in the main cohort.
+\item In the native 16 kHz cohort all three classifiers are perfect. That cohort is smaller and does not independently confirm any of them.
+\end{itemize}
+The three classifiers share the same people, folds and embeddings, so the differences come from the classifiers themselves. They rest on one or two misclassified people out of 46, so none of them shows a classifier is better.
+
+\section{Limitations}\label{sec:limitations}
+\begin{itemize}\item No external validation. Every person comes from the same corpus.
+\item Disease is not separated from recording conditions. Earlier checks in this project found that recording dates and levels differ between the two groups, so the classifiers may partly use acquisition differences. This remains unresolved.
+\item The native 16 kHz scenario is retrained on fewer people. Its perfect scores are not independent confirmation.
+\item Pooled figures are not best-fold figures. Choosing the best of several settings on the same pooled scores would be optimistic, so no setting is picked for reporting.
+\end{itemize}
+\section{Checks performed}\label{sec:checks}
+Every check below ran during the build. The build stops and writes nothing if any check fails.
+
+\begin{table}[H]\centering\footnotesize\renewcommand{\arraystretch}{1.15}
+\caption{Checks run on the saved inputs.}
+\begin{tabular}{p{9.5cm}ll}
+\toprule
+\textbf{Check} & \textbf{Result} & \textbf{Detail}\\
+\midrule
+confusion counts match saved: logistic\_regression, main & PASS & \\
+metrics match saved: logistic\_regression, main & PASS & largest difference 1.11022e-16\\
+confusion counts match saved: logistic\_regression, without\_sheet\_flag & PASS & \\
+metrics match saved: logistic\_regression, without\_sheet\_flag & PASS & largest difference 1.11022e-16\\
+confusion counts match saved: logistic\_regression, native16k & PASS & \\
+metrics match saved: logistic\_regression, native16k & PASS & largest difference 0\\
+confusion counts match saved: random\_forest, main & PASS & \\
+metrics match saved: random\_forest, main & PASS & largest difference 1.11022e-16\\
+confusion counts match saved: random\_forest, without\_sheet\_flag & PASS & \\
+metrics match saved: random\_forest, without\_sheet\_flag & PASS & largest difference 1.11022e-16\\
+confusion counts match saved: random\_forest, native16k & PASS & \\
+metrics match saved: random\_forest, native16k & PASS & largest difference 0\\
+confusion counts match saved: xgboost, main & PASS & \\
+metrics match saved: xgboost, main & PASS & largest difference 1.11022e-16\\
+confusion counts match saved: xgboost, without\_sheet\_flag & PASS & \\
+metrics match saved: xgboost, without\_sheet\_flag & PASS & largest difference 1.11022e-16\\
+confusion counts match saved: xgboost, native16k & PASS & \\
+metrics match saved: xgboost, native16k & PASS & largest difference 0\\
+speaker score equals mean of recordings: logistic\_regression, main & PASS & max difference 1.11022e-16\\
+speaker score equals mean of recordings: logistic\_regression, native16k & PASS & max difference 1.11022e-16\\
+speaker score equals mean of recordings: random\_forest, main & PASS & max difference 1.11022e-16\\
+speaker score equals mean of recordings: random\_forest, native16k & PASS & max difference 1.11022e-16\\
+speaker score equals mean of recordings: xgboost, main & PASS & max difference 6.3e-08\\
+speaker score equals mean of recordings: xgboost, native16k & PASS & max difference 5.875e-08\\
+fold 1: no speaker in both training and test & PASS & overlap 0\\
+fold 1: saved predictions match the split & PASS & difference 0\\
+fold 2: no speaker in both training and test & PASS & overlap 0\\
+fold 2: saved predictions match the split & PASS & difference 0\\
+fold 3: no speaker in both training and test & PASS & overlap 0\\
+fold 3: saved predictions match the split & PASS & difference 0\\
+fold 4: no speaker in both training and test & PASS & overlap 0\\
+fold 4: saved predictions match the split & PASS & difference 0\\
+fold 5: no speaker in both training and test & PASS & overlap 0\\
+fold 5: saved predictions match the split & PASS & difference 0\\
+every main person is in exactly one test fold & PASS & tested 46, unique 46, people 46\\
+conditional fine-tuning never triggered & PASS & triggered 0\\
+\bottomrule
+\end{tabular}\end{table}
+\section{Where to find everything}\label{sec:where}
+\begin{itemize}\item This report: \texttt{reports/WAVLM\_BASELINE\_SUBSET/versions/v1.0/WAVLM\_BASELINE\_SUBSET\_REPORT\_v1.0.pdf}.
+\item Editable LaTeX and Overleaf zip: the same folder, \texttt{WAVLM\_BASELINE\_SUBSET\_REPORT\_v1.0.tex} and \texttt{WAVLM\_BASELINE\_SUBSET\_REPORT\_v1.0\_latex.zip}.
+\item Generator used for this version: \texttt{src/final\_v1/wavlm\_subset\_report.py}, copy in \texttt{versions/v1.0/generator/}.
+\item Saved inputs (read-only copies with SHA-256 fingerprints): \texttt{reports/WAVLM\_BASELINE\_SUBSET/inputs/}.
+\item Original run: \texttt{artifacts/runs/20261014T191654Z\_v4.0\_eb438e63b942/} in the separate PatchTST project.
+\end{itemize}
+\section*{Glossary}\addcontentsline{toc}{section}{Glossary}
+\begin{table}[H]\centering\small\renewcommand{\arraystretch}{1.15}
+\caption{Terms used in this report.}
+\begin{tabular}{p{4.2cm}p{11.8cm}}
+\toprule
+\textbf{Term} & \textbf{Meaning in this report}\\
+\midrule
+Speaker (person) & One person. All of their recordings are scored together by their mean score.\\
+Threshold 0.5 & A person is called Parkinson's when their score is at least 0.5. The threshold is fixed and never tuned on test people.\\
+TP / FN / TN / FP & True positive, false negative, true negative, false positive.\\
+Recall & Share of patients who were correctly found: TP / (TP + FN).\\
+Specificity & Share of controls who were correctly left alone: TN / (TN + FP).\\
+Precision & Share of people called Parkinson's who really are: TP / (TP + FP).\\
+F1 & Balance of precision and recall: 2 x precision x recall / (precision + recall).\\
+AUROC & Chance that a random patient gets a higher score than a random control (1.00 is perfect).\\
+AUPRC & Area under the precision-recall curve, computed with the trapezoidal rule.\\
+Inner search & The three-fold search that chooses settings, using training people only.\\
+Outer fold & One of five speaker-disjoint splits. Each person is tested in exactly one.\\
+\bottomrule
+\end{tabular}\end{table}
+\end{document}

@@ -1,0 +1,313 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.1cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern,microtype}
+\usepackage{booktabs,float,graphicx,amsmath,amssymb,enumitem,xcolor,tcolorbox}
+\usepackage[colorlinks=true,linkcolor=blue!50!black,urlcolor=blue!50!black,citecolor=blue!50!black]{hyperref}
+\setlist{itemsep=2pt,topsep=3pt}\setlength{\parskip}{5pt}\setlength{\parindent}{0pt}\linespread{1.08}
+\usepackage{titlesec}\titleformat{\section}{\Large\bfseries}{\thesection.}{.5em}{}\titleformat{\subsection}{\large\bfseries}{\thesubsection}{.5em}{}
+\usepackage{fancyhdr}\pagestyle{fancy}\fancyhf{}\fancyfoot[C]{\small\thepage}\fancyhead[L]{\small WavLM baseline subset}\fancyhead[R]{\small FINAL\_V1 comparison, baseline part}\renewcommand{\headrulewidth}{.3pt}
+\begin{document}
+\begin{center}{\LARGE\bfseries Frozen WavLM Baseline: Logistic Regression, Random Forest and XGBoost\par}\vspace{6pt}{\large Baseline subset of the FINAL\_V1 comparison (CSE 431, topic 4a)\par}\vspace{4pt}{\large Version 1.1 \textperiodcentered{} 21 October 2026\par}\vspace{6pt}{\small Arannamoy Mondal. Evidence: frozen protocol FINAL\_V1, 47 people, 785 recordings, five speaker-disjoint folds.\par}\end{center}
+\vspace{4pt}\hrule\vspace{6pt}
+\tableofcontents
+\newpage
+\section*{Key numbers at a glance}\addcontentsline{toc}{section}{Key numbers at a glance}
+\begin{table}[H]\centering\footnotesize\renewcommand{\arraystretch}{1.15}
+\caption{Speaker-level results on the 47 FINAL\textbackslash{}\_V1 people, pooled over the five held-out folds, threshold 0.5. Percent.}
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{Classifier} & \textbf{F1} & \textbf{Recall} & \textbf{Specificity} & \textbf{Precision} & \textbf{Accuracy} & \textbf{AUROC} & \textbf{AUPRC}\\
+\midrule
+Logistic regression & 97.96 & 96.00 & 100.00 & 100.00 & 97.87 & 99.45 & 99.57\\
+Random Forest & 97.96 & 96.00 & 100.00 & 100.00 & 97.87 & 99.45 & 99.57\\
+XGBoost & 96.00 & 96.00 & 95.45 & 96.00 & 95.74 & 99.82 & 99.85\\
+\bottomrule
+\end{tabular}\end{table}
+\begin{tcolorbox}[colback=orange!5,colframe=orange!70!black,boxrule=0.5pt,arc=2pt,left=5pt,right=5pt,top=3pt,bottom=3pt,title={\small\bfseries Key point}]\small Logistic regression and Random Forest make the same decisions for all 47 people. XGBoost misses the same patient, has one false alarm, and ranks people slightly better (AUROC 99.82\% against 99.45\%). The differences are one or two people out of 47.\end{tcolorbox}
+\section*{Revision history}\addcontentsline{toc}{section}{Revision history}
+\begin{table}[H]\centering\small\renewcommand{\arraystretch}{1.15}
+\caption{Versions of this report.}
+\begin{tabular}{llp{11cm}}
+\toprule
+\textbf{Version} & \textbf{Date} & \textbf{Changes}\\
+\midrule
+1.0 & 21 October 2026 & Internal draft built from the separate PatchTST proposal run (v4.0). Not delivered. Superseded by 1.1.\\
+1.1 & 21 October 2026 & Rebuilt on the FINAL\textbackslash{}\_V1 comparison: logistic regression and XGBoost from the official frozen run; Random Forest added as exploratory amendment A2 (same folds, same inner rule). Full Final Report structure; the v4.0 run appears only as a labelled cross-check.\\
+\bottomrule
+\end{tabular}\end{table}
+\section{Abstract}\label{sec:abstract}
+Parkinson's disease can change the voice and the way people speak. We asked whether a speech recording can separate people with Parkinson's disease from healthy older adults. We used a public Italian corpus of 785 recordings from 47 people (25 with Parkinson's disease, 22 healthy older adults). Each recording was turned into 1,024 numbers by a frozen, pretrained speech model (WavLM-large) that was not trained on our data. Three classifiers were trained on exactly the same numbers and the same speaker folds: logistic regression (the baseline), Random Forest and XGBoost. On people held out from training, logistic regression and Random Forest reach a speaker F1 of 97.96\%, missing one of the 25 patients and raising no false alarm. XGBoost reaches an F1 of 96.00\%, with the same missed patient and one false alarm, but a slightly higher AUROC of 99.82\%. The classifiers differ by one or two people. The results come from one corpus and do not show clinical accuracy.
+
+\section{Motivation and objectives}\label{sec:motivation}
+Early signs of Parkinson's disease can be subtle. A voice test could be cheap, quick and repeatable, which would help screening where no specialist is available. Patients, families and clinics would benefit if such a test is reliable. Many speech studies, however, place recordings of the same person in both training and testing, which inflates the results.
+
+\textbf{Qualitative objective.} Test whether a frozen speech representation and simple, explainable classifiers separate the two groups when every person is kept on one side of the split.
+
+\textbf{Quantitative objectives.} (1) Report speaker-level F1, recall, specificity, precision, accuracy, AUROC and AUPRC for three classifiers on the same representation. (2) State the success rule before the comparison: a classifier counts as better only if both its pooled F1 and its AUROC exceed the baseline's by more than one misclassified person. (3) Report how much the results change across folds and across each classifier's settings.
+
+\section{Related work}\label{sec:related}
+The works below are from 2022 to 2025 unless stated, grouped by approach.
+
+\begin{itemize}\item \textbf{Neural networks on spectrograms or speech.} Quan et al. (4) train an end-to-end network on speech. Iyer et al. (5) compare a neural network with Random Forest and logistic regression on voice samples. These models are trained from scratch on small datasets; here the speech encoder is frozen.
+\item \textbf{Hand-made features with classical classifiers.} Egbo et al. (7) use XGBoost with SHAP explanations on vocal biomarkers. Wang et al. (6) compare feature-selection methods and four classifiers on a Mandarin corpus. They motivate the XGBoost comparison here.
+\item \textbf{Pretrained speech embeddings.} Klempir and Krupicka (11) classify frozen wav2vec embeddings with logistic regression, Random Forest and XGBoost on several databases: the same three classifiers used here. WavLM (10), wav2vec 2.0 (8) and XLS-R (9) are the encoders in the wider project.
+\item \textbf{Linguistic content.} Crawford (12) uses transcripts and language-model features. Our models use only the audio.
+\item \textbf{Evaluation methodology.} Vaiciukynas et al. (13) show that results are inflated unless all recordings of a person stay on one side of a split. The folds here are speaker-disjoint for that reason.
+\end{itemize}
+The corpus is described by Dimauro and Girardi (14) and used in earlier intelligibility work by Dimauro et al. (15). The NeuroVoz corpus (19) is a Spanish dataset of the same kind. These studies use different data, splits and metrics, so we do not compare their scores with ours.
+
+\section{Background}\label{sec:background}
+\subsection{How Parkinson's disease changes speech}
+Reduced loudness, a flat voice, unclear consonants and shorter or quieter pauses are common in Parkinson's disease. A classifier does not need these names; it needs measurements that differ between the groups.
+
+\subsection{Frozen representations and hand-made features}
+A hand-made feature is a formula chosen by a person. A frozen representation is a hidden layer of a neural network trained by its authors on large amounts of unlabelled speech. Freezing means its weights never change here. It is cheaper, and less likely to memorise 47 people than fine-tuning would be.
+
+\subsection{Why the person, not the recording, is the unit}
+A person contributes several recordings. If one person's recordings are in both training and testing, a classifier can learn to recognise the person rather than the disease. We assign whole people to folds and report one score per person.
+
+\subsection{Why these metrics}
+Recall and specificity are the clinical pair: recall counts the patients found, specificity counts the controls left alone. F1 combines precision and recall but ignores true negatives, so it is never reported alone. AUROC and AUPRC do not depend on one threshold, so they show how well each classifier ranks people.
+
+\section{Methodology}\label{sec:method}
+\subsection{Model description}\label{sec:model}
+The pipeline has four stages. The table gives the input and output shape of each.
+
+\begin{table}[H]\centering\footnotesize\renewcommand{\arraystretch}{1.15}
+\caption{Shapes at each stage. A person can have several recordings; each recording becomes one vector.}
+\begin{tabular}{p{3.2cm}p{4.8cm}p{3.9cm}p{4cm}}
+\toprule
+\textbf{Stage} & \textbf{Input} & \textbf{Output} & \textbf{Parameters or settings}\\
+\midrule
+1. Frozen WavLM-large & one recording, resampled to 16 kHz and cut into windows of at most 10 s & one vector of 1,024 numbers per recording & about 315 million frozen weights\\
+2. Classifier & 1,024 numbers per recording, training people only & probability of Parkinson's per recording & LR: 1,025 weights; RF: 300 trees; XGBoost: 100 to 300 trees\\
+3. Person score & probabilities of one person's recordings & one score per person (the mean) & no parameters\\
+4. Decision & person score & PD if score $\geq$ 0.5, otherwise control & fixed threshold 0.5\\
+\bottomrule
+\end{tabular}\end{table}
+\begin{figure}[H]\centering\includegraphics[width=0.95\linewidth]{embedding_pipeline.pdf}\caption{How one recording becomes one 1,024-number embedding. The encoder weights never change; only averaging is applied.}\label{fig:embedding_pipeline}\end{figure}
+\subsection{Dataset}\label{sec:dataset}
+The Italian Parkinson's Voice and Speech corpus (14) holds 16 speaking tasks per person: two read passages, syllable repetitions, vowels held twice, a word list and a phrase. We used the folders of people with Parkinson's disease and of elderly healthy controls. Young controls (15 people, 45 files) are excluded: they were recorded in only three tasks and are much younger. One exact duplicate file was removed. The result is 785 recordings from 47 people (25 with Parkinson's disease, 22 controls). Tasks are pooled, so the task is not an input. Age, sex, recording date and sampling rate are metadata and are never model inputs.
+
+\subsection{Training and evaluation steps, including batch sampling}\label{sec:steps}
+No mini-batches are used: each classifier is fitted on all training recordings at once, so there is no batch sampling to describe. The steps are:
+
+\begin{enumerate}\item Split the 47 people into five folds, stratified by class, with seed 42. Each person is in exactly one test fold (\texttt{SPLIT\_\allowbreak{}MANIFEST.csv}).
+\item For each outer fold, split its training people into three inner folds, again speaker-disjoint, with seed 142 plus the fold number.
+\item For each setting, fit on two inner folds and score on the third, in each of the three possible ways. The score is the person-level AUPRC averaged over the three validation folds.
+\item Choose the setting with the highest inner score; ties go to the earliest setting in the list. Refit it on all training people of the fold.
+\item Predict the held-out recordings, average them per person and apply threshold 0.5. Repeat for each fold.
+\end{enumerate}
+\subsection{Evaluation metrics}\label{sec:metrics}
+Speaker-level metrics are computed after averaging each person's recording probabilities into one score. Counting TP, FN, TN and FP over people:
+
+\begin{align*} \text{recall} &= \frac{TP}{TP+FN}, & \text{specificity} &= \frac{TN}{TN+FP}, & \text{precision} &= \frac{TP}{TP+FP}, \\ \text{F1} &= \frac{2\cdot\text{precision}\cdot\text{recall}}{\text{precision}+\text{recall}}, & \text{accuracy} &= \frac{TP+TN}{TP+TN+FP+FN}. \end{align*}
+AUROC is the probability that a randomly chosen patient receives a higher score than a randomly chosen control. AUPRC is the average precision over all thresholds. Confidence intervals come from 2,000 resamples of people (seed 42), with the same people resampled for every classifier.
+
+\subsection{Loss functions and optimisation}\label{sec:loss}
+Logistic regression minimises the logistic loss $\sum_i \log(1+e^{-y_i(w^\top x_i+b)})$ with an L1 or L2 penalty on $w$, solved by liblinear; the search parameter $C$ is the inverse of the penalty strength. Random Forest grows trees that reduce the Gini impurity $1-\sum_k p_k^2$ of their leaves. XGBoost minimises the logistic loss plus a regularisation term, with gradient-boosted trees; the regularisation weight is \texttt{reg\textbackslash{}\_\allowbreak{}lambda}. Settings are chosen by the inner AUPRC, not by the loss, so that the choice matches the evaluation.
+
+\subsection{Experimental depth and iteration}\label{sec:depth}
+\begin{table}[H]\centering\footnotesize\renewcommand{\arraystretch}{1.15}
+\caption{Search spaces. Every setting was refitted and scored in each fold.}
+\begin{tabular}{llrp{5cm}}
+\toprule
+\textbf{Classifier} & \textbf{Settings searched} & \textbf{Settings} & \textbf{Chosen across the five folds}\\
+\midrule
+Logistic regression & C in {0.01, 0.1, 1, 10, 100}; penalty in {L1, L2}; class weight in {none, balanced} & 20 & C=0.01, l1, C=0.1, l1\\
+Random Forest & max depth in {4, unlimited}; min leaf in {1, 2}; class weight in {none, balanced}; 300 trees & 8 & depth 4, leaf 1, weight none, depth unlimited, leaf 1, weight balanced, depth unlimited, leaf 1, weight none\\
+XGBoost & 24 settings drawn at random (seed 42) from 256 combinations of learning rate, depth, trees, weights, subsampling and regularisation & 24 & 5 different settings across the five folds\\
+\bottomrule
+\end{tabular}\end{table}
+In total 52 settings were searched in each outer fold. This is a small search, so the settings chosen vary little.
+
+\section{Baseline and extensions}\label{sec:baseline}
+\subsection{Baseline selection and justification}\label{sec:baselineselect}
+Logistic regression is the baseline. It was named the primary baseline before the comparison was run, it has the fewest parameters, its coefficients can be read directly, and it is the classifier used with frozen embeddings in Klempir and Krupicka (11). A simple, well-understood baseline makes it clear what the extensions add.
+
+\subsection{Implemented extensions}\label{sec:extensions}
+\textbf{Random Forest} (exploratory amendment A2) and \textbf{XGBoost} (part of the frozen FINAL\textbackslash{}\_V1 comparison). Both use the same recordings, folds, inner rule and threshold as the baseline. Random Forest was added after the frozen run, at the owner's request. Its settings were written down before it was run (\texttt{supplementary/PREDECLARED\textbackslash{}\_\allowbreak{}RF\textbackslash{}\_\allowbreak{}GRID.md}).
+
+\subsection{Baseline reproduction}\label{sec:reproduction}
+The official logistic regression and XGBoost results were recomputed from their saved predictions. Counts, F1, AUROC and AUPRC match the saved condition table. The integrity gates saved by each run all passed. The Random Forest results come from the S11 run, which reads the same saved vectors and folds.
+
+\section{Results and analysis}\label{sec:results}
+\subsection{Validation and held-out results, kept separate}\label{sec:trainval}
+Each outer fold has two levels of evaluation. The inner validation score (person-level AUPRC on three inner folds of the training people) was used only to choose the settings. The held-out score is computed on the outer test fold, which was never used for any choice. The table shows both.
+
+\begin{table}[H]\centering\footnotesize\renewcommand{\arraystretch}{1.15}
+\caption{Validation AUPRC (used to choose) / held-out AUPRC (reported), per outer fold, percent.}
+\begin{tabular}{rrccc}
+\toprule
+\textbf{Fold} & \textbf{People} & \textbf{Logistic regression} & \textbf{Random Forest} & \textbf{XGBoost}\\
+\midrule
+1 & 10 & 100.00 / 100.00 & 99.55 / 100.00 & 99.76 / 100.00\\
+2 & 10 & 99.76 / 100.00 & 99.35 / 100.00 & 99.17 / 100.00\\
+3 & 9 & 99.76 / 100.00 & 99.55 / 100.00 & 99.76 / 100.00\\
+4 & 9 & 100.00 / 96.67 & 100.00 / 100.00 & 100.00 / 100.00\\
+5 & 9 & 99.76 / 100.00 & 99.76 / 100.00 & 99.76 / 100.00\\
+\bottomrule
+\end{tabular}\end{table}
+\subsection{Pooled held-out results}\label{sec:pooled}
+Each row pools the five held-out folds, so each of the 47 people is scored once. Brackets show 95\% bootstrap intervals over people.
+
+\begin{table}[H]\centering\scriptsize\renewcommand{\arraystretch}{1.15}
+\caption{Pooled person-level results, 47 people, threshold 0.5. Percent except counts. Brackets: 95\% bootstrap interval.}
+\begin{tabular}{lrrrrrrll}
+\toprule
+\textbf{Classifier} & \textbf{TP/FN/TN/FP} & \textbf{F1} & \textbf{Recall} & \textbf{Spec.} & \textbf{Prec.} & \textbf{Acc.} & \textbf{AUROC [CI]} & \textbf{AUPRC [CI]}\\
+\midrule
+Logistic regression & 24/1/22/0 & 97.96 & 96.00 & 100.00 & 100.00 & 97.87 & 99.45 [97.70, 100.00] & 99.57 [98.07, 100.00]\\
+Random Forest & 24/1/22/0 & 97.96 & 96.00 & 100.00 & 100.00 & 97.87 & 99.45 [97.70, 100.00] & 99.57 [98.11, 100.00]\\
+XGBoost & 24/1/21/1 & 96.00 & 96.00 & 95.45 & 96.00 & 95.74 & 99.82 [98.90, 100.00] & 99.85 [99.11, 100.00]\\
+\bottomrule
+\end{tabular}\end{table}
+\begin{figure}[H]\centering\includegraphics[width=0.7\linewidth]{roc_speakers.pdf}\caption{Pooled person-level ROC curves. Each curve uses one score per person from the held-out folds.}\label{fig:roc_speakers}\end{figure}
+Paired differences from logistic regression, on the same resampled people (percentage points, mean and 95\% interval): Random Forest AUROC +0.01 [-0.75, 0.75] (includes zero), AUPRC +0.01 [-0.55, 0.57] (includes zero). XGBoost AUROC +0.37 [-0.00, 1.72] (includes zero), AUPRC +0.28 [-0.00, 1.40] (includes zero).
+
+Each difference is descriptive. None is a significance claim, and the comparison uses only 47 people.
+
+\subsection{Variation across folds}\label{sec:folds}
+\begin{table}[H]\centering\footnotesize\renewcommand{\arraystretch}{1.15}
+\caption{Mean $\pm$ sample standard deviation over the five held-out folds (percent).}
+\begin{tabular}{lrrrr}
+\toprule
+\textbf{Classifier} & \textbf{F1} & \textbf{Recall} & \textbf{Specificity} & \textbf{AUROC}\\
+\midrule
+Logistic regression & 97.78 $\pm$ 4.97 & 96.00 $\pm$ 8.94 & 100.00 $\pm$ 0.00 & 99.00 $\pm$ 2.24\\
+Random Forest & 97.78 $\pm$ 4.97 & 96.00 $\pm$ 8.94 & 100.00 $\pm$ 0.00 & 100.00 $\pm$ 0.00\\
+XGBoost & 95.96 $\pm$ 5.58 & 96.00 $\pm$ 8.94 & 96.00 $\pm$ 8.94 & 100.00 $\pm$ 0.00\\
+\bottomrule
+\end{tabular}\end{table}
+\begin{figure}[H]\centering\includegraphics[width=0.8\linewidth]{fold_f1.pdf}\caption{Held-out speaker F1 in each fold. One missed patient in a fold of about five patients lowers that fold's recall by about 20 points.}\label{fig:fold_f1}\end{figure}
+Each fold has nine or ten people, so one person changes a fold's score a lot. The spread across folds is therefore larger than the differences between classifiers.
+
+\subsection{Error and failure analysis}\label{sec:errors}
+\begin{table}[H]\centering\footnotesize\renewcommand{\arraystretch}{1.15}
+\caption{Every misclassified person in the held-out folds.}
+\begin{tabular}{llllr}
+\toprule
+\textbf{Classifier} & \textbf{Person} & \textbf{Error} & \textbf{Score} & \textbf{Fold}\\
+\midrule
+Logistic regression & PD\_005 & missed patient & 0.423 & fold 4\\
+Random Forest & PD\_005 & missed patient & 0.360 & fold 4\\
+XGBoost & HC\_007 & false alarm & 0.515 & fold 2\\
+XGBoost & PD\_005 & missed patient & 0.322 & fold 4\\
+\bottomrule
+\end{tabular}\end{table}
+\begin{figure}[H]\centering\includegraphics[width=0.95\linewidth]{speaker_scores.pdf}\caption{Person scores in the held-out folds. The dashed line is the threshold 0.5. Labelled points are misclassified.}\label{fig:speaker_scores}\end{figure}
+The misclassifications are few and all concern the same people. Patient PD\_005 is missed by every classifier, with scores LR 0.423, RF 0.360, XGB 0.322, all below the threshold; control HC\_007 is a false alarm for XGBoost only, with score 0.515, just above the threshold. Those are close calls, not evidence that a classifier learned a different signal. Section 9 proposes checking these recordings by task and by session.
+
+\subsection{Sensitivity and ablation}\label{sec:sensitivity}
+We ask how much the result depends on the settings chosen. For each fold, the table gives the range of validation scores across the whole search space of each classifier.
+
+\begin{table}[H]\centering\footnotesize\renewcommand{\arraystretch}{1.15}
+\caption{Range of validation AUPRC across all settings in each fold (percent), with the number of settings in brackets.}
+\begin{tabular}{rlll}
+\toprule
+\textbf{Fold} & \textbf{Logistic regression (20)} & \textbf{Random Forest (8)} & \textbf{XGBoost (24)}\\
+\midrule
+1 & 99.76 to 100.00 & 99.55 to 99.55 & 99.00 to 99.76\\
+2 & 97.00 to 99.76 & 98.85 to 99.35 & 98.45 to 99.17\\
+3 & 98.57 to 99.76 & 99.17 to 99.55 & 98.85 to 99.76\\
+4 & 100.00 to 100.00 & 100.00 to 100.00 & 100.00 to 100.00\\
+5 & 97.36 to 99.76 & 99.35 to 99.76 & 99.00 to 99.76\\
+\bottomrule
+\end{tabular}\end{table}
+Each row shows how much the validation score moves across settings within one classifier. Comparing this range with the gaps between classifiers shows whether the choice of setting or the choice of classifier matters more on this data.
+
+\begin{table}[H]\centering\footnotesize\renewcommand{\arraystretch}{1.15}
+\caption{Cross-check against the separate PatchTST proposal run v4.0 (46 people, different protocol). Percent.}
+\begin{tabular}{lrrrrrr}
+\toprule
+\textbf{Classifier} & \textbf{v4.0 F1} & \textbf{v4.0 recall} & \textbf{v4.0 spec.} & \textbf{v4.0 AUROC} & \textbf{FINAL\textbackslash{}\_V1 F1} & \textbf{FINAL\textbackslash{}\_V1 AUROC}\\
+\midrule
+Logistic regression & 97.96 & 96.00 & 100.00 & 99.43 & 97.96 & 99.45\\
+Random Forest & 97.96 & 96.00 & 100.00 & 99.43 & 97.96 & 99.45\\
+XGBoost & 96.00 & 96.00 & 95.24 & 98.48 & 96.00 & 99.82\\
+\bottomrule
+\end{tabular}\end{table}
+The two runs use similar classifiers but different cohorts, inner objectives and search spaces, so the numbers are not directly comparable. In v4.0 XGBoost ranks lower; in FINAL\textbackslash{}\_V1 it ranks slightly higher on AUROC. The ranking of classifiers therefore changes with the pipeline, which is why we do not claim that one classifier is better.
+
+\section{Discussion}\label{sec:discussion}
+\subsection{Significance of the results}\label{sec:significance}
+On this corpus, a frozen speech representation with a simple classifier separates the two groups well. Within this representation the three classifiers agree on almost every person.
+
+\subsection{Risks}\label{sec:risks}
+The main risk is that the classifiers separate recording conditions rather than disease. The FINAL\textbackslash{}\_V1 report documents recording-condition differences between the two groups (its section 7.7), so part of the separation may come from the recording setup. A second risk is the small number of people: one patient changes recall by about 4 percentage points.
+
+\subsection{Limitations}\label{sec:limitations}
+\begin{itemize}\item No external validation: all people come from one corpus.
+\item One split with one seed. A different seed would change the folds and the results.
+\item Random Forest was added after the frozen comparison, as an exploratory amendment. It is reported beside the frozen results, not in place of them.
+\item The best setting on the same people would look better than it really is, so no best setting is picked for reporting.
+\end{itemize}
+\section{Future directions}\label{sec:future}
+\begin{enumerate}\item Inspect the missed patient and the false alarm: which tasks and recording dates drive their scores.
+\item Repeat the comparison with the recording-condition controls from the FINAL\textbackslash{}\_V1 report, so that disease and recording setup can be separated.
+\item Test the same frozen encoders on a second Parkinson's corpus, for example the Spanish NeuroVoz data (19), to check generalisation.
+\end{enumerate}
+\section{Conclusion}\label{sec:conclusion}
+A frozen WavLM-large representation separates people with Parkinson's disease from elderly controls, with a held-out speaker F1 of 97.96\% for logistic regression. Random Forest and XGBoost reach similar results on the same 47 people, and the differences are one or two people. The result is internal to one corpus and does not show clinical accuracy.
+
+\section*{Appendix A. Checks performed}\addcontentsline{toc}{section}{Appendix A. Checks performed}
+Every check below ran during the build. The build stops and writes nothing if any check fails.
+
+\begin{table}[H]\centering\footnotesize\renewcommand{\arraystretch}{1.15}
+\caption{Checks run on the saved inputs.}
+\begin{tabular}{p{12.5cm}l}
+\toprule
+\textbf{Check} & \textbf{Result}\\
+\midrule
+saved FINAL\_V1 WavLM LR reproduced from predictions & PASS\\
+saved FINAL\_V1 WavLM XGB reproduced from predictions & PASS\\
+all three models score the same 47 people & PASS\\
+cohort is 47 people, 25 PD and 22 controls & PASS\\
+labels identical across models & PASS\\
+LR: each person has exactly one test fold & PASS\\
+RF: each person has exactly one test fold & PASS\\
+XGB: each person has exactly one test fold & PASS\\
+fold of every person matches SPLIT\_MANIFEST & PASS\\
+LR: probabilities finite and in [0, 1] & PASS\\
+RF: probabilities finite and in [0, 1] & PASS\\
+XGB: probabilities finite and in [0, 1] & PASS\\
+saved integrity gates PASS for all WavLM LR and XGB folds & PASS\\
+RF predictions cover the same recordings as LR & PASS\\
+RF summary metrics equal recomputed values & PASS\\
+S11 paired bootstrap has 2,000 resamples per difference & PASS\\
+paired difference intervals computed for RF and XGB & PASS\\
+v4.0 cross-check copy matches its fingerprints & PASS\\
+\bottomrule
+\end{tabular}\end{table}
+\section*{Appendix B. Where to find everything}\addcontentsline{toc}{section}{Appendix B. Where to find everything}
+\begin{itemize}\item This report: \texttt{reports/WAVLM\_\allowbreak{}BASELINE\_\allowbreak{}SUBSET/versions/v1.1/WAVLM\_\allowbreak{}BASELINE\_\allowbreak{}SUBSET\_\allowbreak{}REPORT\_\allowbreak{}v1.1.pdf}, with LaTeX source and an Overleaf zip in the same folder.
+\item Generator: \texttt{src/final\_\allowbreak{}v1/wavlm\_\allowbreak{}subset\_\allowbreak{}report.py} (copy in \texttt{versions/v1.1/generator/}); references in \texttt{src/final\_\allowbreak{}v1/wavlm\_\allowbreak{}subset\_\allowbreak{}refs.py}.
+\item Official WavLM logistic regression and XGBoost predictions: \texttt{predictions/FINAL\_\allowbreak{}V1/FV1-WLM-ALL-*}; saved metrics: \texttt{metrics/FINAL\_\allowbreak{}V1/}.
+\item Random Forest (amendment A2): \texttt{supplementary/code/s11\_\allowbreak{}random\_\allowbreak{}forest.py}, \texttt{supplementary/code/s11\_\allowbreak{}compare.py}, results \texttt{supplementary/results/S11\_\allowbreak{}*}, settings \texttt{supplementary/PREDECLARED\_\allowbreak{}RF\_\allowbreak{}GRID.md}.
+\item Cross-check copy (PatchTST v4.0, read-only, with fingerprints): \texttt{reports/WAVLM\_\allowbreak{}BASELINE\_\allowbreak{}SUBSET/inputs/}.
+\end{itemize}
+\section*{Appendix C. References}\addcontentsline{toc}{section}{Appendix C. References}
+\begin{thebibliography}{99}\setlength{\itemsep}{1pt}\small
+\bibitem{r1} Global, regional, national epidemiology and trends of Parkinson's disease from 1990 to 2021: findings from the Global Burden of Disease Study 2021; Frontiers in Aging Neuroscience, 2025. https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11757241/
+\bibitem{r2} M. Trail et al., Speech treatment for Parkinson's disease, NeuroRehabilitation 20(3), 2005. https://content.iospress.com/articles/neurorehabilitation/nre00283
+\bibitem{r3} A. Raty et al., Stability and accuracy of a diagnosis of Parkinson disease over 10 years, Neurology, 2025. https://research.utu.fi/converis/portal/detail/Publication/491935225
+\bibitem{r4} C. Quan, K. Ren, Z. Luo, Z. Chen, Y. Ling, End-to-end deep learning approach for Parkinson's disease detection from speech signals, Biocybernetics and Biomedical Engineering 42(2):556-574, 2022. doi:10.1016/j.bbe.2022.04.002
+\bibitem{r5} A. Iyer, A. Kemp et al., A machine learning method to process voice samples for identification of Parkinson's disease, Scientific Reports 13:20615, 2023. doi:10.1038/s41598-023-47568-w
+\bibitem{r6} Q. Wang, Y. Fu, B. Shao, L. Chang, K. Ren, Z. Chen, Y. Ling, Early detection of Parkinson's disease from multiple signal speech: based on Mandarin language dataset, Frontiers in Aging Neuroscience 14:1036588, 2022. doi:10.3389/fnagi.2022.1036588
+\bibitem{r7} B. Egbo, Z. Nigmetolla, N. A. Khan, P. K. Jamwal, Explainable machine learning for early detection of Parkinson's disease in aging populations using vocal biomarkers, Frontiers in Aging Neuroscience 17:1672971, 2025. doi:10.3389/fnagi.2025.1672971
+\bibitem{r8} A. Baevski, H. Zhou, A. Mohamed, M. Auli, wav2vec 2.0: a framework for self-supervised learning of speech representations, NeurIPS 2020.
+\bibitem{r9} A. Babu et al., XLS-R: self-supervised cross-lingual speech representation learning at scale, Interspeech 2022. arXiv:2111.09296
+\bibitem{r10} S. Chen et al., WavLM: large-scale self-supervised pre-training for full stack speech processing, IEEE Journal of Selected Topics in Signal Processing 16(6):1505-1518, 2022. doi:10.1109/JSTSP.2022.3188113
+\bibitem{r11} O. Klempir, R. Krupicka, Analyzing wav2vec 1.0 embeddings for cross-database Parkinson's disease detection and speech features extraction, Sensors 24(17):5520, 2024. doi:10.3390/s24175520
+\bibitem{r12} J. L. Crawford, Linguistic changes in spontaneous speech for detecting Parkinson's disease using large language models, PLOS Digital Health 4(2):e0000757, 2025. doi:10.1371/journal.pdig.0000757
+\bibitem{r13} E. Vaiciukynas, A. Verikas, A. Gelzinis, M. Bacauskiene, Detecting Parkinson's disease from sustained phonation and speech signals, PLoS ONE 12(10):e0185613, 2017. doi:10.1371/journal.pone.0185613
+\bibitem{r14} G. Dimauro, F. Girardi, Italian Parkinson's Voice and Speech, IEEE DataPort, 2019. doi:10.21227/aw6b-tg17
+\bibitem{r15} G. Dimauro, V. Di Nicola, V. Bevilacqua, D. Caivano, F. Girardi, Assessment of speech intelligibility in Parkinson's disease using a speech-to-text system, IEEE Access 5:22199-22208, 2017. doi:10.1109/ACCESS.2017.2762475
+\bibitem{r16} R.-E. Fan, K.-W. Chang, C.-J. Hsieh, X.-R. Wang, C.-J. Lin, LIBLINEAR: a library for large linear classification, Journal of Machine Learning Research 9:1871-1874, 2008.
+\bibitem{r17} C.-C. Chang, C.-J. Lin, LIBSVM: a library for support vector machines, ACM Transactions on Intelligent Systems and Technology 2(3):27, 2011.
+\bibitem{r18} T. Chen, C. Guestrin, XGBoost: a scalable tree boosting system, KDD 2016. doi:10.1145/2939672.2939785
+\bibitem{r19} L. Mendes-Laureano et al., NeuroVoz: a Castillian Spanish corpus of parkinsonian speech, Scientific Data 11:1367, 2024. https://zenodo.org/records/10777657
+\bibitem{r20} F. Pedregosa et al., Scikit-learn: machine learning in Python, Journal of Machine Learning Research 12:2825-2830, 2011.
+\end{thebibliography}
+\end{document}

@@ -1,0 +1,13 @@
+{
+  "source_run": "/root/Projects/PatchTST/artifacts/runs/20261014T191654Z_v4.0_eb438e63b942",
+  "files": {
+    "pooled_metrics.csv": {
+      "source": "/root/Projects/PatchTST/artifacts/runs/20261014T191654Z_v4.0_eb438e63b942/pooled_metrics.csv",
+      "sha256": "ba0df8b6f302a8fee37a8808f0f9aa3b98778345d9835ad7d84f520b0f08639e"
+    },
+    "fine_tuning_decisions.json": {
+      "source": "/root/Projects/PatchTST/artifacts/runs/20261014T191654Z_v4.0_eb438e63b942/fine_tuning_decisions.json",
+      "sha256": "4bebc70e40218281c4deab065e2d611d7ac3417215cc9549f7c1b9da2c8661ef"
+    }
+  }
+}

@@ -1,0 +1,440 @@
+{
+  "selection_metric": "mean_inner_speaker_auroc",
+  "tie_rule": "first candidate in frozen ParameterGrid order",
+  "selected": {
+    "candidate": 1,
+    "parameters": {
+      "colsample_bytree": 0.5,
+      "learning_rate": 0.03,
+      "max_depth": 2,
+      "n_estimators": 200,
+      "reg_lambda": 1.0,
+      "subsample": 1.0
+    },
+    "mean_inner_speaker_auroc": 0.9920634920634921,
+    "inner_metrics": [
+      {
+        "threshold": 0.5,
+        "speakers": 13,
+        "tp": 6,
+        "fn": 1,
+        "tn": 6,
+        "fp": 0,
+        "recall": 0.8571428571428571,
+        "specificity": 1.0,
+        "precision": 1.0,
+        "f1": 0.923076923076923,
+        "accuracy": 0.9230769230769231,
+        "auroc": 0.9761904761904763,
+        "auprc": 0.9808673469387754,
+        "average_precision": 0.982142857142857
+      },
+      {
+        "threshold": 0.5,
+        "speakers": 12,
+        "tp": 6,
+        "fn": 0,
+        "tn": 6,
+        "fp": 0,
+        "recall": 1.0,
+        "specificity": 1.0,
+        "precision": 1.0,
+        "f1": 1.0,
+        "accuracy": 1.0,
+        "auroc": 1.0,
+        "auprc": 1.0,
+        "average_precision": 1.0
+      },
+      {
+        "threshold": 0.5,
+        "speakers": 12,
+        "tp": 7,
+        "fn": 0,
+        "tn": 5,
+        "fp": 0,
+        "recall": 1.0,
+        "specificity": 1.0,
+        "precision": 1.0,
+        "f1": 1.0,
+        "accuracy": 1.0,
+        "auroc": 1.0,
+        "auprc": 0.9999999999999998,
+        "average_precision": 0.9999999999999998
+      }
+    ]
+  },
+  "candidates": [
+    {
+      "candidate": 0,
+      "parameters": {
+        "colsample_bytree": 0.5,
+        "learning_rate": 0.03,
+        "max_depth": 1,
+        "n_estimators": 200,
+        "reg_lambda": 1.0,
+        "subsample": 1.0
+      },
+      "mean_inner_speaker_auroc": 0.9841269841269842,
+      "inner_metrics": [
+        {
+          "threshold": 0.5,
+          "speakers": 13,
+          "tp": 6,
+          "fn": 1,
+          "tn": 5,
+          "fp": 1,
+          "recall": 0.8571428571428571,
+          "specificity": 0.8333333333333334,
+          "precision": 0.8571428571428571,
+          "f1": 0.8571428571428571,
+          "accuracy": 0.8461538461538461,
+          "auroc": 0.9523809523809524,
+          "auprc": 0.9662698412698412,
+          "average_precision": 0.9682539682539681
+        },
+        {
+          "threshold": 0.5,
+          "speakers": 12,
+          "tp": 6,
+          "fn": 0,
+          "tn": 6,
+          "fp": 0,
+          "recall": 1.0,
+          "specificity": 1.0,
+          "precision": 1.0,
+          "f1": 1.0,
+          "accuracy": 1.0,
+          "auroc": 1.0,
+          "auprc": 1.0,
+          "average_precision": 1.0
+        },
+        {
+          "threshold": 0.5,
+          "speakers": 12,
+          "tp": 7,
+          "fn": 0,
+          "tn": 5,
+          "fp": 0,
+          "recall": 1.0,
+          "specificity": 1.0,
+          "precision": 1.0,
+          "f1": 1.0,
+          "accuracy": 1.0,
+          "auroc": 1.0,
+          "auprc": 0.9999999999999998,
+          "average_precision": 0.9999999999999998
+        }
+      ]
+    },
+    {
+      "candidate": 1,
+      "parameters": {
+        "colsample_bytree": 0.5,
+        "learning_rate": 0.03,
+        "max_depth": 2,
+        "n_estimators": 200,
+        "reg_lambda": 1.0,
+        "subsample": 1.0
+      },
+      "mean_inner_speaker_auroc": 0.9920634920634921,
+      "inner_metrics": [
+        {
+          "threshold": 0.5,
+          "speakers": 13,
+          "tp": 6,
+          "fn": 1,
+          "tn": 6,
+          "fp": 0,
+          "recall": 0.8571428571428571,
+          "specificity": 1.0,
+          "precision": 1.0,
+          "f1": 0.923076923076923,
+          "accuracy": 0.9230769230769231,
+          "auroc": 0.9761904761904763,
+          "auprc": 0.9808673469387754,
+          "average_precision": 0.982142857142857
+        },
+        {
+          "threshold": 0.5,
+          "speakers": 12,
+          "tp": 6,
+          "fn": 0,
+          "tn": 6,
+          "fp": 0,
+          "recall": 1.0,
+          "specificity": 1.0,
+          "precision": 1.0,
+          "f1": 1.0,
+          "accuracy": 1.0,
+          "auroc": 1.0,
+          "auprc": 1.0,
+          "average_precision": 1.0
+        },
+        {
+          "threshold": 0.5,
+          "speakers": 12,
+          "tp": 7,
+          "fn": 0,
+          "tn": 5,
+          "fp": 0,
+          "recall": 1.0,
+          "specificity": 1.0,
+          "precision": 1.0,
+          "f1": 1.0,
+          "accuracy": 1.0,
+          "auroc": 1.0,
+          "auprc": 0.9999999999999998,
+          "average_precision": 0.9999999999999998
+        }
+      ]
+    },
+    {
+      "candidate": 2,
+      "parameters": {
+        "colsample_bytree": 0.5,
+        "learning_rate": 0.03,
+        "max_depth": 3,
+        "n_estimators": 200,
+        "reg_lambda": 1.0,
+        "subsample": 1.0
+      },
+      "mean_inner_speaker_auroc": 0.9920634920634921,
+      "inner_metrics": [
+        {
+          "threshold": 0.5,
+          "speakers": 13,
+          "tp": 6,
+          "fn": 1,
+          "tn": 6,
+          "fp": 0,
+          "recall": 0.8571428571428571,
+          "specificity": 1.0,
+          "precision": 1.0,
+          "f1": 0.923076923076923,
+          "accuracy": 0.9230769230769231,
+          "auroc": 0.9761904761904763,
+          "auprc": 0.9808673469387754,
+          "average_precision": 0.982142857142857
+        },
+        {
+          "threshold": 0.5,
+          "speakers": 12,
+          "tp": 6,
+          "fn": 0,
+          "tn": 6,
+          "fp": 0,
+          "recall": 1.0,
+          "specificity": 1.0,
+          "precision": 1.0,
+          "f1": 1.0,
+          "accuracy": 1.0,
+          "auroc": 1.0,
+          "auprc": 1.0,
+          "average_precision": 1.0
+        },
+        {
+          "threshold": 0.5,
+          "speakers": 12,
+          "tp": 7,
+          "fn": 0,
+          "tn": 5,
+          "fp": 0,
+          "recall": 1.0,
+          "specificity": 1.0,
+          "precision": 1.0,
+          "f1": 1.0,
+          "accuracy": 1.0,
+          "auroc": 1.0,
+          "auprc": 0.9999999999999998,
+          "average_precision": 0.9999999999999998
+        }
+      ]
+    },
+    {
+      "candidate": 3,
+      "parameters": {
+        "colsample_bytree": 0.5,
+        "learning_rate": 0.1,
+        "max_depth": 1,
+        "n_estimators": 200,
+        "reg_lambda": 1.0,
+        "subsample": 1.0
+      },
+      "mean_inner_speaker_auroc": 0.9841269841269842,
+      "inner_metrics": [
+        {
+          "threshold": 0.5,
+          "speakers": 13,
+          "tp": 6,
+          "fn": 1,
+          "tn": 5,
+          "fp": 1,
+          "recall": 0.8571428571428571,
+          "specificity": 0.8333333333333334,
+          "precision": 0.8571428571428571,
+          "f1": 0.8571428571428571,
+          "accuracy": 0.8461538461538461,
+          "auroc": 0.9523809523809524,
+          "auprc": 0.9662698412698412,
+          "average_precision": 0.9682539682539681
+        },
+        {
+          "threshold": 0.5,
+          "speakers": 12,
+          "tp": 6,
+          "fn": 0,
+          "tn": 6,
+          "fp": 0,
+          "recall": 1.0,
+          "specificity": 1.0,
+          "precision": 1.0,
+          "f1": 1.0,
+          "accuracy": 1.0,
+          "auroc": 1.0,
+          "auprc": 1.0,
+          "average_precision": 1.0
+        },
+        {
+          "threshold": 0.5,
+          "speakers": 12,
+          "tp": 7,
+          "fn": 0,
+          "tn": 5,
+          "fp": 0,
+          "recall": 1.0,
+          "specificity": 1.0,
+          "precision": 1.0,
+          "f1": 1.0,
+          "accuracy": 1.0,
+          "auroc": 1.0,
+          "auprc": 0.9999999999999998,
+          "average_precision": 0.9999999999999998
+        }
+      ]
+    },
+    {
+      "candidate": 4,
+      "parameters": {
+        "colsample_bytree": 0.5,
+        "learning_rate": 0.1,
+        "max_depth": 2,
+        "n_estimators": 200,
+        "reg_lambda": 1.0,
+        "subsample": 1.0
+      },
+      "mean_inner_speaker_auroc": 0.9920634920634921,
+      "inner_metrics": [
+        {
+          "threshold": 0.5,
+          "speakers": 13,
+          "tp": 6,
+          "fn": 1,
+          "tn": 5,
+          "fp": 1,
+          "recall": 0.8571428571428571,
+          "specificity": 0.8333333333333334,
+          "precision": 0.8571428571428571,
+          "f1": 0.8571428571428571,
+          "accuracy": 0.8461538461538461,
+          "auroc": 0.9761904761904763,
+          "auprc": 0.9808673469387754,
+          "average_precision": 0.982142857142857
+        },
+        {
+          "threshold": 0.5,
+          "speakers": 12,
+          "tp": 6,
+          "fn": 0,
+          "tn": 6,
+          "fp": 0,
+          "recall": 1.0,
+          "specificity": 1.0,
+          "precision": 1.0,
+          "f1": 1.0,
+          "accuracy": 1.0,
+          "auroc": 1.0,
+          "auprc": 1.0,
+          "average_precision": 1.0
+        },
+        {
+          "threshold": 0.5,
+          "speakers": 12,
+          "tp": 7,
+          "fn": 0,
+          "tn": 5,
+          "fp": 0,
+          "recall": 1.0,
+          "specificity": 1.0,
+          "precision": 1.0,
+          "f1": 1.0,
+          "accuracy": 1.0,
+          "auroc": 1.0,
+          "auprc": 0.9999999999999998,
+          "average_precision": 0.9999999999999998
+        }
+      ]
+    },
+    {
+      "candidate": 5,
+      "parameters": {
+        "colsample_bytree": 0.5,
+        "learning_rate": 0.1,
+        "max_depth": 3,
+        "n_estimators": 200,
+        "reg_lambda": 1.0,
+        "subsample": 1.0
+      },
+      "mean_inner_speaker_auroc": 0.9920634920634921,
+      "inner_metrics": [
+        {
+          "threshold": 0.5,
+          "speakers": 13,
+          "tp": 6,
+          "fn": 1,
+          "tn": 5,
+          "fp": 1,
+          "recall": 0.8571428571428571,
+          "specificity": 0.8333333333333334,
+          "precision": 0.8571428571428571,
+          "f1": 0.8571428571428571,
+          "accuracy": 0.8461538461538461,
+          "auroc": 0.9761904761904763,
+          "auprc": 0.9808673469387754,
+          "average_precision": 0.982142857142857
+        },
+        {
+          "threshold": 0.5,
+          "speakers": 12,
+          "tp": 6,
+          "fn": 0,
+          "tn": 6,
+          "fp": 0,
+          "recall": 1.0,
+          "specificity": 1.0,
+          "precision": 1.0,
+          "f1": 1.0,
+          "accuracy": 1.0,
+          "auroc": 1.0,
+          "auprc": 1.0,
+          "average_precision": 1.0
+        },
+        {
+          "threshold": 0.5,
+          "speakers": 12,
+          "tp": 7,
+          "fn": 0,
+          "tn": 5,
+          "fp": 0,
+          "recall": 1.0,
+          "specificity": 1.0,
+          "precision": 1.0,
+          "f1": 1.0,
+          "accuracy": 1.0,
+          "auroc": 1.0,
+          "auprc": 0.9999999999999998,
+          "average_precision": 0.9999999999999998
+        }
+      ]
+    }
+  ]
+}
