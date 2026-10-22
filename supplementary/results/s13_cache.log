@@ -1,0 +1,17 @@
+Loading weights:   0%|          | 0/488 [00:00<?, ?it/s]Loading weights: 100%|██████████| 488/488 [00:00<00:00, 24631.70it/s]
+recordings 50 of 785 windows 139 28 s
+recordings 100 of 785 windows 255 38 s
+recordings 150 of 785 windows 397 50 s
+recordings 200 of 785 windows 510 60 s
+recordings 250 of 785 windows 629 70 s
+recordings 300 of 785 windows 752 81 s
+recordings 350 of 785 windows 869 91 s
+recordings 400 of 785 windows 1053 108 s
+recordings 450 of 785 windows 1189 121 s
+recordings 500 of 785 windows 1332 134 s
+recordings 550 of 785 windows 1489 150 s
+recordings 600 of 785 windows 1647 164 s
+recordings 650 of 785 windows 1796 178 s
+recordings 700 of 785 windows 1935 192 s
+recordings 750 of 785 windows 2086 206 s
+cache written (1010028, 1024) check PASS 214 s

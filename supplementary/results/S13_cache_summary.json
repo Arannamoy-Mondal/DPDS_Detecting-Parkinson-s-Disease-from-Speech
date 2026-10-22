@@ -1,0 +1,12 @@
+{
+  "windows": 2158,
+  "frames": 1010028,
+  "split_at_layer": 20,
+  "revision": "c1423ed94bb01d80a3f5ce5bc39f6026a0f4828c",
+  "check_recordings": 40,
+  "max_abs_full_vs_saved": 7.62939453125e-06,
+  "max_abs_cache_vs_saved": 3.600120544433594e-05,
+  "min_cosine_cache_vs_saved": 0.9999999986571044,
+  "check_passed": true,
+  "runtime_seconds": 213.73693418502808
+}

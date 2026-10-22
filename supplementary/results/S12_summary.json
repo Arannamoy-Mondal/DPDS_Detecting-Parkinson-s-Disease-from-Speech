@@ -1,0 +1,174 @@
+{
+  "nested_wide": {
+    "LR": {
+      "pooled": {
+        "tp": 24,
+        "fn": 1,
+        "tn": 22,
+        "fp": 0,
+        "sensitivity": 0.96,
+        "specificity": 1.0,
+        "precision": 1.0,
+        "f1": 0.9795918367346939,
+        "accuracy": 0.9787234042553191,
+        "balanced_accuracy": 0.98,
+        "auroc": 0.989090909090909,
+        "auprc": 0.9922580645161292
+      },
+      "selected": {
+        "0": {
+          "C": 0.01,
+          "penalty": "l1",
+          "class_weight": null
+        },
+        "1": {
+          "C": 0.1,
+          "penalty": "l1",
+          "class_weight": null
+        },
+        "2": {
+          "C": 1000,
+          "penalty": "l2",
+          "class_weight": null
+        },
+        "3": {
+          "C": 0.001,
+          "penalty": "l2",
+          "class_weight": null
+        },
+        "4": {
+          "C": 0.1,
+          "penalty": "l1",
+          "class_weight": null
+        }
+      }
+    },
+    "RF": {
+      "pooled": {
+        "tp": 24,
+        "fn": 1,
+        "tn": 22,
+        "fp": 0,
+        "sensitivity": 0.96,
+        "specificity": 1.0,
+        "precision": 1.0,
+        "f1": 0.9795918367346939,
+        "accuracy": 0.9787234042553191,
+        "balanced_accuracy": 0.98,
+        "auroc": 0.9981818181818182,
+        "auprc": 0.9984615384615387
+      },
+      "selected": {
+        "0": {
+          "n_estimators": 100,
+          "max_depth": 4,
+          "min_samples_leaf": 1,
+          "max_features": "sqrt",
+          "class_weight": "balanced"
+        },
+        "1": {
+          "n_estimators": 100,
+          "max_depth": 4,
+          "min_samples_leaf": 1,
+          "max_features": 0.1,
+          "class_weight": "balanced"
+        },
+        "2": {
+          "n_estimators": 100,
+          "max_depth": 8,
+          "min_samples_leaf": 1,
+          "max_features": "sqrt",
+          "class_weight": "balanced"
+        },
+        "3": {
+          "n_estimators": 100,
+          "max_depth": 2,
+          "min_samples_leaf": 1,
+          "max_features": "sqrt",
+          "class_weight": null
+        },
+        "4": {
+          "n_estimators": 100,
+          "max_depth": 4,
+          "min_samples_leaf": 1,
+          "max_features": "sqrt",
+          "class_weight": "balanced"
+        }
+      }
+    },
+    "XGB": {
+      "pooled": {
+        "tp": 24,
+        "fn": 1,
+        "tn": 21,
+        "fp": 1,
+        "sensitivity": 0.96,
+        "specificity": 0.9545454545454546,
+        "precision": 0.96,
+        "f1": 0.96,
+        "accuracy": 0.9574468085106383,
+        "balanced_accuracy": 0.9572727272727273,
+        "auroc": 0.9909090909090909,
+        "auprc": 0.9933333333333336
+      },
+      "selected": {
+        "0": {
+          "max_depth": 4,
+          "learning_rate": 0.3,
+          "n_estimators": 100,
+          "subsample": 1.0,
+          "colsample_bytree": 0.3,
+          "min_child_weight": 1,
+          "reg_lambda": 1,
+          "scale_pos_weight": 1
+        },
+        "1": {
+          "max_depth": 2,
+          "learning_rate": 0.1,
+          "n_estimators": 300,
+          "subsample": 1.0,
+          "colsample_bytree": 0.3,
+          "min_child_weight": 1,
+          "reg_lambda": 1,
+          "scale_pos_weight": 1
+        },
+        "2": {
+          "max_depth": 1,
+          "learning_rate": 0.3,
+          "n_estimators": 300,
+          "subsample": 1.0,
+          "colsample_bytree": 0.3,
+          "min_child_weight": 1,
+          "reg_lambda": 1,
+          "scale_pos_weight": 1
+        },
+        "3": {
+          "max_depth": 1,
+          "learning_rate": 0.03,
+          "n_estimators": 300,
+          "subsample": 0.7,
+          "colsample_bytree": 0.3,
+          "min_child_weight": 1,
+          "reg_lambda": 1,
+          "scale_pos_weight": 1
+        },
+        "4": {
+          "max_depth": 4,
+          "learning_rate": 0.01,
+          "n_estimators": 100,
+          "subsample": 1.0,
+          "colsample_bytree": 1.0,
+          "min_child_weight": 1,
+          "reg_lambda": 1,
+          "scale_pos_weight": 1
+        }
+      }
+    }
+  },
+  "grid_sizes": {
+    "LR": 32,
+    "RF": 96,
+    "XGB": 128
+  },
+  "runtime_seconds": 1749.7526547908783
+}

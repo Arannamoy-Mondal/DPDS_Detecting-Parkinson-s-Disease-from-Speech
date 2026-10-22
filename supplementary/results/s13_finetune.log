@@ -1,0 +1,27 @@
+Loading weights:   0%|          | 0/488 [00:00<?, ?it/s]Loading weights: 100%|██████████| 488/488 [00:00<00:00, 9563.55it/s]
+fold 0 config {'k': 2, 'lr': 1e-05} inner AUPRC by epoch [0.987, 0.9955, 0.9976, 0.9955, 0.9976, 0.9955] 549 s
+fold 0 config {'k': 2, 'lr': 3e-05} inner AUPRC by epoch [0.9955, 0.9955, 0.9976, 0.9976, 0.9976, 0.9976] 1001 s
+fold 0 config {'k': 4, 'lr': 1e-05} inner AUPRC by epoch [0.9917, 0.9976, 0.9976, 0.9976, 0.9976, 0.9955] 1538 s
+fold 0 config {'k': 4, 'lr': 3e-05} inner AUPRC by epoch [0.9955, 0.9976, 0.9976, 0.9976, 0.9976, 0.9976] 2076 s
+fold 0 selected {'k': 2, 'lr': 1e-05} epochs 3 inner 0.9976 2168 s
+fold 1 config {'k': 2, 'lr': 1e-05} inner AUPRC by epoch [0.9803, 0.9955, 0.9955, 0.9955, 0.9955, 0.9955] 431 s
+fold 1 config {'k': 2, 'lr': 3e-05} inner AUPRC by epoch [0.9935, 0.9976, 0.9976, 0.9976, 0.9976, 0.9976] 861 s
+fold 1 config {'k': 4, 'lr': 1e-05} inner AUPRC by epoch [0.9813, 1.0, 0.9955, 0.9976, 0.9976, 0.9976] 1375 s
+fold 1 config {'k': 4, 'lr': 3e-05} inner AUPRC by epoch [0.9955, 0.9976, 0.9976, 1.0, 1.0, 0.9976] 1888 s
+fold 1 selected {'k': 4, 'lr': 1e-05} epochs 2 inner 1.0000 1967 s
+fold 2 config {'k': 2, 'lr': 1e-05} inner AUPRC by epoch [0.987, 0.9976, 0.9976, 0.9976, 1.0, 0.9976] 469 s
+fold 2 config {'k': 2, 'lr': 3e-05} inner AUPRC by epoch [0.9976, 1.0, 1.0, 1.0, 1.0, 1.0] 938 s
+fold 2 config {'k': 4, 'lr': 1e-05} inner AUPRC by epoch [0.9955, 0.9976, 0.9976, 1.0, 1.0, 1.0] 1496 s
+fold 2 config {'k': 4, 'lr': 3e-05} inner AUPRC by epoch [1.0, 1.0, 1.0, 1.0, 1.0, 1.0] 2054 s
+fold 2 selected {'k': 2, 'lr': 1e-05} epochs 5 inner 1.0000 2204 s
+fold 3 config {'k': 2, 'lr': 1e-05} inner AUPRC by epoch [1.0, 1.0, 1.0, 1.0, 1.0, 1.0] 465 s
+fold 3 config {'k': 2, 'lr': 3e-05} inner AUPRC by epoch [1.0, 1.0, 1.0, 1.0, 1.0, 1.0] 930 s
+fold 3 config {'k': 4, 'lr': 1e-05} inner AUPRC by epoch [1.0, 1.0, 1.0, 1.0, 1.0, 1.0] 1484 s
+fold 3 config {'k': 4, 'lr': 3e-05} inner AUPRC by epoch [1.0, 1.0, 1.0, 1.0, 1.0, 1.0] 2038 s
+fold 3 selected {'k': 2, 'lr': 1e-05} epochs 1 inner 1.0000 2079 s
+fold 4 config {'k': 2, 'lr': 1e-05} inner AUPRC by epoch [0.9803, 0.9976, 0.9976, 0.9976, 0.9976, 0.9976] 470 s
+fold 4 config {'k': 2, 'lr': 3e-05} inner AUPRC by epoch [0.9976, 1.0, 0.9976, 1.0, 0.9976, 1.0] 941 s
+fold 4 config {'k': 4, 'lr': 1e-05} inner AUPRC by epoch [0.9885, 1.0, 0.9976, 1.0, 1.0, 1.0] 1502 s
+fold 4 config {'k': 4, 'lr': 3e-05} inner AUPRC by epoch [0.9976, 1.0, 1.0, 1.0, 1.0, 1.0] 2064 s
+fold 4 selected {'k': 2, 'lr': 3e-05} epochs 2 inner 1.0000 2133 s
+pooled fine-tuned: {'f1': 0.9796, 'sensitivity': 0.96, 'specificity': 1.0, 'auroc': 0.9982, 'auprc': 0.9985}

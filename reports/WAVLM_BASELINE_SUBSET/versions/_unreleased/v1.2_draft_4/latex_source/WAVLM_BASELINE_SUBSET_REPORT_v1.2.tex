@@ -1,0 +1,480 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.1cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern,microtype}
+\usepackage{booktabs,float,graphicx,amsmath,amssymb,enumitem,xcolor,tcolorbox,adjustbox}
+\usepackage[colorlinks=true,linkcolor=blue!50!black,urlcolor=blue!50!black,citecolor=blue!50!black]{hyperref}
+\setlist{itemsep=2pt,topsep=3pt}\setlength{\parskip}{5pt}\setlength{\parindent}{0pt}\linespread{1.08}
+\usepackage{titlesec}\titleformat{\section}{\Large\bfseries}{\thesection.}{.5em}{}\titleformat{\subsection}{\large\bfseries}{\thesubsection}{.5em}{}
+\usepackage{fancyhdr}\pagestyle{fancy}\fancyhf{}\fancyfoot[C]{\small\thepage}\fancyhead[L]{\small Frozen and fine-tuned WavLM for Parkinson's speech}\fancyhead[R]{\small FINAL\_V1, baseline subset, v1.2}\renewcommand{\headrulewidth}{.3pt}
+\begin{document}
+\begin{center}{\LARGE\bfseries Does the Classifier or Fine-Tuning Matter?\\[3pt]\Large Frozen and Fine-Tuned WavLM for Detecting Parkinson's Disease from Speech\par}\vspace{8pt}{\large Baseline-and-extensions study on the FINAL\_V1 folds (CSE 431, topic 4a)\par}\vspace{4pt}{\large Version 1.2 \textperiodcentered{} 22 October 2026\par}\vspace{6pt}{\small Evidence: frozen protocol FINAL\_V1 (47 people, 785 recordings, five speaker-disjoint folds); amendments A2 and A3, declared before their runs.\par}\end{center}
+\vspace{4pt}\hrule\vspace{6pt}
+\tableofcontents
+\newpage
+\section*{Key numbers at a glance}\addcontentsline{toc}{section}{Key numbers at a glance}
+\begin{table}[H]\centering\footnotesize\renewcommand{\arraystretch}{1.15}
+\caption{Held-out person-level results on the 47 FINAL\_V1 people (five folds pooled, threshold 0.5). Percent; errors = missed patients + false alarms.}
+\begin{adjustbox}{max width=\linewidth}\begin{tabular}{lrrrrrr}
+\toprule
+\textbf{Model} & \textbf{Errors} & \textbf{F1} & \textbf{Recall} & \textbf{Specificity} & \textbf{AUROC} & \textbf{AUPRC}\\
+\midrule
+Logistic regression (baseline) & 1 & 97.96 & 96.00 & 100.00 & 99.45 & 99.57\\
+Random Forest & 1 & 97.96 & 96.00 & 100.00 & 99.45 & 99.57\\
+XGBoost & 2 & 96.00 & 96.00 & 95.45 & 99.82 & 99.85\\
+Fine-tuned WavLM & 1 & 97.96 & 96.00 & 100.00 & 99.82 & 99.85\\
+LR, wide grid & 1 & 97.96 & 96.00 & 100.00 & 98.91 & 99.23\\
+RF, wide grid & 1 & 97.96 & 96.00 & 100.00 & 99.82 & 99.85\\
+XGB, wide grid & 2 & 96.00 & 96.00 & 95.45 & 99.09 & 99.33\\
+\bottomrule
+\end{tabular}\end{adjustbox}\end{table}
+\begin{tcolorbox}[colback=orange!5,colframe=orange!70!black,boxrule=0.5pt,arc=2pt,left=5pt,right=5pt,top=3pt,bottom=3pt,title={\small\bfseries Key finding}]\small No extension met the pre-declared improvement rule. The frozen baseline makes 1 error; the best extension makes 1 error. Every model misses the same patient (PD\_005), and the spread across folds is larger than the differences between models.\end{tcolorbox}
+\section*{Revision history}\addcontentsline{toc}{section}{Revision history}
+\begin{table}[H]\centering\footnotesize\renewcommand{\arraystretch}{1.15}
+\caption{Versions of this report.}
+\begin{adjustbox}{max width=\linewidth}\begin{tabular}{llp{11.4cm}}
+\toprule
+\textbf{Version} & \textbf{Date} & \textbf{Changes}\\
+\midrule
+1.0 & 21 October 2026 & Internal draft built from the separate PatchTST proposal run (v4.0). Not delivered. Superseded.\\
+1.1 & 21 October 2026 & Rebuilt on FINAL\_V1: LR and XGB official runs, Random Forest added (amendment A2).\\
+1.2 & 22 October 2026 & Rewritten to the guideline's Final Report column. New experiments (amendment A3): wide hyperparameter study for LR, RF and XGB; nested partial fine-tuning of WavLM-large. New sections on training versus validation versus test, parameter counts, failure analysis by task, sensitivity to input changes, and detailed future directions. v4.0 cross-check removed.\\
+\bottomrule
+\end{tabular}\end{adjustbox}\end{table}
+\section{Abstract}\label{sec:abstract}
+Parkinson's disease changes how people speak: the voice becomes quieter and flatter, and consonants become less clear. A short voice recording could therefore help to flag the disease early, cheaply and without a clinic visit. We study one concrete question on a public Italian corpus of 785 recordings from 47 people (25 with Parkinson's disease, 22 healthy older adults): when a large pretrained speech model, WavLM-large, turns each recording into numbers, does it matter which classifier reads those numbers, how its settings are chosen, or whether the speech model itself is fine-tuned on our data? Every person is kept entirely on one side of every train/test split. The baseline is the frozen speech model with logistic regression; it misses 1 of 25 patients and raises 0 false alarms (F1 97.96\%, AUROC 99.45\%). Random Forest, XGBoost, 256 alternative classifier settings and partial fine-tuning of the top layers of WavLM make between 1 and 2 errors, with AUROC between 98.91\% and 99.82\%. None meets the improvement rule we fixed before running the new experiments. All models miss the same patient, and evidence from the same corpus suggests that part of the separation may come from recording conditions rather than from the disease. We therefore treat the high scores as an upper bound for this corpus, not as clinical accuracy, and we give a concrete plan to test this.
+
+\section{Motivation and objectives}\label{sec:motivation}
+About one person in a hundred over the age of 60 has Parkinson's disease, and speech changes are among its early signs [2]. A test that needs only a microphone would be cheap, painless and repeatable, so it could help screening where neurologists are scarce. Patients would gain an earlier referral; clinics would gain a tool for follow-up. The obstacle is trust: many published voice studies report near-perfect accuracy, but often because recordings of the same person appear in both training and testing [13].
+
+\textbf{Qualitative objective.} Find out whether a frozen self-supervised speech model is enough, or whether a stronger classifier, better-tuned settings or fine-tuning of the speech model adds anything, under a protocol in which no person is ever seen in both training and testing.
+
+\textbf{Quantitative objectives.}
+
+\begin{itemize}\item O1. Report held-out person-level recall, specificity, precision, F1, accuracy, AUROC and AUPRC, with 95\% bootstrap intervals, for the baseline and every extension.
+\item O2. Decide improvement with the rule fixed before the new runs: at least two fewer person errors than the baseline and a paired AUROC interval that excludes zero.
+\item O3. Report training, validation and test results separately for every model, and the spread across the five folds.
+\item O4. Identify at least one failure mode, and measure how results change with hyperparameters and with the type of speech task.
+\end{itemize}
+\section{Related work}\label{sec:related}
+We group prior work into four research lines and state how each one shapes this study.
+
+\textbf{End-to-end deep networks.} Quan et al. (2022) [4] train convolutional networks directly on speech spectrograms. Iyer et al. (2023) [5] compare a convolutional network with Random Forest and logistic regression on telephone voice recordings. Such models learn every parameter from small clinical datasets. \emph{Connection:} our fine-tuning extension sits between these models and a frozen encoder: it trains only the top layers of a large pretrained model.
+
+\textbf{Hand-made acoustic features with classical classifiers.} Wang et al. (2022) [6] select features from a Mandarin corpus and compare four classifiers; Egbo et al. (2025) [7] use XGBoost with SHAP explanations on vocal biomarkers. \emph{Connection:} they motivate our tree-based extensions (Random Forest, XGBoost) and their tuning.
+
+\textbf{Self-supervised speech representations.} wav2vec 2.0 [8], XLS-R [9] and WavLM [10] learn speech representations from tens of thousands of hours of unlabelled audio. Klempir and Krupicka (2024) [11] classify frozen wav2vec embeddings with logistic regression, Random Forest and XGBoost across several Parkinson's databases. \emph{Connection:} this is the closest design to ours; we use the stronger WavLM-large encoder, add fine-tuning, and evaluate strictly by person.
+
+\textbf{Evaluation methodology and data.} Vaiciukynas et al. (2017) [13] show that scores are inflated unless all recordings of a person stay together, and that results change with the microphone. Crawford (2025) [12] uses what people say rather than how they sound. The Italian corpus we use is described by Dimauro and Girardi [14]; Dimauro et al. [15] study intelligibility in Parkinson's disease, and NeuroVoz [19] is a Spanish corpus of the same kind. \emph{Connection:} they justify person-level evaluation and our concern about recording conditions.
+
+\section{Background}\label{sec:background}
+\subsection{Why these metrics}
+The unit is the person, because a diagnosis is about a person, not a file. Following Vaiciukynas et al. [13], all of a person's recordings are averaged to one score. Recall (sensitivity) and specificity are the clinical pair used throughout the Parkinson's voice literature [5]: recall counts patients found, specificity counts healthy people left alone. F1 is the comparison number of several of the cited studies [7], but it ignores true negatives, so we never report it alone. AUROC and AUPRC measure ranking quality without a threshold.
+
+\subsection{Why these baselines and extensions}
+Logistic regression on frozen self-supervised embeddings is the reference design of Klempir and Krupicka [11] and the simplest model with readable weights [16]. Random Forest and XGBoost [18] are the two tree ensembles those authors and Egbo et al. [7] compare against it. Fine-tuning is the natural next step for a self-supervised encoder [10]: WavLM was trained for general speech, not for disease, so adapting its top layers could make it more sensitive to Parkinson's speech.
+
+\subsection{Frozen versus fine-tuned, in plain words}
+\begin{tcolorbox}[colback=green!3,colframe=green!40!black,boxrule=0.5pt,arc=2pt,left=5pt,right=5pt,top=3pt,bottom=3pt,title={\small\bfseries In plain words}]\small A frozen model is a fixed listener: it turns each recording into 1,024 numbers and never changes. Only the small classifier on top learns from our data. A fine-tuned model lets the top part of the listener change too, so it can learn to pay attention to the cues that matter for Parkinson's disease, but with only 47 people it can also learn things that do not generalise.\end{tcolorbox}
+\section{Methodology}\label{sec:method}
+\subsection{Model description}\label{sec:model}
+\begin{figure}[H]\centering\includegraphics[width=1.0\linewidth]{method_overview.pdf}\caption{The two model families. Top: the baseline and classifier extensions read a frozen 1,024-number vector per recording. Bottom: the fine-tuning extension trains the top k WavLM layers, the final layer norm and a linear head on 10-second windows.}\label{fig:method_overview}\end{figure}
+\begin{table}[H]\centering\footnotesize\renewcommand{\arraystretch}{1.15}
+\caption{Inputs, outputs and shapes at each stage (one 10-second window, batch size B).}
+\begin{adjustbox}{max width=\linewidth}\begin{tabular}{p{4.3cm}p{3.6cm}p{3.0cm}p{5.0cm}}
+\toprule
+\textbf{Stage} & \textbf{Input shape} & \textbf{Output shape} & \textbf{Notes}\\
+\midrule
+Audio window & B x 160,000 samples & B x 160,000 & 16 kHz, zero mean and unit variance per window\\
+Convolutional feature encoder & B x 160,000 & B x 499 x 512 & 7 conv layers, 20 ms frame step (frozen)\\
+Projection + positional conv & B x 499 x 512 & B x 499 x 1,024 & frozen\\
+Transformer layers 0-19 & B x 499 x 1,024 & B x 499 x 1,024 & frozen; cached once for fine-tuning\\
+Transformer layers 20-23 + layer norm & B x 499 x 1,024 & B x 499 x 1,024 & frozen (baseline) or top k trained (fine-tuning)\\
+Mean over frames & B x 499 x 1,024 & B x 1,024 & baseline also averages windows of a recording\\
+Classifier / head & 1,024 & 1 probability & LR, RF, XGB, or dropout + linear head\\
+Person score & probabilities of one person's recordings & 1 score & mean; PD if score >= 0.5\\
+\bottomrule
+\end{tabular}\end{adjustbox}\end{table}
+\begin{table}[H]\centering\footnotesize\renewcommand{\arraystretch}{1.15}
+\caption{Parameter counts of the fitted models (chosen settings, refitted on each fold's training people).}
+\begin{adjustbox}{max width=\linewidth}\begin{tabular}{p{3.2cm}p{5.6cm}p{7.2cm}}
+\toprule
+\textbf{Model} & \textbf{Size} & \textbf{Detail}\\
+\midrule
+Logistic regression & 1,025 (1,024 weights + bias) & non-zero weights per fold: 7, 44, 37, 5, 42\\
+Random Forest & 300 trees per fold & tree nodes per fold: 7,680, 21,276, 22,588, 7,688, 22,472\\
+XGBoost & 100 trees per fold (100, 100, 300, 100, 100) & tree nodes per fold: 956, 690, 2,264, 700, 2,130\\
+Fine-tuned WavLM & k = 2: 25,196,593 trainable, k = 4: 50,390,113 trainable & frozen part: about 315 million weights (whole WavLM-large)\\
+\bottomrule
+\end{tabular}\end{adjustbox}\end{table}
+The L1 penalty chosen by every baseline fold keeps only a handful of the 1,024 WavLM dimensions (between 5 and 44 non-zero weights). In other words, the baseline separates the groups with very few directions of the representation, a first hint that the signal is strong and simple.
+
+\subsection{Dataset}\label{sec:dataset}
+We use the Italian Parkinson's Voice and Speech corpus [14]. Each person performs 16 short tasks: two read passages (B1, B2), syllable repetition /pa/ and /ta/ (D1, D2), a phrase (FB1), a word list (PR1) and five vowels held twice (VA to VU). We keep the folders of people with Parkinson's disease and of elderly healthy controls. The 15 young controls are excluded because they recorded only three tasks and are 40 years younger, so age would be confused with disease. One byte-identical duplicate is removed. The result is 785 recordings from 47 people (25 with Parkinson's disease, 22 controls); three people recorded in two sessions are merged into one identity each. Audio is resampled to 16 kHz with polyphase filtering, without peak normalisation or silence removal (loudness is itself a symptom).
+
+\begin{figure}[H]\centering\includegraphics[width=0.9\linewidth]{dataset_examples.pdf}\caption{Representative recordings: a sustained vowel and a phrase from a person with Parkinson's disease and from a control (waveform and spectrogram).}\label{fig:dataset_examples}\end{figure}
+\subsection{Training and evaluation steps, including batch sampling}\label{sec:steps}
+\begin{figure}[H]\centering\includegraphics[width=0.95\linewidth]{nested_cv.pdf}\caption{Nested, speaker-disjoint cross-validation. The outer folds give the held-out results; the inner folds, built only from training people, choose all settings.}\label{fig:nested_cv}\end{figure}
+\begin{enumerate}\item \textbf{Outer split.} The 47 people are dealt into five folds, stratified by class (seed 42). Each person is tested exactly once.
+\item \textbf{Inner split.} Inside each outer training set, people are dealt into three inner folds (seed 142 + fold).
+\item \textbf{Selection.} Every setting is trained on two inner folds and scored on the third, three times; the pooled person AUPRC chooses the setting (ties: the earliest setting).
+\item \textbf{Refit and test.} The chosen setting is refitted on all training people of the fold and predicts the held-out people. Threshold 0.5 is fixed.
+\item \textbf{Batch sampling, classical models.} LR, RF and XGB are fitted on all training recordings at once; no mini-batches are used.
+\item \textbf{Batch sampling, fine-tuning.} Each mini-batch holds 8 ten-second windows: 4 from people with Parkinson's disease and 4 from controls. Within a class a person is drawn uniformly, then one of their windows uniformly, so every person and both classes have equal expected weight regardless of how long they spoke. One epoch is the number of training windows divided by 8.
+\end{enumerate}
+\subsection{Evaluation metrics}\label{sec:metrics}
+Let $\mathcal{P}$ be the set of test people, $y_i \in \{0, 1\}$ the true label of person $i$ (1 = Parkinson's disease) and $s_i$ the person score, the mean of the predicted probabilities of person $i$'s recordings. The decision is $\hat{y}_i = 1$ if $s_i \geq 0.5$. Counting over people:
+
+\begin{align*}TP&=\textstyle\sum_i[\hat y_i=1,\,y_i=1]\ \text{(patients found)}, & FN&=\textstyle\sum_i[\hat y_i=0,\,y_i=1]\ \text{(patients missed)},\\ TN&=\textstyle\sum_i[\hat y_i=0,\,y_i=0]\ \text{(controls cleared)}, & FP&=\textstyle\sum_i[\hat y_i=1,\,y_i=0]\ \text{(false alarms)},\\ \text{Recall}&=\frac{TP}{TP+FN}, \quad \text{Specificity}=\frac{TN}{TN+FP}, & \text{Precision}&=\frac{TP}{TP+FP}, \quad F_1=\frac{2\,\text{Precision}\cdot\text{Recall}}{\text{Precision}+\text{Recall}},\\ \text{AUROC}&=\frac{1}{N_1N_0}\sum_{i:y_i=1}\sum_{j:y_j=0}\Big([s_i>s_j]+\tfrac12[s_i=s_j]\Big), & \text{AUPRC}&=\sum_{n}(R_n-R_{n-1})\,P_n .\end{align*}
+$N_1$ and $N_0$ are the numbers of patients and controls; $P_n$ and $R_n$ are precision and recall at the n-th threshold (average precision). AUROC is the chance that a random patient scores above a random control. Uncertainty comes from 2,000 bootstrap resamples of people (seed 42); differences between models use the same resamples (paired).
+
+\subsection{Loss functions and optimisation}\label{sec:loss}
+With $x_r \in \mathbb{R}^{1024}$ a recording vector (standardised with training statistics) and $y_r$ its label, the models minimise the following objectives on the training data of each fold.
+
+\begin{align*}\textbf{LR:}\quad &\min_{w,b}\ \lVert w\rVert_q^{q'}\!/\,\!c + C\sum_r \log\big(1+e^{-\tilde y_r(w^\top x_r+b)}\big),\quad \tilde y_r\in\{-1,1\},\ (q,q',c)=(1,1,1)\ \text{or}\ (2,2,2),\\ \textbf{RF:}\quad &\text{each split maximises } G(\text{node})-\tfrac{n_L}{n}G(L)-\tfrac{n_R}{n}G(R),\quad G=1-\textstyle\sum_{k\in\{0,1\}}p_k^2,\\ \textbf{XGB:}\quad &\min\ \textstyle\sum_r \ell\big(y_r,\hat y_r\big)+\sum_{t}\Omega(f_t),\quad \Omega(f)=\gamma T+\tfrac12\lambda\lVert w\rVert^2,\quad \ell=\text{log-loss},\\ \textbf{Fine-tuning:}\quad &\min_{\theta}\ -\frac{1}{|\mathcal{B}|}\sum_{u\in\mathcal{B}}\Big[y_u\log\sigma(z_u)+(1-y_u)\log\big(1-\sigma(z_u)\big)\Big],\quad z_u=v^\top\,\overline{h}_\theta(u)+b .\end{align*}
+For LR, liblinear solves the problem [16]; class weights, when chosen, rescale each class's terms. For XGBoost, $T$ is the number of leaves of a tree and $w$ its leaf values; trees are added by second-order boosting [18]. For fine-tuning, $u$ is a window in mini-batch $\mathcal{B}$, $\overline{h}_\theta(u)$ the mean over frames of the last layer norm, and $\theta$ the weights of the top k layers. Optimisation uses AdamW (weight decay 0.01; learning rate 1e-5 or 3e-5 for WavLM layers, 1e-3 for the head), 10\% linear warm-up, gradient clipping at norm 1 and bfloat16 arithmetic.
+
+\subsection{Experimental depth and iteration}\label{sec:depth}
+\begin{table}[H]\centering\footnotesize\renewcommand{\arraystretch}{1.15}
+\caption{Every configuration tried. Each was trained and scored inside every outer fold.}
+\begin{adjustbox}{max width=\linewidth}\begin{tabular}{p{3.4cm}p{2.9cm}p{8.0cm}r}
+\toprule
+\textbf{Stage} & \textbf{Model} & \textbf{Settings searched} & \textbf{Number}\\
+\midrule
+1. Baseline (frozen protocol) & LR & C in \{0.01, 0.1, 1, 10, 100\} x penalty \{L1, L2\} x class weight \{none, balanced\} & 20\\
+2. Classifier extensions & XGB (frozen protocol) & 24 random draws from 256 combinations of rate, depth, trees, child weight, subsample, columns, lambda, class weight & 24\\
+ & RF (amendment A2) & depth \{4, none\} x min leaf \{1, 2\} x class weight \{none, balanced\}; 300 trees & 8\\
+3. Hyperparameter study (A3) & LR & C in \{1e-4 ... 1e3\} (8 values) x penalty x class weight & 32\\
+ & RF & trees \{100, 300, 1000\} x depth \{2, 4, 8, none\} x min leaf \{1, 5\} x features \{sqrt, 10\%\} x class weight & 96\\
+ & XGB & depth \{1, 2, 4, 6\} x rate \{0.01, 0.03, 0.1, 0.3\} x trees \{100, 300\} x subsample \{0.7, 1\} x columns \{0.3, 1\} & 128\\
+4. Fine-tuning (A3) & WavLM top k + head & k in \{2, 4\} x learning rate \{1e-5, 3e-5\} x epochs 1-6 (chosen on inner folds) & 4 x 6\\
+\bottomrule
+\end{tabular}\end{adjustbox}\end{table}
+In total about 7,440 classical model fits and 65 fine-tuning runs (5 folds x 4 settings x 3 inner folds, plus 5 refits) were made, 2.9 GPU hours for fine-tuning. The development path was: baseline, then other classifiers on the same vectors, then a much wider search over their settings, then adapting the speech model itself.
+
+\section{Baseline and extensions}\label{sec:baseline}
+\subsection{Baseline choice and justification}\label{sec:baselinechoice}
+The baseline is frozen WavLM-large with logistic regression. We chose it for four reasons. (1) It is the reference design for frozen self-supervised embeddings in Parkinson's speech [11]. (2) It has the fewest learned parameters, which matters with 47 people. (3) Its weights are readable, and with an L1 penalty it shows how many representation dimensions are needed. (4) WavLM-large was named as the baseline encoder in the frozen FINAL\_V1 protocol before any result was seen, because its authors report it as the strongest of the self-supervised models they compared on a broad speech benchmark [10].
+
+\subsection{Systematic evaluation of the baseline}\label{sec:baselineeval}
+\begin{table}[H]\centering\scriptsize\renewcommand{\arraystretch}{1.15}
+\caption{Baseline, fold by fold. Settings and inner AUPRC come from the training people only; the last four columns are held-out.}
+\begin{adjustbox}{max width=\linewidth}\begin{tabular}{llp{3.1cm}rrlrrr}
+\toprule
+\textbf{Fold} & \textbf{Test people} & \textbf{Chosen setting} & \textbf{Non-zero weights} & \textbf{Inner AUPRC} & \textbf{TP/FN/TN/FP} & \textbf{Recall} & \textbf{Spec.} & \textbf{AUROC}\\
+\midrule
+1 & 10 (5 PD) & C=0.01, L1, weight none & 7 & 100.00 & 5/0/5/0 & 100.00 & 100.00 & 100.00\\
+2 & 10 (5 PD) & C=0.1, L1, weight none & 44 & 99.76 & 5/0/5/0 & 100.00 & 100.00 & 100.00\\
+3 & 9 (5 PD) & C=0.1, L1, weight none & 37 & 99.76 & 5/0/4/0 & 100.00 & 100.00 & 100.00\\
+4 & 9 (5 PD) & C=0.01, L1, weight none & 5 & 100.00 & 4/1/4/0 & 80.00 & 100.00 & 95.00\\
+5 & 9 (5 PD) & C=0.1, L1, weight none & 42 & 99.76 & 5/0/4/0 & 100.00 & 100.00 & 100.00\\
+Pooled & 47 (25 PD) &  &  &  & 24/1/22/0 & 96.00 & 100.00 & 99.45\\
+\bottomrule
+\end{tabular}\end{adjustbox}\end{table}
+\subsection{Baseline outputs confirming reproduction}\label{sec:reproduction}
+\begin{table}[H]\centering\footnotesize\renewcommand{\arraystretch}{1.15}
+\caption{Run log of the five official baseline runs (from the saved run records).}
+\begin{adjustbox}{max width=\linewidth}\begin{tabular}{llllll}
+\toprule
+\textbf{Run} & \textbf{Status} & \textbf{Integrity gates} & \textbf{Protocol hash} & \textbf{Split hash} & \textbf{Runtime}\\
+\midrule
+FV1-WLM-ALL-LR-F0 & COMPLETED & all 6 PASS & 5535d1a440a5 & 31c40ed90216 & 3 s\\
+FV1-WLM-ALL-LR-F1 & COMPLETED & all 6 PASS & 5535d1a440a5 & 31c40ed90216 & 3 s\\
+FV1-WLM-ALL-LR-F2 & COMPLETED & all 6 PASS & 5535d1a440a5 & 31c40ed90216 & 3 s\\
+FV1-WLM-ALL-LR-F3 & COMPLETED & all 6 PASS & 5535d1a440a5 & 31c40ed90216 & 3 s\\
+FV1-WLM-ALL-LR-F4 & COMPLETED & all 6 PASS & 5535d1a440a5 & 31c40ed90216 & 3 s\\
+\bottomrule
+\end{tabular}\end{adjustbox}\end{table}
+Recomputing the pooled baseline from its saved predictions gives exactly the saved values (TP 24, FN 1, TN 22, FP 0; AUROC 99.45\%). The same holds for XGBoost. All checks are listed in Appendix A.
+
+\subsection{Extension 1: other classifiers on the same vectors}\label{sec:ext1}
+\textbf{Idea.} If the WavLM vectors contain non-linear patterns, tree ensembles could use them where a linear model cannot. \textbf{Design.} Random Forest and XGBoost read exactly the same vectors, folds, selection rule and threshold as the baseline (settings in Section 5.6). \textbf{Result.} Random Forest makes 1 error and XGBoost 2 errors, against 1 error for the baseline. Random Forest and the baseline give the same decision for every person. XGBoost ranks people slightly better (AUROC 99.82\% against 99.45\%) but adds a false alarm.
+
+\subsection{Extension 2: changing the hyperparameters}\label{sec:ext2}
+\begin{table}[H]\centering\scriptsize\renewcommand{\arraystretch}{1.15}
+\caption{Wide hyperparameter study. Columns 3-7 describe every setting scored on the held-out folds (descriptive only); the last two columns are the honest nested result, where each fold chose its own setting on inner folds.}
+\begin{adjustbox}{max width=\linewidth}\begin{tabular}{lrrrrrrrr}
+\toprule
+\textbf{Model} & \textbf{Settings} & \textbf{Min AUROC} & \textbf{Median AUROC} & \textbf{Max AUROC} & \textbf{Errors} & \textbf{Share with <= baseline errors} & \textbf{Nested errors} & \textbf{Nested AUROC}\\
+\midrule
+LR & 32 & 50.00 & 99.82 & 100.00 & 1 to 22 & 75\% & 1 & 98.91\\
+RF & 96 & 98.36 & 99.45 & 99.82 & 1 to 2 & 85\% & 1 & 99.82\\
+XGB & 128 & 97.09 & 99.27 & 99.82 & 1 to 5 & 48\% & 2 & 99.09\\
+\bottomrule
+\end{tabular}\end{adjustbox}\end{table}
+\textbf{Idea.} Perhaps the original grids were too narrow. \textbf{Design.} We widened every grid (256 settings in total, Section 5.6) and repeated nested selection. \textbf{Result.} The best single settings look slightly better than the baseline, but choosing them would use the test people. When each fold chooses on its own training people, the wide grids give 1 error, 1 error, 2 errors (LR, RF, XGB respectively) against 1 error for the baseline.
+
+\subsection{Extension 3: fine-tuning WavLM}\label{sec:ext3}
+\begin{table}[H]\centering\footnotesize\renewcommand{\arraystretch}{1.15}
+\caption{Fine-tuning, fold by fold. Setting, epochs and inner AUPRC are chosen on training people only.}
+\begin{adjustbox}{max width=\linewidth}\begin{tabular}{llrrrlrr}
+\toprule
+\textbf{Fold} & \textbf{Chosen setting} & \textbf{Epochs} & \textbf{Trainable weights} & \textbf{Inner AUPRC} & \textbf{TP/FN/TN/FP} & \textbf{AUROC} & \textbf{Runtime}\\
+\midrule
+1 & k = 2, lr = 1e-05 & 3 & 25,196,593 & 99.76 & 5/0/5/0 & 100.00 & 36 min\\
+2 & k = 4, lr = 1e-05 & 2 & 50,390,113 & 100.00 & 5/0/5/0 & 100.00 & 33 min\\
+3 & k = 2, lr = 1e-05 & 5 & 25,196,593 & 100.00 & 5/0/4/0 & 100.00 & 37 min\\
+4 & k = 2, lr = 1e-05 & 1 & 25,196,593 & 100.00 & 4/1/4/0 & 100.00 & 35 min\\
+5 & k = 2, lr = 3e-05 & 2 & 25,196,593 & 100.00 & 5/0/4/0 & 100.00 & 36 min\\
+Pooled &  &  &  &  & 24/1/22/0 & 99.82 & 2.9 h\\
+\bottomrule
+\end{tabular}\end{adjustbox}\end{table}
+\textbf{Idea.} Let the top of the speech model adapt to Parkinson's speech. \textbf{Design.} The top 2 or 4 transformer layers, the final layer norm and a linear head are trained on 10-second windows with balanced mini-batches; layers below are frozen and their output is cached once (the cache reproduces the frozen vectors to within 3.6e-05). Settings and the number of epochs are chosen on inner folds only. \textbf{Result.} Fine-tuning makes 1 error (recall 96.00\%, specificity 100.00\%) with AUROC 99.82\%. The inner folds chose k = 4 in 1 of 5 folds; in most folds several settings tied at the best inner score, and the tie rule then picks the simplest one (k = 2, the smaller learning rate).
+
+\subsection{Did any extension improve on the baseline?}\label{sec:verdict}
+\begin{tcolorbox}[colback=red!3,colframe=red!50!black,boxrule=0.5pt,arc=2pt,left=5pt,right=5pt,top=3pt,bottom=3pt,title={\small\bfseries Decision rule (fixed before the A3 runs)}]\small An extension counts as an improvement only if it makes at least two fewer person errors than the baseline AND the 95\% paired bootstrap interval of its AUROC minus the baseline AUROC excludes zero. Fixed in supplementary/PREDECLARED\_A3.md before any A3 result existed.\end{tcolorbox}
+\begin{table}[H]\centering\footnotesize\renewcommand{\arraystretch}{1.15}
+\caption{Each extension against the baseline (1 error). Differences in percentage points with 95\% paired bootstrap intervals.}
+\begin{adjustbox}{max width=\linewidth}\begin{tabular}{lrrllc}
+\toprule
+\textbf{Extension} & \textbf{Errors} & \textbf{Change in errors} & \textbf{AUROC difference} & \textbf{AUPRC difference} & \textbf{Improvement?}\\
+\midrule
+Random Forest & 1 & +0 & +0.01 [-0.75, 0.75] & +0.01 [-0.55, 0.57] & no\\
+XGBoost & 2 & +1 & +0.37 [-0.00, 1.72] & +0.28 [-0.00, 1.40] & no\\
+Fine-tuned WavLM & 1 & +0 & +0.37 [0.00, 1.72] & +0.28 [-0.00, 1.40] & no\\
+LR, wide grid & 1 & +0 & -0.52 [-2.54, 0.18] & -0.33 [-1.55, 0.11] & no\\
+RF, wide grid & 1 & +0 & +0.37 [0.00, 1.72] & +0.28 [-0.00, 1.40] & no\\
+XGB, wide grid & 2 & +1 & -0.35 [-2.20, 0.73] & -0.23 [-1.38, 0.44] & no\\
+\bottomrule
+\end{tabular}\end{adjustbox}\end{table}
+\begin{figure}[H]\centering\includegraphics[width=0.95\linewidth]{paired_differences.pdf}\caption{Paired bootstrap differences from the baseline. An interval that crosses zero means the data cannot tell the two models apart.}\label{fig:paired_differences}\end{figure}
+\textbf{Justified analysis of the failure to improve.} Three facts explain why no extension can show an improvement here. First, there is almost no room: the baseline already ranks 99.45\% of patient-control pairs correctly, so the most an extension could gain is about 0.5 AUROC points. Second, the remaining errors are the same people for every model (Section 7.6), so they are not caused by the classifier. Third, with 47 people one person is worth 4 points of recall, and the bootstrap intervals are wider than any difference between the models. A larger, harder or external test set is needed to separate them (Section 9).
+
+\section{Results and analysis}\label{sec:results}
+\subsection{Training, validation and test, kept separate}\label{sec:tvt}
+\begin{table}[H]\centering\scriptsize\renewcommand{\arraystretch}{1.15}
+\caption{Mean $\pm$ SD over the five folds (percent). Training = the refitted model scored on its own training people; validation = the inner-fold score that chose the setting; test = held-out people.}
+\begin{adjustbox}{max width=\linewidth}\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{Model} & \textbf{Train AUPRC} & \textbf{Val. AUPRC} & \textbf{Test AUPRC} & \textbf{Train AUROC} & \textbf{Test AUROC} & \textbf{Train F1} & \textbf{Test F1}\\
+\midrule
+Logistic regression (baseline) & 100.00 $\pm$ 0.00 & 99.86 $\pm$ 0.13 & 99.33 $\pm$ 1.49 & 100.00 $\pm$ 0.00 & 99.00 $\pm$ 2.24 & 99.49 $\pm$ 1.15 & 97.78 $\pm$ 4.97\\
+Random Forest & 100.00 $\pm$ 0.00 & 99.64 $\pm$ 0.25 & 100.00 $\pm$ 0.00 & 100.00 $\pm$ 0.00 & 100.00 $\pm$ 0.00 & 100.00 $\pm$ 0.00 & 97.78 $\pm$ 4.97\\
+XGBoost & 100.00 $\pm$ 0.00 & 99.69 $\pm$ 0.31 & 100.00 $\pm$ 0.00 & 100.00 $\pm$ 0.00 & 100.00 $\pm$ 0.00 & 100.00 $\pm$ 0.00 & 95.96 $\pm$ 5.58\\
+Fine-tuned WavLM & 100.00 $\pm$ 0.00 & 99.95 $\pm$ 0.11 & 100.00 $\pm$ 0.00 & 100.00 $\pm$ 0.00 & 100.00 $\pm$ 0.00 & 98.46 $\pm$ 1.40 & 97.78 $\pm$ 4.97\\
+\bottomrule
+\end{tabular}\end{adjustbox}\end{table}
+\begin{figure}[H]\centering\includegraphics[width=0.8\linewidth]{train_val_test_models.pdf}\caption{Training, inner-validation and held-out AUPRC for every model (mean and SD over folds).}\label{fig:train_val_test_models}\end{figure}
+Every model fits its training people almost perfectly; the tree models and the fine-tuned model reach a perfect or near-perfect training score. Validation and test scores stay high and close to each other, which means the selection step did not overfit the inner folds in a way that hurt the test folds. The gap between training and test is the cost of meeting new people; it is small here, which is itself suspicious for a medical task with 47 people (Section 8).
+
+\subsection{Held-out comparison of all models}\label{sec:heldout}
+\begin{table}[H]\centering\scriptsize\renewcommand{\arraystretch}{1.15}
+\caption{Pooled held-out person-level results with 95\% bootstrap intervals (percent).}
+\begin{adjustbox}{max width=\linewidth}\begin{tabular}{lrrrrrrll}
+\toprule
+\textbf{Model} & \textbf{TP/FN/TN/FP} & \textbf{F1} & \textbf{Recall} & \textbf{Spec.} & \textbf{Prec.} & \textbf{Acc.} & \textbf{AUROC [95\% CI]} & \textbf{AUPRC [95\% CI]}\\
+\midrule
+Logistic regression (baseline) & 24/1/22/0 & 97.96 & 96.00 & 100.00 & 100.00 & 97.87 & 99.45 [97.70, 100.00] & 99.57 [98.07, 100.00]\\
+Random Forest & 24/1/22/0 & 97.96 & 96.00 & 100.00 & 100.00 & 97.87 & 99.45 [97.70, 100.00] & 99.57 [98.11, 100.00]\\
+XGBoost & 24/1/21/1 & 96.00 & 96.00 & 95.45 & 96.00 & 95.74 & 99.82 [98.90, 100.00] & 99.85 [99.11, 100.00]\\
+Fine-tuned WavLM & 24/1/22/0 & 97.96 & 96.00 & 100.00 & 100.00 & 97.87 & 99.82 [98.90, 100.00] & 99.85 [99.11, 100.00]\\
+LR, wide grid & 24/1/22/0 & 97.96 & 96.00 & 100.00 & 100.00 & 97.87 & 98.91 [95.97, 100.00] & 99.23 [96.90, 100.00]\\
+RF, wide grid & 24/1/22/0 & 97.96 & 96.00 & 100.00 & 100.00 & 97.87 & 99.82 [98.90, 100.00] & 99.85 [99.11, 100.00]\\
+XGB, wide grid & 24/1/21/1 & 96.00 & 96.00 & 95.45 & 96.00 & 95.74 & 99.09 [96.38, 100.00] & 99.33 [97.37, 100.00]\\
+\bottomrule
+\end{tabular}\end{adjustbox}\end{table}
+\begin{figure}[H]\centering\includegraphics[width=0.62\linewidth]{roc.pdf}\caption{Pooled person-level ROC curves on the held-out folds.}\label{fig:roc}\end{figure}
+\subsection{Variation across folds}\label{sec:folds}
+\begin{table}[H]\centering\footnotesize\renewcommand{\arraystretch}{1.15}
+\caption{Held-out results per fold: mean $\pm$ sample SD over five folds (percent).}
+\begin{adjustbox}{max width=\linewidth}\begin{tabular}{lrrrr}
+\toprule
+\textbf{Model} & \textbf{F1} & \textbf{Recall} & \textbf{Specificity} & \textbf{AUROC}\\
+\midrule
+Logistic regression (baseline) & 97.78 $\pm$ 4.97 & 96.00 $\pm$ 8.94 & 100.00 $\pm$ 0.00 & 99.00 $\pm$ 2.24\\
+Random Forest & 97.78 $\pm$ 4.97 & 96.00 $\pm$ 8.94 & 100.00 $\pm$ 0.00 & 100.00 $\pm$ 0.00\\
+XGBoost & 95.96 $\pm$ 5.58 & 96.00 $\pm$ 8.94 & 96.00 $\pm$ 8.94 & 100.00 $\pm$ 0.00\\
+Fine-tuned WavLM & 97.78 $\pm$ 4.97 & 96.00 $\pm$ 8.94 & 100.00 $\pm$ 0.00 & 100.00 $\pm$ 0.00\\
+\bottomrule
+\end{tabular}\end{adjustbox}\end{table}
+\begin{figure}[H]\centering\includegraphics[width=0.95\linewidth]{folds.pdf}\caption{Every dot is one held-out fold of 9 or 10 people. One missed patient lowers a fold's recall by about 20 points.}\label{fig:folds}\end{figure}
+\subsection{How the hyperparameters change the result}\label{sec:hparams}
+\begin{figure}[H]\centering\includegraphics[width=1.0\linewidth]{hparam_effects.pdf}\caption{Effect of the main hyperparameters on pooled held-out AUROC (descriptive; never used to choose). Left: logistic regression against C (the y-axis starts at 95\%; the settings that remove every weight sit at 50\%). Middle and right: tree models, each cell averaged over the other settings.}\label{fig:hparam_effects}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=0.98\linewidth]{hparam_landscape.pdf}\caption{Left: held-out AUROC of every setting (y-axis from 95\%; the LR settings that remove every weight, at 50\%, are off the scale); the star is the honest nested result with the wide grid, the diamond the original grid. Right: how many people each setting misclassifies (the same constant LR settings, with 22 errors, are off the scale).}\label{fig:hparam_landscape}\end{figure}
+Three patterns stand out. \textbf{Logistic regression} is stable over most of the range of C: apart from the 4 strongest-penalty settings, which remove every weight and give everyone the same score (AUROC 50\%), every setting reaches at least 96.36\% AUROC. \textbf{Random Forest} improves only slightly with depth (mean AUROC 98.76\% at depth 2, 99.57\% with unlimited depth) and hardly at all with more trees. \textbf{XGBoost} is the most sensitive: the shallowest, slowest-learning settings are the weakest (depth 1, learning rate 0.01: 97.57\%) and deeper, faster ones the strongest (depth 6, learning rate 0.1: 99.61\%). Across all 256 settings, 65\% make at most as many errors as the baseline, so the choice of setting matters less than which people are hard.
+
+\subsection{Fine-tuning dynamics}\label{sec:ftdyn}
+\begin{figure}[H]\centering\includegraphics[width=1.0\linewidth]{ft_curves.pdf}\caption{Fine-tuning learning curves, averaged over outer and inner folds. Training loss falls steadily; inner-validation loss and AUPRC show how quickly the model starts to fit the training people.}\label{fig:ft_curves}\end{figure}
+Training loss falls with every epoch, from 0.46 to 0.023. The inner-validation loss is lowest at epoch 2 (0.182) and then rises to 0.213 at epoch 6 while the training loss keeps falling: the model starts to memorise the training people after one or two passes. The inner folds chose between 1 and 5 epochs. Four layers or the larger learning rate make the training loss fall faster; they raise the mean inner AUPRC only from 99.57\% to 99.90\% and do not lower the validation loss, so the extra capacity mostly fits the training people.
+
+\subsection{Error and failure analysis}\label{sec:errors}
+\begin{table}[H]\centering\footnotesize\renewcommand{\arraystretch}{1.15}
+\caption{Every misclassified person in the held-out folds.}
+\begin{adjustbox}{max width=\linewidth}\begin{tabular}{llllr}
+\toprule
+\textbf{Model} & \textbf{Person} & \textbf{Error} & \textbf{Score} & \textbf{Fold}\\
+\midrule
+Logistic regression (baseline) & PD\_005 & missed patient & 0.423 & fold 4\\
+Random Forest & PD\_005 & missed patient & 0.360 & fold 4\\
+XGBoost & HC\_007 & false alarm & 0.515 & fold 2\\
+XGBoost & PD\_005 & missed patient & 0.322 & fold 4\\
+Fine-tuned WavLM & PD\_005 & missed patient & 0.238 & fold 4\\
+\bottomrule
+\end{tabular}\end{adjustbox}\end{table}
+\begin{figure}[H]\centering\includegraphics[width=1.0\linewidth]{person_scores.pdf}\caption{Person scores of the four main models on the held-out folds. The dashed line is the threshold; labelled points are errors.}\label{fig:person_scores}\end{figure}
+\begin{figure}[H]\centering\includegraphics[width=0.98\linewidth]{task_breakdown.pdf}\caption{Failure analysis by speech task: probability of Parkinson's disease for each recording of the misclassified people, for every model.}\label{fig:task_breakdown}\end{figure}
+\textbf{Failure mode 1: one patient sounds like a control to every model.} Person PD\_005 is missed by all four models. Only 3 of their 16 recordings are scored above 0.5 by the baseline. Most models score the phrase, the word list, /u/ (1) and /u/ (2) as Parkinson's, but the read passages, the syllables and most of the vowels as control, so the average falls below the threshold. Because the classifiers and even the fine-tuned encoder agree, the error is a property of this person's recordings, not of a model: either their speech is only mildly affected, or their recordings resemble the control sessions. This is exactly the kind of case a screening tool would miss.
+
+\textbf{Failure mode 2: a borderline false alarm.} Control HC\_007 is called Parkinson's by XGB only, with a score just above the threshold. Most models score this person's /a/ (2), /e/ (1), /e/ (2), /i/ (1), /i/ (2), /o/ (1), /o/ (2), /u/ (1) and /u/ (2) as Parkinson's, while their connected speech (passages, phrase, word list) is scored as control. Vowels and connected speech disagree, so the average sits close to 0.5 and a small change in the training data moves it across. Such borderline cases are where a calibrated threshold or a second test would help.
+
+\subsection{Sensitivity to the input: which speech tasks carry the signal}\label{sec:families}
+\begin{figure}[H]\centering\includegraphics[width=0.85\linewidth]{task_families.pdf}\caption{Person AUROC when each model's score is computed from one family of speech tasks only.}\label{fig:task_families}\end{figure}
+\begin{table}[H]\centering\footnotesize\renewcommand{\arraystretch}{1.15}
+\caption{Person AUROC (errors in brackets) from one task family at a time (percent).}
+\begin{adjustbox}{max width=\linewidth}\begin{tabular}{lrrllll}
+\toprule
+\textbf{Task family} & \textbf{People} & \textbf{Recordings} & \textbf{LR} & \textbf{RF} & \textbf{XGB} & \textbf{FT}\\
+\midrule
+passages & 46 & 93 & 96.19 (3) & 98.86 (1) & 98.67 (3) & 99.24 (1)\\
+phrase & 44 & 47 & 100.00 (2) & 100.00 (0) & 100.00 (1) & 100.00 (0)\\
+word list & 47 & 50 & 98.00 (2) & 100.00 (0) & 100.00 (2) & 100.00 (0)\\
+syllables & 47 & 100 & 97.64 (3) & 98.55 (1) & 98.91 (1) & 100.00 (1)\\
+vowels & 47 & 495 & 97.82 (3) & 98.55 (3) & 98.73 (2) & 99.27 (2)\\
+\bottomrule
+\end{tabular}\end{adjustbox}\end{table}
+All task families separate the groups well, including sustained vowels, which contain no words at all. This is consistent with a disease signal in the voice, but it is also exactly what one would expect if the models recognised recording conditions, which are shared by every task of a session (Section 8.2).
+
+\subsection{Key findings}\label{sec:findings}
+\begin{itemize}\item A frozen WavLM-large with a sparse logistic regression already reaches 99.45\% AUROC with 1 error in 47 people.
+\item Neither other classifiers, nor 256 alternative settings, nor fine-tuning of the top layers improve on it under the pre-declared rule.
+\item All models fail on the same patient, so the remaining errors belong to the data, not to the model.
+\item Fine-tuning fits the training people within one or two epochs and then overfits; with 47 people the extra capacity does not help.
+\item Every task family, even vowels, separates the groups, which is consistent with both a voice signal and a recording-condition shortcut.
+\end{itemize}
+\section{Discussion}\label{sec:discussion}
+\subsection{Significance of the results}\label{sec:significance}
+For a course project the main lesson is methodological: when a strong frozen representation already separates the classes, adding model capacity is not where the gains are. The models agree on almost every person, and their differences are smaller than the uncertainty from having 47 people. Vaiciukynas et al. [13] showed that such scores depend on how the evaluation is split and even on the microphone, so near-ceiling results on one small corpus should be read with care.
+
+\subsection{Risks: recording conditions}\label{sec:risks}
+The largest risk is that the models detect \emph{how the recordings were made} rather than the disease. Three facts from FINAL\_V1 support this risk. (1) Digital silence: 272 of 349 control recordings start with a short block of exact zeros, which no patient recording has, and 112 of 436 patient recordings end with at least half a second of exact zeros, which no control recording has. (2) Sessions are recognisable: within the controls, the same WavLM vectors tell two recording periods apart with AUROC 92.86\%, and within the patients they separate 2016 from 2017 recordings with AUROC 100.00\%. (3) Each recording date belongs to one group only. A model can therefore score well by recognising the session. Our results cannot rule this out.
+
+\subsection{Sensitivity of the results to input changes}\label{sec:inputsens}
+Using one task family instead of all tasks changes AUROC by at most 3.8 points for any model (Section 7.7). Apart from the settings that remove every weight, changing the hyperparameters moves AUROC by at most 3.6 points (Section 7.4). Fine-tuning changes the representation itself and still leaves the same patient misclassified. The result is therefore robust to the design choices we varied, but this robustness says nothing about robustness to a new microphone, room or language.
+
+\subsection{Limitations}\label{sec:limitations}
+\begin{itemize}\item One corpus, one language, one recording setup; no external test set.
+\item 47 people: one person moves recall by 4 points and specificity by 4.5 points.
+\item One outer split (seed 42). Fine-tuning on a GPU is not bit-exactly repeatable; we fixed seeds but did not repeat runs with other seeds.
+\item Random Forest, the wide grids and fine-tuning are exploratory amendments added after the frozen comparison; they were declared before their runs but are reported beside, not instead of, the frozen results.
+\item Only the top 2 or 4 of 24 layers were fine-tuned, with at most 6 epochs; deeper or longer fine-tuning was not tested.
+\end{itemize}
+\section{Future directions}\label{sec:future}
+Our results point to the data, not the model, as the limit. The next steps are ordered by how much they would change what we can claim.
+
+\begin{table}[H]\centering\footnotesize\renewcommand{\arraystretch}{1.15}
+\caption{Planned next steps, each tied to a result of this report.}
+\begin{adjustbox}{max width=\linewidth}\begin{tabular}{rp{4.2cm}p{4.6cm}p{5.4cm}}
+\toprule
+\textbf{\#} & \textbf{Next step} & \textbf{Why (from our results)} & \textbf{How we would measure success}\\
+\midrule
+1 & Remove the recording-condition shortcut: trim leading and trailing digital silence, then retrain; train a model on silent frames only & Digital-silence blocks and session predictability (Section 8.2) & If the silence-only model is near chance and the trimmed model keeps its AUROC, the signal is in the voice\\
+2 & Test across corpora: train on the Italian corpus, test on NeuroVoz (Spanish) and vice versa & No external test set; all errors are shared by all models & Person AUROC and recall on the other corpus, with intervals\\
+3 & Session-aware evaluation: hold out whole recording dates, not only people & Each date belongs to one group & Drop in AUROC when sessions are held out\\
+4 & Better adaptation with little data: low-rank adapters, layer-wise learning-rate decay, more epochs with stronger regularisation, several seeds & Fine-tuning overfits after few epochs (Section 7.5) & Inner and held-out AUPRC averaged over seeds\\
+5 & Choose a screening threshold on training people for high recall, and report predictive values at a realistic prevalence & Threshold 0.5 is arbitrary; the clinical goal is to miss few patients & Recall at 95\% specificity; positive predictive value at 1\% prevalence\\
+6 & Collect more people, with matched recording sessions for patients and controls & One person moves recall by 4 points & Narrower intervals; a power plan from FINAL\_V1 suggests about 33 to 70 people per class to bound sensitivity above 75\%\\
+\bottomrule
+\end{tabular}\end{adjustbox}\end{table}
+Steps 1 and 3 are cheap and decisive: they reuse the saved models and data and directly test the main risk. Step 2 is the real test of usefulness. Step 4 only makes sense after steps 1 to 3, because a better-adapted model on confounded data would only learn the shortcut better.
+
+\section{Conclusion}\label{sec:conclusion}
+\begin{table}[H]\centering\footnotesize\renewcommand{\arraystretch}{1.15}
+\caption{Objectives and how they were met.}
+\begin{adjustbox}{max width=\linewidth}\begin{tabular}{lp{6cm}p{8.4cm}}
+\toprule
+\textbf{\#} & \textbf{Objective} & \textbf{Outcome}\\
+\midrule
+O1 & Report all metrics with intervals & Done for 7 models (Sections 7.1-7.3)\\
+O2 & Decide improvement by the pre-declared rule & No extension improved; analysed in Section 6.6\\
+O3 & Training, validation and test separately & Done (Section 7.1)\\
+O4 & Failure modes and sensitivity & Shared missed patient, borderline false alarms; hyperparameters and task families (Sections 7.4-7.7)\\
+\bottomrule
+\end{tabular}\end{adjustbox}\end{table}
+A frozen WavLM-large representation with a sparse logistic regression separates people with Parkinson's disease from elderly controls on held-out people with 99.45\% AUROC and 1 error in 47. Changing the classifier, widening its settings or fine-tuning the speech model does not improve this, and every model misses the same patient. The honest conclusion is that this corpus is too easy and too small to rank methods, and that recording conditions may explain part of the separation. The most valuable next steps are therefore about the data: removing shortcuts, holding out sessions, and testing on another corpus.
+
+\section*{Appendix A. Checks performed during the build}\addcontentsline{toc}{section}{Appendix A. Checks performed during the build}
+The build stops and writes nothing if any check fails.
+
+\begin{table}[H]\centering\scriptsize\renewcommand{\arraystretch}{1.15}
+\caption{Checks run on the saved inputs.}
+\begin{adjustbox}{max width=\linewidth}\begin{tabular}{p{13.3cm}l}
+\toprule
+\textbf{Check} & \textbf{Result}\\
+\midrule
+official WavLM LR reproduced from its saved predictions & PASS\\
+official WavLM XGB reproduced from its saved predictions & PASS\\
+LR scores the same 47 people with the same labels & PASS\\
+LR: every person in exactly one test fold; every recording predicted once & PASS\\
+LR: probabilities finite and in [0, 1] & PASS\\
+RF scores the same 47 people with the same labels & PASS\\
+RF: every person in exactly one test fold; every recording predicted once & PASS\\
+RF: probabilities finite and in [0, 1] & PASS\\
+XGB scores the same 47 people with the same labels & PASS\\
+XGB: every person in exactly one test fold; every recording predicted once & PASS\\
+XGB: probabilities finite and in [0, 1] & PASS\\
+FT scores the same 47 people with the same labels & PASS\\
+FT: every person in exactly one test fold; every recording predicted once & PASS\\
+FT: probabilities finite and in [0, 1] & PASS\\
+LR wide scores the same 47 people with the same labels & PASS\\
+LR wide: every person in exactly one test fold; every recording predicted once & PASS\\
+LR wide: probabilities finite and in [0, 1] & PASS\\
+RF wide scores the same 47 people with the same labels & PASS\\
+RF wide: every person in exactly one test fold; every recording predicted once & PASS\\
+RF wide: probabilities finite and in [0, 1] & PASS\\
+XGB wide scores the same 47 people with the same labels & PASS\\
+XGB wide: every person in exactly one test fold; every recording predicted once & PASS\\
+XGB wide: probabilities finite and in [0, 1] & PASS\\
+folds of all models equal SPLIT\_MANIFEST & PASS\\
+saved integrity gates PASS for the official WavLM LR and XGB runs & PASS\\
+fine-tuning cache reproduces the saved FINAL\_V1 WavLM vectors (max |diff| 3.6e-05, cosine 1.00000000) & PASS\\
+amendment A3 pre-declaration includes the decision rule & PASS\\
+training-partition scores exist for all four models and five folds & PASS\\
+S12 landscape covers 32 + 96 + 128 configurations & PASS\\
+fine-tuning learning curves for 5 folds x 4 settings x 3 inner folds x 6 epochs & PASS\\
+\bottomrule
+\end{tabular}\end{adjustbox}\end{table}
+\section*{Appendix B. Chosen settings per fold}\addcontentsline{toc}{section}{Appendix B. Chosen settings per fold}
+\begin{table}[H]\centering\footnotesize\renewcommand{\arraystretch}{1.15}
+\caption{Settings chosen by the inner folds in each outer fold.}
+\begin{adjustbox}{max width=\linewidth}\begin{tabular}{lllll}
+\toprule
+\textbf{Fold} & \textbf{LR} & \textbf{RF} & \textbf{XGB} & \textbf{Fine-tuning}\\
+\midrule
+1 & C=0.01 L1 & depth 4, leaf 1, weight none & depth 4, rate 0.1, 100 trees & k=2, lr=1e-05, 3 epochs\\
+2 & C=0.1 L1 & depth none, leaf 1, weight none & depth 2, rate 0.1, 100 trees & k=4, lr=1e-05, 2 epochs\\
+3 & C=0.1 L1 & depth none, leaf 1, weight balanced & depth 4, rate 0.1, 300 trees & k=2, lr=1e-05, 5 epochs\\
+4 & C=0.01 L1 & depth 4, leaf 1, weight none & depth 2, rate 0.03, 100 trees & k=2, lr=1e-05, 1 epochs\\
+5 & C=0.1 L1 & depth none, leaf 1, weight none & depth 4, rate 0.1, 100 trees & k=2, lr=3e-05, 2 epochs\\
+\bottomrule
+\end{tabular}\end{adjustbox}\end{table}
+\section*{Appendix C. Where to find everything}\addcontentsline{toc}{section}{Appendix C. Where to find everything}
+\begin{itemize}\item Report, LaTeX source and Overleaf zip: \texttt{reports/WAVLM\_\allowbreak{}BASELINE\_\allowbreak{}SUBSET/versions/v1.2/}.
+\item Generator: \texttt{src/final\_\allowbreak{}v1/wavlm\_\allowbreak{}subset\_\allowbreak{}report.py} (copy in the version folder).
+\item Pre-declarations: \texttt{supplementary/PREDECLARED\_\allowbreak{}RF\_\allowbreak{}GRID.md} (A2) and \texttt{supplementary/PREDECLARED\_\allowbreak{}A3.md} (A3).
+\item Code: \texttt{supplementary/code/s11\_\allowbreak{}random\_\allowbreak{}forest.py}, \texttt{s12\_\allowbreak{}hparams.py}, \texttt{s13\_\allowbreak{}cache.py}, \texttt{s13\_\allowbreak{}finetune.py}, \texttt{s14\_\allowbreak{}param\_\allowbreak{}counts.py}.
+\item Results: \texttt{supplementary/results/S11\_\allowbreak{}*}, \texttt{S12\_\allowbreak{}*}, \texttt{S13\_\allowbreak{}*}, \texttt{S14\_\allowbreak{}*}; official FINAL\_V1 predictions in \texttt{predictions/FINAL\_\allowbreak{}V1/}.
+\end{itemize}
+\section*{References}\addcontentsline{toc}{section}{References}
+\begin{thebibliography}{99}\setlength{\itemsep}{1pt}\small
+\bibitem{r1} Global, regional, national epidemiology and trends of Parkinson's disease from 1990 to 2021: findings from the Global Burden of Disease Study 2021; Frontiers in Aging Neuroscience, 2025. https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11757241/
+\bibitem{r2} M. Trail et al., Speech treatment for Parkinson's disease, NeuroRehabilitation 20(3), 2005. https://content.iospress.com/articles/neurorehabilitation/nre00283
+\bibitem{r3} A. Raty et al., Stability and accuracy of a diagnosis of Parkinson disease over 10 years, Neurology, 2025. https://research.utu.fi/converis/portal/detail/Publication/491935225
+\bibitem{r4} C. Quan, K. Ren, Z. Luo, Z. Chen, Y. Ling, End-to-end deep learning approach for Parkinson's disease detection from speech signals, Biocybernetics and Biomedical Engineering 42(2):556-574, 2022. doi:10.1016/j.bbe.2022.04.002
+\bibitem{r5} A. Iyer, A. Kemp et al., A machine learning method to process voice samples for identification of Parkinson's disease, Scientific Reports 13:20615, 2023. doi:10.1038/s41598-023-47568-w
+\bibitem{r6} Q. Wang, Y. Fu, B. Shao, L. Chang, K. Ren, Z. Chen, Y. Ling, Early detection of Parkinson's disease from multiple signal speech: based on Mandarin language dataset, Frontiers in Aging Neuroscience 14:1036588, 2022. doi:10.3389/fnagi.2022.1036588
+\bibitem{r7} B. Egbo, Z. Nigmetolla, N. A. Khan, P. K. Jamwal, Explainable machine learning for early detection of Parkinson's disease in aging populations using vocal biomarkers, Frontiers in Aging Neuroscience 17:1672971, 2025. doi:10.3389/fnagi.2025.1672971
+\bibitem{r8} A. Baevski, H. Zhou, A. Mohamed, M. Auli, wav2vec 2.0: a framework for self-supervised learning of speech representations, NeurIPS 2020.
+\bibitem{r9} A. Babu et al., XLS-R: self-supervised cross-lingual speech representation learning at scale, Interspeech 2022. arXiv:2111.09296
+\bibitem{r10} S. Chen et al., WavLM: large-scale self-supervised pre-training for full stack speech processing, IEEE Journal of Selected Topics in Signal Processing 16(6):1505-1518, 2022. doi:10.1109/JSTSP.2022.3188113
+\bibitem{r11} O. Klempir, R. Krupicka, Analyzing wav2vec 1.0 embeddings for cross-database Parkinson's disease detection and speech features extraction, Sensors 24(17):5520, 2024. doi:10.3390/s24175520
+\bibitem{r12} J. L. Crawford, Linguistic changes in spontaneous speech for detecting Parkinson's disease using large language models, PLOS Digital Health 4(2):e0000757, 2025. doi:10.1371/journal.pdig.0000757
+\bibitem{r13} E. Vaiciukynas, A. Verikas, A. Gelzinis, M. Bacauskiene, Detecting Parkinson's disease from sustained phonation and speech signals, PLoS ONE 12(10):e0185613, 2017. doi:10.1371/journal.pone.0185613
+\bibitem{r14} G. Dimauro, F. Girardi, Italian Parkinson's Voice and Speech, IEEE DataPort, 2019. doi:10.21227/aw6b-tg17
+\bibitem{r15} G. Dimauro, V. Di Nicola, V. Bevilacqua, D. Caivano, F. Girardi, Assessment of speech intelligibility in Parkinson's disease using a speech-to-text system, IEEE Access 5:22199-22208, 2017. doi:10.1109/ACCESS.2017.2762475
+\bibitem{r16} R.-E. Fan, K.-W. Chang, C.-J. Hsieh, X.-R. Wang, C.-J. Lin, LIBLINEAR: a library for large linear classification, Journal of Machine Learning Research 9:1871-1874, 2008.
+\bibitem{r17} C.-C. Chang, C.-J. Lin, LIBSVM: a library for support vector machines, ACM Transactions on Intelligent Systems and Technology 2(3):27, 2011.
+\bibitem{r18} T. Chen, C. Guestrin, XGBoost: a scalable tree boosting system, KDD 2016. doi:10.1145/2939672.2939785
+\bibitem{r19} L. Mendes-Laureano et al., NeuroVoz: a Castillian Spanish corpus of parkinsonian speech, Scientific Data 11:1367, 2024. https://zenodo.org/records/10777657
+\bibitem{r20} F. Pedregosa et al., Scikit-learn: machine learning in Python, Journal of Machine Learning Research 12:2825-2830, 2011.
+\end{thebibliography}
+\end{document}

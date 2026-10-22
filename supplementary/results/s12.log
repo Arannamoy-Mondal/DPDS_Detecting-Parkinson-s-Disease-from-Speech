@@ -1,0 +1,22 @@
+jobs 5120
+[Parallel(n_jobs=24)]: Using backend LokyBackend with 24 concurrent workers.
+[Parallel(n_jobs=24)]: Done  24 tasks      | elapsed:    1.1s
+[Parallel(n_jobs=24)]: Done 114 tasks      | elapsed:    1.7s
+[Parallel(n_jobs=24)]: Done 240 tasks      | elapsed:    3.3s
+[Parallel(n_jobs=24)]: Done 402 tasks      | elapsed:    5.9s
+[Parallel(n_jobs=24)]: Done 600 tasks      | elapsed:    9.7s
+[Parallel(n_jobs=24)]: Done 834 tasks      | elapsed:   14.3s
+[Parallel(n_jobs=24)]: Done 1104 tasks      | elapsed:   23.2s
+[Parallel(n_jobs=24)]: Done 1410 tasks      | elapsed:   36.4s
+[Parallel(n_jobs=24)]: Done 1752 tasks      | elapsed:  1.2min
+[Parallel(n_jobs=24)]: Done 2130 tasks      | elapsed:  2.5min
+[Parallel(n_jobs=24)]: Done 2544 tasks      | elapsed:  5.3min
+[Parallel(n_jobs=24)]: Done 2994 tasks      | elapsed:  6.3min
+[Parallel(n_jobs=24)]: Done 3480 tasks      | elapsed:  8.3min
+[Parallel(n_jobs=24)]: Done 4002 tasks      | elapsed: 12.7min
+[Parallel(n_jobs=24)]: Done 4560 tasks      | elapsed: 19.4min
+[Parallel(n_jobs=24)]: Done 5120 out of 5120 | elapsed: 29.0min finished
+LR {'f1': 0.9796, 'sensitivity': 0.96, 'specificity': 1.0, 'auroc': 0.9891, 'auprc': 0.9923}
+RF {'f1': 0.9796, 'sensitivity': 0.96, 'specificity': 1.0, 'auroc': 0.9982, 'auprc': 0.9985}
+XGB {'f1': 0.96, 'sensitivity': 0.96, 'specificity': 0.9545, 'auroc': 0.9909, 'auprc': 0.9933}
+runtime 1750 s
